@@ -83,6 +83,9 @@ class RecordingEvents:
     def decided(self, step, decision, labels):
         self.log.append(f"decided {decision.choice}")
 
+    def writer_started(self):
+        pass
+
     def writer_used(self, ms):
         self.log.append("writer")
 

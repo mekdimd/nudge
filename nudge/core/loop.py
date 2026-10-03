@@ -22,6 +22,8 @@ class Events(Protocol):
 
     def decided(self, step: int, decision: JevDecision, labels: dict[str, str]) -> None: ...
 
+    def writer_started(self) -> None: ...
+
     def writer_used(self, milliseconds: int) -> None: ...
 
     def propose(self, action: Action, target: Control | None) -> None: ...
@@ -170,6 +172,7 @@ class NudgeLoop:
             note = "Check the draft, edit anything, then approve."
             if self.writer is not None:
                 self.events.status("Gemini is drafting the text")
+                self.events.writer_started()
                 draft = self.writer.fill(self.goal, fields)
                 self.events.writer_used(draft.milliseconds)
                 values = draft.values
@@ -190,6 +193,7 @@ class NudgeLoop:
             url = None
             if self.writer is not None:
                 self.events.status("Gemini is finding the address")
+                self.events.writer_started()
                 url, ms = self.writer.url(self.goal)
                 self.events.writer_used(ms)
             text = self.events.approve_url(url, self.goal)
