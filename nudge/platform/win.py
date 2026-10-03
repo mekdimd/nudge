@@ -13,7 +13,7 @@ from pynput.mouse import Controller as MouseController
 
 from ..core.actions import is_browser
 from ..core.models import AppRef, Control, Rect, Snapshot
-from .base import AdapterError, ToLogical
+from .base import AdapterError, ToLogical, clean_text
 
 PRESSABLE = {
     "ButtonControl": "button",
@@ -305,7 +305,7 @@ class _Walker:
             self.nodes += 1
             try:
                 role = element.ControlTypeName
-                name = element.Name or ""
+                name = clean_text(element.Name)
                 raw = element.BoundingRectangle
                 offscreen = element.IsOffscreen
             except Exception:

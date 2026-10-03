@@ -11,7 +11,7 @@ from CoreFoundation import CFEqual, CFGetTypeID
 
 from ..core.actions import is_browser
 from ..core.models import AppRef, Control, Rect, Snapshot
-from .base import AdapterError
+from .base import AdapterError, clean_text
 
 ATTRS = [
     "AXRole",
@@ -125,7 +125,7 @@ def _text(value: Any) -> str:
     if value is None or _is_element(value):
         return ""
     if isinstance(value, str):
-        return " ".join(value.split())
+        return clean_text(value)
     return ""
 
 

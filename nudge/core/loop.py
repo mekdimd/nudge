@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from . import safety
-from .actions import OptionSet, build_options, option_label, to_action
+from .actions import OptionSet, build_options, field_key, fillable, option_label, to_action
 from .jev import JevClient, JevDecision, JevError
 from .models import Action, AppRef, Control, Snapshot
 from .verify import fingerprint, wait_for_change
@@ -87,6 +87,7 @@ class NudgeLoop:
         self.app = app
         self.history: list[str] = []
         self.excluded: set[str] = set()
+        self.drafted_fields: set[str] = set()
         try:
             with self.adapter.thread_context():
                 message = self._run()
@@ -122,7 +123,7 @@ class NudgeLoop:
             self._check_app()
 
             snapshot = self.adapter.snapshot(self.app)
-            options = build_options(snapshot, self.excluded)
+            options = build_options(snapshot, self.excluded, self.drafted_fields)
             self.events.status(f"Jev is choosing from {len(options.criteria)} options")
             decision = self.jev.decide(self.goal, snapshot, self.history, options)
             self._check()
@@ -137,7 +138,7 @@ class NudgeLoop:
             key = self._choose_key(decision, snapshot, options)
             if key is None:
                 continue
-            action = to_action(key, snapshot)
+            action = to_action(key, snapshot, self.drafted_fields)
             if not self._prepare(action, snapshot):
                 continue
             self._act(action, snapshot)
@@ -167,7 +168,7 @@ class NudgeLoop:
     def _prepare(self, action: Action, snapshot: Snapshot) -> bool:
         """Get any text the action needs. Returns False to re-plan instead of acting."""
         if action.kind == "fill":
-            fields = snapshot.empty_fields
+            fields = fillable(snapshot, self.drafted_fields)
             values: dict[str, str] = {f.id: "" for f in fields}
             note = "Check the draft, edit anything, then approve."
             if self.writer is not None:
@@ -185,6 +186,8 @@ class NudgeLoop:
             if approved is None:
                 raise Stop("cancelled", "Stopped.")
             action.text_by_field = {k: v for k, v in approved.items() if v.strip()}
+            self.drafted_fields |= {field_key(f) for f in fields}
+            action.label = ", ".join(f.label or f.role for f in fields if f.id in action.text_by_field)
             if not action.text_by_field:
                 self.excluded.add(action.option_key)
                 return False

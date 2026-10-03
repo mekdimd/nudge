@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import sys
 from contextlib import AbstractContextManager
 from typing import Callable, Literal, Protocol
@@ -7,6 +8,13 @@ from typing import Callable, Literal, Protocol
 from ..core.models import AppRef, Control, Snapshot
 
 KeyName = Literal["enter", "escape", "tab", "back", "address_bar", "find", "paste"]
+
+
+BIDI_MARKS = re.compile("[\u200e\u200f\u202a-\u202e\u2066-\u2069]")
+
+
+def clean_text(text: str | None) -> str:
+    return " ".join(BIDI_MARKS.sub("", text or "").split())
 
 
 class AdapterError(RuntimeError):

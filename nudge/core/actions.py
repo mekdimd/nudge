@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .models import Action, Control, Snapshot
 
@@ -30,6 +30,7 @@ def is_browser(app_name: str) -> bool:
 class OptionSet:
     criteria: dict[str, str]
     controls: list[Control]
+    fields: list[Control] = field(default_factory=list)
 
     @property
     def keys(self) -> list[str]:
@@ -42,7 +43,18 @@ def _reading_order(control: Control) -> tuple[float, float]:
     return (round(control.bounds.y / 8), control.bounds.x)
 
 
-def build_options(snapshot: Snapshot, excluded: set[str] | None = None) -> OptionSet:
+def field_key(control: Control) -> str:
+    """Identifies a text field across snapshots, whose ids and positions shift."""
+    return f"{control.label}|{control.role}"
+
+
+def fillable(snapshot: Snapshot, skipped: set[str] | None = None) -> list[Control]:
+    """Empty fields, minus ones already drafted this run (Gmail's To empties itself into a chip)."""
+    skipped = skipped or set()
+    return [f for f in snapshot.empty_fields if field_key(f) not in skipped]
+
+
+def build_options(snapshot: Snapshot, excluded: set[str] | None = None, skipped: set[str] | None = None) -> OptionSet:
     """Every choice Jev may make for this screen. Controls first in reading order, then verbs."""
     excluded = excluded or set()
     seen: set[str] = set()
@@ -58,7 +70,7 @@ def build_options(snapshot: Snapshot, excluded: set[str] | None = None) -> Optio
 
     criteria: dict[str, str] = {f"press:{c.id}": f"Press {c.describe()}" for c in controls}
 
-    empty = snapshot.empty_fields
+    empty = fillable(snapshot, skipped)
     if empty and FILL_KEY not in excluded:
         names = ", ".join(f.label or "unlabeled field" for f in empty[:8])
         criteria[FILL_KEY] = f"Type text into the empty text fields on screen: {names}"
@@ -79,7 +91,7 @@ def build_options(snapshot: Snapshot, excluded: set[str] | None = None) -> Optio
         criteria[GO_TO_URL_KEY] = "Go to a different website or web page by typing its address"
 
     criteria[NONE_KEY] = "None of these would advance the task; the control needed is not on screen"
-    return OptionSet(criteria=criteria, controls=controls)
+    return OptionSet(criteria=criteria, controls=controls, fields=empty)
 
 
 def option_label(key: str, snapshot: Snapshot) -> str:
@@ -98,7 +110,7 @@ def option_label(key: str, snapshot: Snapshot) -> str:
     return "None of these"
 
 
-def to_action(key: str, snapshot: Snapshot) -> Action:
+def to_action(key: str, snapshot: Snapshot, skipped: set[str] | None = None) -> Action:
     if key.startswith("press:"):
         target_id = key.split(":", 1)[1]
         control = snapshot.by_id(target_id)
@@ -106,7 +118,7 @@ def to_action(key: str, snapshot: Snapshot) -> Action:
             raise ValueError(f"unknown control {target_id}")
         return Action(kind="press", option_key=key, target_id=target_id, label=control.label or control.role)
     if key == FILL_KEY:
-        names = ", ".join(f.label or "field" for f in snapshot.empty_fields)
+        names = ", ".join(f.label or "field" for f in fillable(snapshot, skipped))
         return Action(kind="fill", option_key=key, label=names)
     if key.startswith("scroll:"):
         direction = key.split(":", 1)[1]

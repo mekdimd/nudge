@@ -19,13 +19,15 @@ When text has to be written, Gemini drafts it and you approve or edit it before 
 - **Python + PySide6** for the floating bar and the click-through overlay, which draws the cursor's curved flight, trail, target ring, and hold timer.
 - **Accessibility APIs** instead of screenshots: macOS AX through pyobjc, Windows UI Automation through `uiautomation`. Each step reads named controls with their positions and presses them through the API.
 - **Jev** (TypeSafe) makes each decision. We send the goal, history, and on-screen control labels as up to 255 options. One call returns a choice, a probability for every option, and "is the task done?". The probabilities drive our safety rules: low confidence or a narrow margin shows the picker instead of acting.
-- **Gemini** (`gemini-3.8-flash`, structured JSON output) is used only to write text: email drafts, form values, and URLs. A validator blanks any email address the model invents.
+- **Gemini** (`gemini-3.5-flash-lite` raced against `gemini-3.5-flash`, structured JSON output) is used only to write text: email drafts, form values, and URLs. A draft comes back in under a second. A validator blanks any email address the model invents.
 
 ## Challenges
 
 - Chrome only builds its accessibility tree once asked, so the first read can come back empty. We retry the window lookup.
 - Chrome's own menus appear inside the main window's tree, while Settings uses a web menu. We had to tell the two apart so the open-menu filter didn't hide the Live Caption toggle.
 - Gmail's Compose can take over two seconds to react to an accessibility press. An early fallback clicked it again and opened two compose windows. Now Nudge never retries on its own; the person chooses.
+- Gmail turns a typed address into a recipient chip, which empties the To field, so it looked unfilled and Nudge offered to type again. Now each field is drafted at most once per run.
+- During the hackathon the newest Gemini models were returning 503s or hanging. We race two models and take the first answer.
 - Making overlay windows float above full-screen apps and every Space on macOS without taking focus.
 
 ## Accomplishments

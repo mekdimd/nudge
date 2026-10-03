@@ -3,12 +3,17 @@ from __future__ import annotations
 import json
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from urllib.parse import urlparse
 
 from .models import Control
 
-MODEL = "gemini-3.8-flash"
+MODEL = "gemini-3.5-flash-lite"
+RACE_MODELS = ("gemini-3.5-flash",)  # asked in parallel; the first good answer wins
+FALLBACK_MODEL = "gemini-3.8-flash"
+OVERLOADED = ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED", "timed out", "Timeout")
+TIMEOUT_MS = 10_000  # the API rejects deadlines under 10 s
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 
 FILL_SYSTEM = """You write short text that a person would type into a desktop app form.
@@ -19,7 +24,9 @@ Rules:
 - Never invent email addresses, phone numbers, or people's names that do not appear in the goal.
   If a field needs one and the goal does not contain it, return an empty string for that field.
 - A recipient field ("To", "Cc", "Recipients") gets only the address from the goal.
-- If a field is unrelated to the goal, return an empty string."""
+- If a field is unrelated to the goal, return an empty string.
+- Search boxes and AI-assistant prompts ("Search", "Ask ...", "Describe your message", "Help me write")
+  are not part of the message. Always return an empty string for them."""
 
 URL_SYSTEM = """Return the single web address that best matches what the person wants to open.
 Only return a URL you are confident exists. If you are not confident, set confident to false and url to an empty string."""
@@ -74,27 +81,43 @@ class Writer:
         if not api_key:
             raise WriterError("No GEMINI_API_KEY set. Add it to .env.")
         from google import genai
+        from google.genai import types
 
-        self._client = genai.Client(api_key=api_key)
+        self._client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(timeout=TIMEOUT_MS, retry_options=types.HttpRetryOptions(attempts=1)),
+        )
         self.model = model
 
     def _generate(self, system: str, prompt: str, schema: dict) -> tuple[dict, int]:
         from google.genai import types
 
+        config = types.GenerateContentConfig(
+            system_instruction=system,
+            response_mime_type="application/json",
+            response_json_schema=schema,
+            thinking_config=types.ThinkingConfig(thinking_level="low"),
+        )
+        call = lambda model: self._client.models.generate_content(model=model, contents=prompt, config=config)
         started = time.perf_counter()
-        try:
-            response = self._client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=system,
-                    response_mime_type="application/json",
-                    response_json_schema=schema,
-                    thinking_config=types.ThinkingConfig(thinking_level="low"),
-                ),
-            )
-        except Exception as exc:
-            raise WriterError(f"Gemini request failed: {exc}") from exc
+        response, error = None, None
+        racers = [self.model] + [m for m in RACE_MODELS if m != self.model]
+        pool = ThreadPoolExecutor(len(racers))
+        futures = [pool.submit(call, m) for m in racers]
+        for future in as_completed(futures):
+            try:
+                response = future.result()
+                break
+            except Exception as exc:
+                error = exc
+        pool.shutdown(wait=False, cancel_futures=True)  # don't wait for the slower model
+        if response is None:
+            if error is not None and not any(s in str(error) for s in OVERLOADED):
+                raise WriterError(f"Gemini request failed: {error}") from error
+            try:
+                response = call(FALLBACK_MODEL)
+            except Exception as exc:
+                raise WriterError(f"Gemini request failed: {exc}") from exc
         elapsed = int((time.perf_counter() - started) * 1000)
         try:
             return json.loads(response.text or "{}"), elapsed

@@ -4,7 +4,7 @@ import httpx
 import pytest
 
 from nudge.core import safety
-from nudge.core.actions import NONE_KEY, build_options, to_action
+from nudge.core.actions import NONE_KEY, build_options, field_key, to_action
 from nudge.core.jev import JevClient, JevDecision, JevError, build_request, parse_decision
 from nudge.core.models import AppRef, Control, Rect, Snapshot
 from nudge.core.verify import fingerprint, wait_for_change
@@ -38,6 +38,16 @@ def test_fill_only_offered_with_empty_fields_and_never_disabled_ones():
     assert "fill" not in build_options(s2).criteria
     s3 = snap([ctl("t", "Subject", role="text field", is_text_field=True, value="", enabled=False)])
     assert "fill" not in build_options(s3).criteria
+
+
+def test_fields_left_blank_are_not_offered_again():
+    ask = ctl("q", "Ask Gmail", role="text field", is_text_field=True, value="")
+    body = ctl("b", "Message Body", role="text area", is_text_field=True, value="", y=50)
+    skipped = {field_key(ask)}
+    options = build_options(snap([ask, body]), skipped=skipped)
+    assert [f.id for f in options.fields] == ["b"]
+    assert "Ask Gmail" not in options.criteria["fill"]
+    assert "fill" not in build_options(snap([ask]), skipped=skipped).criteria
 
 
 def test_browser_only_options():

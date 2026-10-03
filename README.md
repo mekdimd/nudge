@@ -34,6 +34,18 @@ uv run python scripts/smoke.py   # checks both keys with real calls
 uv run nudge
 ```
 
+Without uv (Python 3.12 or 3.13):
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate          # Windows; on macOS: source .venv/bin/activate
+pip install -r requirements.txt  # also installs Nudge itself, so scripts/ can import it
+python scripts/smoke.py
+python -m nudge
+```
+
+`requirements.txt` is generated with `uv export --no-hashes --no-dev -o requirements.txt`; regenerate it after changing dependencies.
+
 ### macOS
 
 Grant Accessibility permission to the app you launch Nudge from (Terminal, iTerm, Cursor, or VS Code): System Settings, Privacy & Security, Accessibility. Restart Nudge afterwards. Nudge prompts for this on first launch.
@@ -65,8 +77,8 @@ These are the only workflows we have tested end to end. Nudge's action vocabular
 
 | Workflow | macOS | Windows |
 | --- | --- | --- |
-| Chrome: "turn on Live Caption" | adapter verified step by step | pending teammate run |
-| Gmail in Chrome: "email prof.lee@sfu.ca that I'm sick and will miss lecture" | adapter verified (compose, fill, send confirm) | pending teammate run |
+| Chrome: "turn on Live Caption" | works: 4 steps, about 11 s | pending teammate run |
+| Gmail in Chrome: "email … that I'm sick and will miss lecture" | works: Compose, draft, confirm Send; 3 steps, about 15 s | pending teammate run |
 
 ## Limitations
 

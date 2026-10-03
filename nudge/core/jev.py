@@ -55,7 +55,7 @@ def build_request(task: str, snapshot: Snapshot, history: list[str], options: Op
         "step": len(history) + 1,
         "already_done": history or ["nothing yet"],
         "screen_elements": [{"id": c.id, "describes": c.describe()} for c in options.controls],
-        "empty_text_fields": [f.label or "unlabeled field" for f in snapshot.empty_fields],
+        "empty_text_fields": [f.label or "unlabeled field" for f in options.fields],
     }
     questions: dict[str, Any] = {
         "done": {
@@ -73,7 +73,9 @@ def build_request(task: str, snapshot: Snapshot, history: list[str], options: Op
             "type": "choice",
             "instructions": (
                 f'Which single action should be taken next to make progress on the task: "{task}"? '
-                "Consider what has already been done; do not repeat a step that already succeeded."
+                "Consider what has already been done; do not repeat a step that already succeeded. "
+                "To write text into fields, choose the option to type into the empty text fields; "
+                "do not press a field label or a button that opens a picker first."
             ),
             "criteria": options.criteria,
         },
