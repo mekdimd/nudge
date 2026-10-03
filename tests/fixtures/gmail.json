@@ -1,0 +1,30 @@
+{
+  "app": "Google Chrome",
+  "start": "inbox",
+  "screens": {
+    "inbox": {
+      "title": "Inbox - Gmail - Google Chrome",
+      "controls": [
+        {"id": "i1", "label": "Compose", "role": "button", "bounds": [20, 140, 140, 48], "goto": "compose"},
+        {"id": "i2", "label": "Inbox", "role": "link", "bounds": [20, 200, 140, 32]},
+        {"id": "i3", "label": "Search mail", "role": "text field", "text": true, "value": "", "bounds": [300, 70, 700, 40]}
+      ]
+    },
+    "compose": {
+      "title": "Inbox - Gmail - Google Chrome",
+      "controls": [
+        {"id": "c1", "label": "To recipients", "role": "combo box", "text": true, "value": "", "context": "New Message", "bounds": [1300, 500, 500, 30]},
+        {"id": "c2", "label": "Subject", "role": "text field", "text": true, "value": "", "context": "New Message", "bounds": [1300, 540, 500, 30]},
+        {"id": "c3", "label": "Message Body", "role": "text area", "text": true, "value": "", "context": "New Message", "bounds": [1300, 580, 500, 300]},
+        {"id": "c4", "label": "Send", "role": "button", "context": "New Message", "bounds": [1300, 900, 80, 36], "goto": "sent"}
+      ]
+    },
+    "sent": {
+      "title": "Inbox - Gmail - Google Chrome",
+      "controls": [
+        {"id": "x1", "label": "Message sent", "role": "status", "bounds": [20, 900, 200, 36]},
+        {"id": "i1", "label": "Compose", "role": "button", "bounds": [20, 140, 140, 48]}
+      ]
+    }
+  }
+}

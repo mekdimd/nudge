@@ -1,0 +1,38 @@
+{
+  "app": "Google Chrome",
+  "start": "browser",
+  "screens": {
+    "browser": {
+      "title": "New Tab - Google Chrome",
+      "controls": [
+        {"id": "b1", "label": "Back", "role": "button", "context": "toolbar", "bounds": [10, 50, 28, 28]},
+        {"id": "b2", "label": "Reload", "role": "button", "context": "toolbar", "bounds": [44, 50, 28, 28]},
+        {"id": "b3", "label": "Address and search bar", "role": "text field", "text": true, "value": "google.com", "bounds": [90, 50, 900, 28]},
+        {"id": "b4", "label": "Chrome", "role": "menu button", "context": "toolbar", "bounds": [1880, 50, 28, 28], "goto": "menu"}
+      ]
+    },
+    "menu": {
+      "title": "New Tab - Google Chrome",
+      "controls": [
+        {"id": "m1", "label": "New tab", "role": "menu item", "context": "Chrome menu", "bounds": [1600, 90, 300, 30]},
+        {"id": "m2", "label": "History", "role": "menu item", "context": "Chrome menu", "bounds": [1600, 130, 300, 30]},
+        {"id": "m3", "label": "Settings", "role": "menu item", "context": "Chrome menu", "bounds": [1600, 170, 300, 30], "goto": "settings"}
+      ]
+    },
+    "settings": {
+      "title": "Settings - Google Chrome",
+      "controls": [
+        {"id": "s1", "label": "You and Google", "role": "link", "context": "Settings", "bounds": [20, 140, 220, 32]},
+        {"id": "s2", "label": "Privacy and security", "role": "link", "context": "Settings", "bounds": [20, 180, 220, 32]},
+        {"id": "s3", "label": "Accessibility", "role": "link", "context": "Settings", "bounds": [20, 220, 220, 32], "goto": "accessibility"}
+      ]
+    },
+    "accessibility": {
+      "title": "Settings - Accessibility",
+      "controls": [
+        {"id": "a1", "label": "Live Caption", "role": "switch", "context": "Accessibility", "value": "off", "toggle": ["off", "on"], "bounds": [800, 300, 40, 24]},
+        {"id": "a2", "label": "Show a quick highlight on the focused object", "role": "switch", "context": "Accessibility", "value": "off", "toggle": ["off", "on"], "bounds": [800, 360, 40, 24]}
+      ]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+@dataclass
+class Config:
+    typesafe_api_key: str
+    gemini_api_key: str
+    elevenlabs_api_key: str
+
+
+def load_config() -> Config:
+    load_dotenv(ROOT / ".env")
+    return Config(
+        typesafe_api_key=os.environ.get("TYPESAFE_API_KEY", "").strip(),
+        gemini_api_key=os.environ.get("GEMINI_API_KEY", "").strip(),
+        elevenlabs_api_key=os.environ.get("ELEVENLABS_API_KEY", "").strip(),
+    )
