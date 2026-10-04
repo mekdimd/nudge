@@ -71,6 +71,7 @@ class Snapshot:
     controls: list[Control]
     focused_id: str | None = None
     window_bounds: Rect | None = None
+    loading: bool = False
     elapsed_ms: int = 0
 
     def by_id(self, control_id: str) -> Control | None:
@@ -101,10 +102,11 @@ class Action:
     text_by_field: dict[str, str] = field(default_factory=dict)
     url: str | None = None
     label: str = ""
+    double: bool = False
 
     def describe(self) -> str:
         if self.kind == "press":
-            return f"Press “{self.label}”"
+            return f"{'Double-click' if self.double else 'Press'} “{self.label}”"
         if self.kind == "fill":
             return "Type into " + (self.label or "the empty fields")
         if self.kind == "scroll":

@@ -39,7 +39,7 @@ class OfflineJev:
 
 
 class OfflineWriter:
-    def fill(self, goal, fields, filled=None) -> FillDraft:
+    def fill(self, goal, fields, page="") -> FillDraft:
         time.sleep(0.6)
         address = (EMAIL.findall(goal) or [""])[0]
         values = {}

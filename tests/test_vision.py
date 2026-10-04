@@ -26,8 +26,8 @@ class FakeVision:
 
 
 class ClickRecordingAdapter(FakeAdapter):
-    def click(self, control):
-        self.log.append(f"click {control.id}")
+    def click(self, control, double=False):
+        self.log.append(f"{'double ' if double else ''}click {control.id}")
         if control.source == "tree":
             self.press(control)
         else:

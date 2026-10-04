@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from .models import Action, Control, Snapshot
@@ -19,6 +20,9 @@ KEYS: dict[str, tuple[str, str]] = {
 }
 
 BROWSERS = ("chrome", "edge", "firefox", "safari", "brave", "arc")
+ADDRESS_BAR = re.compile(
+    r"address (and search )?bar|search or (type|enter) (a )?(url|web address)|or enter address|^url$", re.I
+)
 
 
 def is_browser(app_name: str) -> bool:
@@ -44,14 +48,27 @@ def _reading_order(control: Control) -> tuple[float, float]:
 
 
 def field_key(control: Control) -> str:
-    """Identifies a text field across snapshots, whose ids and positions shift."""
+    """Identifies a text field across snapshots, whose ids and positions shift.
+
+    Vision reads a field's label from its pixels, so once text is typed the label changes too.
+    """
+    if control.source == "vision":
+        return f"vision|{control.role}"
     return f"{control.label}|{control.role}"
 
 
 def fillable(snapshot: Snapshot, skipped: set[str] | None = None) -> list[Control]:
-    """Empty fields, minus ones already drafted this run (Gmail's To empties itself into a chip)."""
+    """Empty fields, minus ones already drafted this run (Gmail's To empties itself into a chip).
+
+    A browser's own address bar is left to go_to_url, which writes a real address instead of a query.
+    """
     skipped = skipped or set()
-    return [f for f in snapshot.empty_fields if field_key(f) not in skipped]
+    browser = is_browser(snapshot.app.name)
+    return [
+        f
+        for f in snapshot.empty_fields
+        if field_key(f) not in skipped and not (browser and ADDRESS_BAR.search(f.label))
+    ]
 
 
 def build_options(snapshot: Snapshot, excluded: set[str] | None = None, skipped: set[str] | None = None) -> OptionSet:
@@ -69,6 +86,11 @@ def build_options(snapshot: Snapshot, excluded: set[str] | None = None, skipped:
             break
 
     criteria: dict[str, str] = {f"press:{c.id}": f"Press {c.describe()}" for c in controls}
+    for c in controls:
+        if c.source == "vision" and c.role == "text" and f"double:{c.id}" not in excluded:
+            criteria[f"double:{c.id}"] = (
+                f"Double-click {c.describe()}: plays a song or opens an item in a list or search results"
+            )
 
     empty = fillable(snapshot, skipped)
     if empty and FILL_KEY not in excluded:
@@ -99,9 +121,10 @@ def build_options(snapshot: Snapshot, excluded: set[str] | None = None, skipped:
 
 def option_label(key: str, snapshot: Snapshot) -> str:
     """Short human label for an option, used in the picker and history."""
-    if key.startswith("press:"):
+    if key.startswith(("press:", "double:")):
         control = snapshot.by_id(key.split(":", 1)[1])
-        return control.label or control.role if control else key
+        label = control.label or control.role if control else key
+        return f"Double-click {label}" if key.startswith("double:") else label
     if key == FILL_KEY:
         return "Type into the empty fields"
     if key.startswith("scroll:"):
@@ -114,12 +137,18 @@ def option_label(key: str, snapshot: Snapshot) -> str:
 
 
 def to_action(key: str, snapshot: Snapshot, skipped: set[str] | None = None) -> Action:
-    if key.startswith("press:"):
+    if key.startswith(("press:", "double:")):
         target_id = key.split(":", 1)[1]
         control = snapshot.by_id(target_id)
         if control is None:
             raise ValueError(f"unknown control {target_id}")
-        return Action(kind="press", option_key=key, target_id=target_id, label=control.label or control.role)
+        return Action(
+            kind="press",
+            option_key=key,
+            target_id=target_id,
+            label=control.label or control.role,
+            double=key.startswith("double:"),
+        )
     if key == FILL_KEY:
         names = ", ".join(f.label or "field" for f in fillable(snapshot, skipped))
         return Action(kind="fill", option_key=key, label=names)

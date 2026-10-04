@@ -22,6 +22,8 @@ BOX_THRESHOLD = 0.05
 IOU_THRESHOLD = 0.1
 MAX_CAPTIONS = 32
 SEARCH_HINT = re.compile(r"\bsearch\b|what do you want|type here|^find\b", re.IGNORECASE)
+WORDY = re.compile(r"[^\W\d_]")
+FILLER = re.compile(r"\s+for (playing )?(a )?(video|audio|media)( or (video|audio))?\b", re.IGNORECASE)
 
 
 def _iou(a: Box, b: Box) -> float:
@@ -114,7 +116,9 @@ class ScreenParser:
 
         tree = [c.bounds for c in snapshot.controls if c.bounds is not None]
         controls: list[Control] = []
-        items = [(t, b, "text") for t, b in labelled] + [(f"{c} icon", b, "icon") for c, b in zip(captions, unnamed) if c]
+        items = [(t, b, "text") for t, b in labelled] + [
+            (f"{FILLER.sub('', c).rstrip('. ')} icon", b, "icon") for c, b in zip(captions, unnamed) if c
+        ]
         for label, box, role in items:
             bounds = Rect(rect.x + box[0] / scale, rect.y + box[1] / scale, (box[2] - box[0]) / scale, (box[3] - box[1]) / scale)
             if bounds.w < 4 or bounds.h < 4:
@@ -131,7 +135,38 @@ class ScreenParser:
                     bounds=bounds,
                     is_text_field=searchy,
                     source="vision",
-                    context="seen on screen",
+                    context=_where(box, image.size, labelled, scale) if role == "icon" else _region(box, image.size),
                 )
             )
         return controls, int((time.perf_counter() - started) * 1000)
+
+
+def _region(box, size) -> str:
+    w, h = size
+    cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
+    if cy < h * 0.1:
+        return "the top bar"
+    if cy > h * 0.88:
+        return "the bottom bar"
+    if cx < w * 0.22:
+        return "the left sidebar"
+    if cx > w * 0.78:
+        return "the right panel"
+    return "the main area"
+
+
+def _where(box, size, texts, scale: float) -> str:
+    """Where an icon sits and what text is beside it, since captions alone ("play button") repeat."""
+    cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
+    parts = [_region(box, size)]
+    if (box[2] - box[0]) / scale >= 48:
+        parts.append("large")
+    reach = max(box[2] - box[0], box[3] - box[1]) * 2.5
+    near = [
+        (abs((b[0] + b[2]) / 2 - cx) + abs((b[1] + b[3]) / 2 - cy), t)
+        for t, b in texts
+        if len(WORDY.findall(t)) >= 3 and b[0] - reach < cx < b[2] + reach and b[1] - reach < cy < b[3] + reach
+    ]
+    if near:
+        parts.append(f"next to “{min(near)[1][:40]}”")
+    return ", ".join(parts)

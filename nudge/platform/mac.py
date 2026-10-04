@@ -219,6 +219,7 @@ class MacAdapter:
             controls=controls,
             focused_id=walker.focused_id,
             window_bounds=window_rect,
+            loading=walker.loading or (is_browser(app.name) and not menu and not any(c.ref_is_web for c in controls)),
             elapsed_ms=int((time.perf_counter() - started) * 1000),
         )
 
@@ -237,14 +238,20 @@ class MacAdapter:
                 return
         raise AdapterError(f"could not press {control.label!r}")
 
-    def click(self, control: Control) -> None:
+    def click(self, control: Control, double: bool = False) -> None:
         if control.bounds is None:
             raise AdapterError(f"{control.label!r} has no position to click")
-        x, y = control.bounds.center
-        for kind in (Quartz.kCGEventLeftMouseDown, Quartz.kCGEventLeftMouseUp):
-            event = Quartz.CGEventCreateMouseEvent(None, kind, (x, y), Quartz.kCGMouseButtonLeft)
-            Quartz.CGEventPost(Quartz.kCGHIDEventTap, event)
-            time.sleep(0.03)
+        point = control.bounds.center
+        # Chromium apps (Spotify, Slack) drop clicks that arrive without a hover first
+        move = Quartz.CGEventCreateMouseEvent(None, Quartz.kCGEventMouseMoved, point, Quartz.kCGMouseButtonLeft)
+        Quartz.CGEventPost(Quartz.kCGHIDEventTap, move)
+        time.sleep(0.08)
+        for clicks in range(1, (2 if double else 1) + 1):
+            for kind in (Quartz.kCGEventLeftMouseDown, Quartz.kCGEventLeftMouseUp):
+                event = Quartz.CGEventCreateMouseEvent(None, kind, point, Quartz.kCGMouseButtonLeft)
+                Quartz.CGEventSetIntegerValueField(event, Quartz.kCGMouseEventClickState, clicks)
+                Quartz.CGEventPost(Quartz.kCGHIDEventTap, event)
+                time.sleep(0.03)
 
     def set_text(self, control: Control, text: str) -> None:
         element = control.ref
@@ -311,6 +318,7 @@ class _Walker:
         self.nodes = 0
         self.controls: list[Control] = []
         self.focused_id: str | None = None
+        self.loading = False
 
     def _out_of_view(self, rect: Rect | None) -> bool:
         if rect is None or rect.is_empty or self.window_rect is None:
@@ -331,6 +339,8 @@ class _Walker:
             rect = _rect(info)
             if self._out_of_view(rect) and role not in ("AXMenu",):
                 continue
+            if role == "AXWebArea" and _attr(element, "AXLoaded") is False:
+                self.loading = True
             in_web = in_web or role == "AXWebArea"
             label = (
                 _text(info.get("AXTitle"))

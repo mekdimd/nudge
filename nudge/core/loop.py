@@ -174,9 +174,7 @@ class NudgeLoop:
         return self.vision is not None and len(options.controls) < safety.SPARSE_TREE
 
     def _wants_a_closer_look(self, decision: JevDecision) -> bool:
-        return self.vision is not None and (
-            decision.chose_none or decision.absent >= safety.ABSENT_THRESHOLD or safety.is_unsure(decision)
-        )
+        return self.vision is not None and (decision.chose_none or safety.is_unsure(decision))
 
     def _look(self, snapshot: Snapshot) -> tuple[Snapshot, OptionSet, bool]:
         """Add what vision sees on screen that the accessibility tree doesn't expose."""
@@ -220,9 +218,13 @@ class NudgeLoop:
             if self.writer is not None:
                 self.events.status("Gemini is drafting the text")
                 self.events.writer_started()
-                draft = self.writer.fill(self.goal, fields)
+                draft = self.writer.fill(self.goal, fields, page=snapshot.window_title)
                 self.events.writer_used(draft.milliseconds)
                 values = draft.values
+                if not draft.rejected and not any(v.strip() for v in values.values()):
+                    self.drafted_fields |= {field_key(f) for f in fields}
+                    self.excluded.add(action.option_key)
+                    return False
                 if draft.rejected:
                     note = "I left some fields blank because the goal didn't include them. " + note
             else:
@@ -289,7 +291,8 @@ class NudgeLoop:
             after, changed = wait_for_change(
                 lambda: self.adapter.snapshot(self.app),
                 before,
-                timeout=self.settle_timeout,
+                timeout=self.settle_timeout * (3 if action.kind == "go_to_url" else 1),
+                expect_load=action.kind == "go_to_url",
                 cancelled=self.events.cancelled,
             )
             if changed:
@@ -313,6 +316,9 @@ class NudgeLoop:
             control = snapshot.by_id(action.target_id or "")
             if control is None:
                 raise Stop("missing", "That control disappeared before I could press it.")
+            if action.double:
+                adapter.click(control, double=True)
+                return
             if by_click or control.source == "vision":
                 adapter.click(control)
                 return

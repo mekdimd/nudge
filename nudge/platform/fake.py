@@ -77,7 +77,7 @@ class FakeAdapter:
         if "goto" in raw:
             self.screen = raw["goto"]
 
-    def click(self, control: Control) -> None:
+    def click(self, control: Control, double: bool = False) -> None:
         self.press(control)
 
     def set_text(self, control: Control, text: str) -> None:

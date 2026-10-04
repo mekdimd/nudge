@@ -52,7 +52,7 @@ class FakeWriter:
         self._url = url
         self.fill_calls = 0
 
-    def fill(self, goal, fields, filled=None) -> FillDraft:
+    def fill(self, goal, fields, page="") -> FillDraft:
         self.fill_calls += 1
         return FillDraft(values={f.id: self.values_by_label.get(f.label, "") for f in fields}, milliseconds=800)
 
