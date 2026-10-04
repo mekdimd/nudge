@@ -19,6 +19,7 @@ from .core.writer import Writer
 from .ui.audio_settings import AudioSettings
 from .ui.bar import Bar
 from .ui.bridge import Bridge, Worker
+from .ui.console import Console
 from .ui.coords import logical_to_physical, physical_to_logical
 from .ui.hotkeys import Hotkeys
 from .ui.overlay import Overlay
@@ -47,6 +48,14 @@ class Nudge(QObject):
         self.bridge = Bridge()
         self.timeline = Timeline()
         self.recorder = RunRecorder(self.timeline)
+        self.console = Console(self.timeline)
+        self.console.banner({
+            "Jev": jev is not None,
+            "Gemini": writer is not None,
+            "voice": voice is not None,
+            "wake word": wake is not None,
+            "vision": vision is not None,
+        })
         self.bar = Bar(self.timeline)
         self.overlay = Overlay()
         self.hotkeys = Hotkeys()
