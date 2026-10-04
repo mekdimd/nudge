@@ -13,7 +13,7 @@ DRAFT = {
 
 
 def make_loop(adapter, jev, events, writer=None):
-    return NudgeLoop(adapter, jev, writer, events, hold_seconds=0, own_pid=1, settle_timeout=0.05, startup_delay=0)
+    return NudgeLoop(adapter, jev, writer, events, hold_seconds=0, own_pid=1, settle_timeout=0.05, startup_delay=0, step_delay=0)
 
 
 def test_live_caption_flow_presses_four_controls_and_finishes():

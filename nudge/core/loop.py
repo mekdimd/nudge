@@ -18,6 +18,9 @@ from .writer import Writer, WriterError
 SHELL_WORDS = re.compile(r"\b(task ?bar|dock|start (menu|button)|system tray|tray|menu ?bar|notification area|pinned)\b", re.I)
 
 
+FOLLOW_GRACE = 10.0  # seconds after our own action during which a new front app is followed, not treated as a hijack
+
+
 class Events(Protocol):
     """How the loop talks to the person. Blocking methods return None when the run is cancelled."""
 
@@ -81,7 +84,9 @@ class NudgeLoop:
         settle_timeout: float = 2.5,
         startup_delay: float = 0.0,
         vision=None,
+        step_delay: float = 0.5,
     ):
+        self.step_delay = step_delay
         self.adapter = adapter
         self.vision = vision
         self.jev = jev
@@ -101,6 +106,7 @@ class NudgeLoop:
         self.drafted_fields: set[str] = set()
         self.jev_ms: list[int] = []
         self.fresh: Snapshot | None = None
+        self.last_acted = float("-inf")
         self.shell_on = bool(SHELL_WORDS.search(goal))
         try:
             with self.adapter.thread_context():
@@ -123,6 +129,12 @@ class NudgeLoop:
     def _check_app(self) -> None:
         front = self.adapter.frontmost_app()
         if front is not None and front.pid not in (self.app.pid, self.own_pid):
+            if time.monotonic() - self.last_acted < FOLLOW_GRACE:
+                # our own action launched or raised it, just after the settle check gave up waiting
+                self.app = front
+                self.events.status(f"Working in {front.name}")
+                self.fresh = None
+                return
             raise Stop("app_changed", f"{front.name} came to the front, so I stopped. Start again in the app you want.")
 
     def _run(self) -> str:
@@ -305,13 +317,14 @@ class NudgeLoop:
         by_click = False
         while True:
             self._execute(action, snapshot, by_click)
+            self.last_acted = time.monotonic()
             if self._is_shell_press(action, snapshot) and self._follow_front():
                 self.history.append(f"{action.describe()}: worked")
                 self.excluded.clear()
-                self.fresh = None
+                self._pause_then_refetch()
                 return
             after, changed = wait_for_change(
-                lambda: self.adapter.snapshot(self.app),
+                self._read_following_front,
                 before,
                 timeout=self.settle_timeout * (3 if action.kind == "go_to_url" else 1),
                 expect_load=action.kind == "go_to_url",
@@ -320,7 +333,7 @@ class NudgeLoop:
             if changed:
                 self.history.append(f"{action.describe()}: worked")
                 self.excluded.clear()
-                self.fresh = after
+                self._pause_then_refetch()
                 return
             choice = self.events.recover(f"“{action.describe()}” didn't seem to change anything.")
             if choice in ("retry", "click"):
@@ -330,6 +343,19 @@ class NudgeLoop:
                 self.excluded.add(target.describe() if action.kind == "press" and target else action.option_key)
                 return
             raise Stop("no_change", "Stopped because the last step didn't work.")
+
+    def _read_following_front(self) -> Snapshot:
+        """Read the UI after our own action; if it launched or raised another app, carry on in that one."""
+        front = self.adapter.frontmost_app()
+        if front is not None and front.pid not in (self.app.pid, self.own_pid):
+            self.app = front
+            self.events.status(f"Working in {front.name}")
+        return self.adapter.snapshot(self.app)
+
+    def _pause_then_refetch(self) -> None:
+        """Let the UI settle after a step, then drop the cached snapshot so the next round reads it fresh."""
+        time.sleep(self.step_delay)
+        self.fresh = None
 
     def _is_shell_press(self, action: Action, snapshot: Snapshot) -> bool:
         control = snapshot.by_id(action.target_id or "") if action.kind == "press" else None

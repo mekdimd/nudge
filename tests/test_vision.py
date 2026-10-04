@@ -41,7 +41,7 @@ SPARSE = {
 
 
 def make_loop(adapter, jev, events, vision):
-    return NudgeLoop(adapter, jev, None, events, hold_seconds=0, own_pid=1, settle_timeout=0.05, startup_delay=0, vision=vision)
+    return NudgeLoop(adapter, jev, None, events, hold_seconds=0, own_pid=1, settle_timeout=0.05, startup_delay=0, step_delay=0, vision=vision)
 
 
 def test_sparse_tree_looks_with_vision_and_clicks_what_it_found():
