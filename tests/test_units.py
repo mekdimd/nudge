@@ -211,3 +211,32 @@ def test_wait_for_change_times_out_unchanged():
     a = snap([ctl("a", "A")])
     result, changed = wait_for_change(lambda: a, fingerprint(a), timeout=0.05, interval=0.01)
     assert not changed
+
+
+# spoken choice
+
+
+def test_spoken_choice_by_number_name_and_stop():
+    from nudge.core.spoken import match_choice
+
+    labels = ["Turn on Live Captions", "Open Settings", "Reload"]
+    assert match_choice("the second one", labels) == 1
+    assert match_choice("option 3", labels) == 2
+    assert match_choice("open settings please", labels) == 1
+    assert match_choice("live caption", labels) == 0
+    assert match_choice("two", labels) == 1 and match_choice("to", labels) == 1
+    assert match_choice("never mind", labels) == "stop"
+    assert match_choice("banana", labels) is None
+    assert match_choice("fifth", labels) is None
+
+
+def test_spoken_intents():
+    from nudge.core.spoken import match_intent
+
+    assert match_intent("yes, do it", ("stop", "no", "yes")) == "yes"
+    assert match_intent("no", ("stop", "no", "yes")) == "no"
+    assert match_intent("please stop that", ("stop", "yes")) == "stop"
+    assert match_intent("try again", ("stop", "retry", "click", "other")) == "retry"
+    assert match_intent("pick something else", ("stop", "retry", "click", "other")) == "other"
+    assert match_intent("go to the settings page and turn it on", ("stop", "yes")) is None
+    assert match_intent("banana", ("stop", "yes")) is None

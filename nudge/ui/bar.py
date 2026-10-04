@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..core.spoken import match_choice, match_intent
 from . import theme
 
 WIDTH = 760
@@ -102,6 +103,7 @@ class Bar(QWidget):
     go_requested = Signal(str)
     stop_requested = Signal()
     quit_requested = Signal()
+    panel_closed = Signal()
 
     def __init__(self):
         flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool
@@ -114,6 +116,7 @@ class Bar(QWidget):
         self.setFixedWidth(WIDTH)
         self._drag: QPoint | None = None
         self._enter_action: Callable[[], None] | None = None
+        self.spoken: Callable[[str], bool] | None = None  # answers the open prompt from speech; True if it understood
         self.running = False
 
         root = QVBoxLayout(self)
@@ -299,6 +302,8 @@ class Bar(QWidget):
 
     def clear_panel(self) -> None:
         self._enter_action = None
+        self.spoken = None
+        self.panel_closed.emit()
         _clear_layout(self.panel_layout)
         self.panel.hide()
         self._resize()
@@ -343,13 +348,22 @@ class Bar(QWidget):
     def show_choice(self, reason: str, options: list[tuple[str, str, float]], reply: Callable[[object], None]) -> None:
         self._open_panel(reason)
         first = None
-        for key, label, prob in options:
-            b = _button(f"{label}    {prob:.0%}", "choice")
+        for number, (key, label, prob) in enumerate(options, 1):
+            b = _button(f"{number}   {label}    {prob:.0%}", "choice")
             b.setMinimumHeight(56)
             b.clicked.connect(lambda _=False, k=key: self._answer(lambda: reply(k)))
             self.panel_layout.addWidget(b)
             first = first or b
         self._buttons([("Stop", "danger", lambda: reply(None))])
+
+        def spoken(text: str) -> bool:
+            match = match_choice(text, [label for _, label, _ in options])
+            if match is None:
+                return False
+            self._answer(lambda: reply(None if match == "stop" else options[match][0]))
+            return True
+
+        self.spoken = spoken
         self._finish_panel(first)
 
     def show_draft(self, note: str, fields: list[tuple[str, str, str]], reply: Callable[[object], None]) -> None:
@@ -380,6 +394,7 @@ class Bar(QWidget):
         approve = lambda: reply(values())
         self._buttons([("Type it", "primary", approve), ("Stop", "danger", lambda: reply(None))])
         self._enter_action = approve
+        self.spoken = self._yes_or_stop(approve, lambda: reply(None))
         self._finish_panel(first)
 
     def show_url(self, url: str | None, fallback: str, reply: Callable[[object], None]) -> None:
@@ -391,11 +406,13 @@ class Bar(QWidget):
         go = lambda: reply(editor.text())
         self._buttons([("Go", "primary", go), ("Stop", "danger", lambda: reply(None))])
         self._enter_action = go
+        self.spoken = self._yes_or_stop(go, lambda: reply(None))
         self._finish_panel(editor)
 
     def show_confirm(self, message: str, reply: Callable[[object], None]) -> None:
         self._open_panel(message, tone="warn")
         yes, _ = self._buttons([("Yes, do it", "warn", lambda: reply(True)), ("No", "", lambda: reply(False))])
+        self.spoken = self._intents({"stop": lambda: reply(False), "no": lambda: reply(False), "yes": lambda: reply(True)})
         self._finish_panel(None)
 
     def show_recover(self, message: str, reply: Callable[[object], None]) -> None:
@@ -406,6 +423,12 @@ class Bar(QWidget):
             ("Pick something else", "", lambda: reply("other")),
             ("Stop", "danger", lambda: reply("stop")),
         ])
+        self.spoken = self._intents({
+            "stop": lambda: reply("stop"),
+            "retry": lambda: reply("retry"),
+            "click": lambda: reply("click"),
+            "other": lambda: reply("other"),
+        })
         self._finish_panel(retry)
 
     def show_ask(self, message: str, reply: Callable[[object], None]) -> None:
@@ -418,7 +441,29 @@ class Bar(QWidget):
         go = lambda: reply(editor.text())
         self._buttons([("Continue", "primary", go), ("Stop", "danger", lambda: reply(None))])
         self._enter_action = go
+        intents = self._intents({"stop": lambda: reply(None), "yes": go, "no": go})
+
+        def spoken(text: str) -> bool:
+            if not intents(text):  # anything else is the detail they were asked for
+                editor.setText(text)
+                self._answer(go)
+            return True
+
+        self.spoken = spoken
         self._finish_panel(editor)
+
+    def _intents(self, actions: dict[str, Callable[[], None]]) -> Callable[[str], bool]:
+        def spoken(text: str) -> bool:
+            intent = match_intent(text, tuple(actions))
+            if intent is None:
+                return False
+            self._answer(actions[intent])
+            return True
+
+        return spoken
+
+    def _yes_or_stop(self, yes: Callable[[], None], stop: Callable[[], None]) -> Callable[[str], bool]:
+        return self._intents({"stop": stop, "no": stop, "yes": yes})
 
 
 def _clear_layout(layout) -> None:

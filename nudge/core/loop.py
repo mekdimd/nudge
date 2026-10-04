@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import time
+import traceback
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -97,6 +98,7 @@ class NudgeLoop:
         except (JevError, WriterError) as exc:
             outcome = Outcome(False, "model_error", str(exc), len(self.history))
         except Exception as exc:  # adapters talk to live OS APIs; never crash the bar
+            traceback.print_exc()
             outcome = Outcome(False, "error", f"{type(exc).__name__}: {exc}", len(self.history))
         self.events.finished(outcome.ok, outcome.message)
         return outcome
