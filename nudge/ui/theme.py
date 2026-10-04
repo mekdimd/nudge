@@ -53,4 +53,8 @@ QPushButton[kind="danger"] {{ background: {RED.name()}; border: none; color: whi
 QPushButton[kind="danger"]:hover {{ background: #d9434a; }}
 QPushButton[kind="warn"] {{ background: {AMBER.name()}; border: none; color: #1b1300; }}
 QPushButton[kind="choice"] {{ text-align: left; padding: 14px 18px; }}
+QScrollArea#feed, QWidget#feedBody {{ background: transparent; border: none; }}
+QScrollBar:vertical {{ background: transparent; width: 6px; }}
+QScrollBar::handle:vertical {{ background: rgba(255,255,255,0.16); border-radius: 3px; min-height: 24px; }}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
 """
