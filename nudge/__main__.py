@@ -41,6 +41,7 @@ class Nudge(QObject):
         self.audio = audio if audio is not None else AudioSettings()
         self.audio.changed.connect(self.on_audio_changed)
         self.sounds = Sounds(self.audio)
+        self._listening = False
         self.target: AppRef | None = None
         self.worker: Worker | None = None
         self.debug = False
@@ -131,6 +132,10 @@ class Nudge(QObject):
         self.voice.listen()
 
     def on_voice_state(self, state: str) -> None:
+        listening = state == "listening"
+        if listening != self._listening:
+            self.sounds.play("listen" if listening else "listen_off")
+            self._listening = listening
         self.sync_orb()
         if self.wake is not None:
             self.wake.pause() if state == "listening" else self.wake.start()

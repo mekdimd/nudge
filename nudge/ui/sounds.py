@@ -18,6 +18,8 @@ TONES = {
     "attention": [(880.0, 0.08), (880.0, 0.08)],
     "success": [(1046.5, 0.07), (1318.5, 0.07), (1568.0, 0.12)],
     "failure": [(329.6, 0.09), (261.6, 0.14)],
+    "listen": [(988.0, 0.045), (1318.5, 0.08)],
+    "listen_off": [(1318.5, 0.04), (784.0, 0.09)],
 }
 
 
@@ -40,7 +42,7 @@ def synth(notes: list[tuple[float, float]]) -> bytes:
 
 
 class Sounds:
-    """Short UI sounds for run start, each press, needing you, success, and failure."""
+    """Short UI sounds for run start, each press, needing you, success, failure, and listening."""
 
     def __init__(self, settings, folder: Path | None = None):
         self.settings = settings

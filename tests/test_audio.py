@@ -118,7 +118,7 @@ def test_mic_button_toggles_mute_and_lists_toggles(settings):
     from nudge.ui.mic import MicButton
 
     button = MicButton(settings)
-    button.click()
+    button.mute.click()
     assert settings.mic_muted
     button._rebuild()
     texts = [a.text() for a in button.menu_.actions() if not a.isSeparator()]

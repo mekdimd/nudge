@@ -179,6 +179,8 @@ class Bar(QWidget):
         self.input.returnPressed.connect(self._go)
         self.input.textEdited.connect(self._on_edited)
         self.mic_slot = QHBoxLayout()
+        self.mic_slot.setContentsMargins(0, 0, 0, 0)
+        self.mic_slot.setSpacing(0)
         self.go = _button("Go", "primary", 112)
         self.go.setMinimumHeight(54)
         self.go.clicked.connect(self._go)

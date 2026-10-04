@@ -2,38 +2,81 @@ from __future__ import annotations
 
 from typing import Callable
 
-from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QActionGroup, QIcon, QKeySequence
+from PySide6.QtCore import QPoint, QRectF, QSize, Qt
+from PySide6.QtGui import QActionGroup, QColor, QIcon, QKeySequence, QPainter, QPen
 from PySide6.QtMultimedia import QMediaDevices
-from PySide6.QtWidgets import QMenu, QToolButton
+from PySide6.QtWidgets import QHBoxLayout, QMenu, QStyleFactory, QToolButton, QWidget
 
 from .audio_settings import AudioSettings
 from .icons import svg_pixmap
 
+HEIGHT = 54
+MUTE_W = 44
+ARROW_W = 28
 
-class MicButton(QToolButton):
-    """Click to mute or unmute the mic; the arrow picks a microphone and the other audio toggles."""
+
+class MicButton(QWidget):
+    """One rounded control: the mic mutes, the chevron opens the audio menu. Neither draws past the edge."""
 
     def __init__(self, settings: AudioSettings):
         super().__init__()
         self.settings = settings
         self.setObjectName("mic")
-        self.setPopupMode(QToolButton.ToolButtonPopupMode.MenuButtonPopup)
-        self.setFixedHeight(54)
-        self.setMinimumWidth(72)
-        self.setIconSize(QSize(22, 22))
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setToolTip("Click to mute the mic. Use the arrow to pick a microphone.")
+        self.setFixedSize(MUTE_W + ARROW_W, HEIGHT)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAutoFillBackground(False)
+
+        row = QHBoxLayout(self)
+        row.setContentsMargins(1, 1, 1, 1)
+        row.setSpacing(0)
+
+        self.mute = self._half("micMute", MUTE_W - 1, "Mute the mic")
+        self.mute.clicked.connect(lambda: settings.set_mic_muted(not settings.mic_muted))
+        self.arrow = self._half("micArrow", ARROW_W - 1, "Choose a microphone")
+        self.arrow.setIcon(QIcon(svg_pixmap("chevron", 14)))
+        self.arrow.setIconSize(QSize(14, 14))
+        self.arrow.clicked.connect(self._popup)
+        row.addWidget(self.mute)
+        row.addWidget(self.arrow)
+
         self.menu_ = QMenu(self)
-        self.setMenu(self.menu_)
         self.menu_.aboutToShow.connect(self._rebuild)
-        self.clicked.connect(lambda: settings.set_mic_muted(not settings.mic_muted))
         settings.changed.connect(self._refresh)
         self._refresh()
         self._rebuild()
 
+    def _half(self, name: str, width: int, tip: str) -> QToolButton:
+        button = QToolButton()
+        button.setObjectName(name)
+        style = QStyleFactory.create("Fusion")
+        style.setParent(button)
+        button.setStyle(style)
+        button.setFixedSize(width, HEIGHT - 2)
+        button.setAutoRaise(True)
+        button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        button.setCursor(Qt.CursorShape.PointingHandCursor)
+        button.setToolTip(tip)
+        return button
+
+    def paintEvent(self, _event) -> None:
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        box = QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5)
+        painter.setPen(QPen(QColor(255, 255, 255, 26), 1))
+        painter.setBrush(QColor(255, 255, 255, 20))
+        painter.drawRoundedRect(box, 12, 12)
+        painter.setPen(QPen(QColor(255, 255, 255, 32), 1))
+        split = self.mute.geometry().right() + 1
+        painter.drawLine(QPoint(split, 14), QPoint(split, self.height() - 14))
+
     def _refresh(self) -> None:
-        self.setIcon(QIcon(svg_pixmap("mic-off" if self.settings.mic_muted else "mic", 22)))
+        muted = self.settings.mic_muted
+        self.mute.setIcon(QIcon(svg_pixmap("mic-off" if muted else "mic", 20)))
+        self.mute.setIconSize(QSize(20, 20))
+        self.mute.setToolTip("Unmute the mic" if muted else "Mute the mic")
+
+    def _popup(self) -> None:
+        self.menu_.popup(self.arrow.mapToGlobal(QPoint(0, self.arrow.height() + 4)))
 
     def _rebuild(self) -> None:
         menu = self.menu_

@@ -52,6 +52,18 @@ def finished(app):
     return not app.running and entries and entries[-1].actor == "nudge" and entries[-1].state != "waiting"
 
 
+def test_voice_states_play_listen_cues(offline):
+    app, _, _ = offline("live_caption")
+    played = []
+    app.sounds.play = played.append
+    app.on_voice_state("listening")
+    app.on_voice_state("idle")
+    app.on_voice_state("timeout")
+    app.on_voice_state("listening")
+    app.on_voice_state("muted")
+    assert played == ["listen", "listen_off", "listen", "listen_off"]
+
+
 def test_offline_live_caption_run_fills_the_feed(offline):
     app, adapter, goal = offline("live_caption")
     app.start(goal)
