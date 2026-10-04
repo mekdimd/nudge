@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 import time
 
-from PySide6.QtCore import QPointF, Qt, QTimer
+from PySide6.QtCore import QPointF, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QConicalGradient, QPainter, QPainterPath, QPen, QRadialGradient
 from PySide6.QtWidgets import QWidget
 
@@ -16,10 +16,14 @@ class Orb(QWidget):
     SIZE = 32
     MODES = ("idle", "listening", "thinking", "speaking")
 
+    clicked = Signal()
+
     def __init__(self):
         super().__init__()
         self.setFixedSize(self.SIZE, self.SIZE)
         self.mode = "idle"
+        self.clickable = False
+        self.hovered = False
         self.level = 0.0
         self._target = 0.0
         self._t0 = time.monotonic()
@@ -37,6 +41,23 @@ class Orb(QWidget):
 
     def set_level(self, value: float) -> None:
         self._target = min(1.0, max(0.0, float(value)))
+
+    def set_clickable(self, on: bool) -> None:
+        self.clickable = on
+        self.setCursor(Qt.CursorShape.PointingHandCursor if on else Qt.CursorShape.ArrowCursor)
+
+    def mouseReleaseEvent(self, event) -> None:
+        if self.clickable and event.button() == Qt.MouseButton.LeftButton and self.rect().contains(event.position().toPoint()):
+            self.clicked.emit()
+        super().mouseReleaseEvent(event)
+
+    def enterEvent(self, event) -> None:
+        self.hovered = True
+        super().enterEvent(event)
+
+    def leaveEvent(self, event) -> None:
+        self.hovered = False
+        super().leaveEvent(event)
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
@@ -70,7 +91,7 @@ class Orb(QWidget):
             p.setPen(Qt.PenStyle.NoPen)
 
         if self.mode == "idle":
-            scale, opacity = 1 + 0.04 * math.sin(2 * math.pi * t / 4), 0.75
+            scale, opacity = 1 + 0.04 * math.sin(2 * math.pi * t / 4), 1.0 if self.clickable and self.hovered else 0.75
         elif self.mode == "listening":
             scale, opacity = 1 + 0.05 * math.sin(2 * math.pi * t / 1.2) + 0.22 * self.level, 1.0
         else:

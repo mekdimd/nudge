@@ -114,29 +114,16 @@ def test_muted_sounds_do_not_play(settings, tmp_path):
     assert played == [True]
 
 
-def test_mic_button_asks_to_talk_and_mute_lives_in_the_menu(settings):
+def test_mic_button_toggles_mute_and_lists_toggles(settings):
     from nudge.ui.mic import MicButton
 
     button = MicButton(settings)
-    asked = []
-    button.talk_requested.connect(lambda: asked.append(True))
-    button.talk.click()
-    assert asked == [True] and not settings.mic_muted
-    button._rebuild()
-    next(a for a in button.menu_.actions() if a.text() == "Mute mic").trigger()
-    assert settings.mic_muted
+    button.mute.click()
+    assert settings.mic_muted and button.mute.toolTip() == "Unmute the mic"
+    button.mute.click()
+    assert not settings.mic_muted
     button._rebuild()
     texts = [a.text() for a in button.menu_.actions() if not a.isSeparator()]
     assert {"Mute mic", "Mute Nudge's voice", "Sound effects"} <= set(texts)
     next(a for a in button.menu_.actions() if a.text() == "Sound effects").trigger()
     assert settings.sounds_muted
-
-
-def test_mic_button_lights_up_while_listening(settings):
-    from nudge.ui.mic import MicButton
-
-    button = MicButton(settings)
-    button.set_listening(True)
-    assert button.talk.isChecked() and button.talk.toolTip() == "Stop listening"
-    button.set_listening(False)
-    assert not button.talk.isChecked() and button.talk.toolTip().startswith("Talk to Nudge")

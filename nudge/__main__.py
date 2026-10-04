@@ -121,9 +121,9 @@ class Nudge(QObject):
             voice.request.connect(self.on_voice_request)
             from .ui.mic import MicButton
 
-            mic = MicButton(self.audio)
-            mic.talk_requested.connect(self.on_talk)
-            self.bar.add_mic(mic)
+            self.bar.add_mic(MicButton(self.audio))
+            self.bar.orb.set_clickable(True)
+            self.bar.orb.clicked.connect(self.on_talk)
             voice.level.connect(self.bar.orb.set_level)
         if speaker is not None:
             speaker.finished.connect(self.on_spoken_prompt)
@@ -147,8 +147,6 @@ class Nudge(QObject):
         if listening != self._listening:
             self.sounds.play("listen" if listening else "listen_off")
             self._listening = listening
-        if self.bar.mic is not None:
-            self.bar.mic.set_listening(listening)
         self.sync_orb()
         if self.wake is not None:
             self.wake.pause() if state == "listening" else self.wake.start()
@@ -218,6 +216,8 @@ class Nudge(QObject):
         else:
             mode = "idle"
         self.bar.orb.set_mode(mode)
+        if self.voice is not None:
+            self.bar.orb.setToolTip("Stop listening" if mode == "listening" else "Talk to Nudge, or say the wake word")
 
     def on_voice_request(self, goal: str) -> None:
         if self.bar.spoken is not None:
@@ -258,7 +258,7 @@ class Nudge(QObject):
             self.bar.set_status("Nudge is working. Answer by voice when it asks, or press Stop.", during_run=True)
 
     def toggle_listening(self) -> bool:
-        """The hotkey and the talk button share this. False when a run is going and nothing is being asked."""
+        """The hotkey and the orb share this. False when a run is going and nothing is being asked."""
         if self.voice is None or (self.running and self.bar.spoken is None):
             return False
         self.voice.cancel() if self.voice.active else self.voice.listen()

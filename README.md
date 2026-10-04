@@ -74,7 +74,7 @@ Summon the bar with **Ctrl+Shift+Space**.
 
 1. Click into the app you want help with. The bar shows it as "in Google Chrome".
 2. Press the hotkey, type a goal, and press Enter.
-3. With an ElevenLabs key, say the wake word or click the mic button next to the input to talk. The button lights up whenever Nudge is listening, however listening started, and clicking it again stops. Its arrow picks a microphone and holds the mutes: mic, Nudge's voice, and sound effects.
+3. With an ElevenLabs key, say the wake word or click the orb (the circle left of the input) to talk. The orb ripples whenever Nudge is listening, however listening started, and clicking it again stops. The mic button mutes the mic; its arrow picks a microphone and toggles Nudge's voice and sound effects.
 4. Watch the cursor. Press Stop or Esc at any point. Ctrl+C in the terminal quits.
 
 To keep Nudge running like an installed app, start it in the background:

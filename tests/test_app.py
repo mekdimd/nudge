@@ -1,7 +1,8 @@
 import time
 
 import pytest
-from PySide6.QtCore import QObject, QSettings, Signal
+from PySide6.QtCore import QObject, QSettings, Qt, Signal
+from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
 
@@ -84,29 +85,47 @@ def with_voice(offline):
     return app
 
 
-def test_talk_button_starts_and_stops_listening(offline):
+def click_orb(app):
+    QTest.mouseClick(app.bar.orb, Qt.MouseButton.LeftButton)
+
+
+def test_clicking_the_orb_starts_and_stops_listening(offline):
     app = with_voice(offline)
-    app.bar.mic.talk.click()
-    assert app.voice.active and app.bar.mic.talk.isChecked() and app.bar.orb.mode == "listening"
-    app.bar.mic.talk.click()
-    assert not app.voice.active and not app.bar.mic.talk.isChecked()
+    click_orb(app)
+    assert app.voice.active and app.bar.orb.mode == "listening"
+    click_orb(app)
+    assert not app.voice.active and app.bar.orb.mode == "idle"
 
 
-def test_talk_button_lights_up_when_the_wake_word_or_hotkey_listens(offline):
+def test_the_orb_stops_what_the_wake_word_or_hotkey_started(offline):
     app = with_voice(offline)
     app.on_wake()
-    assert app.bar.mic.talk.isChecked()
+    assert app.bar.orb.mode == "listening"
+    click_orb(app)
+    assert not app.voice.active
     app.on_hotkey()
-    assert not app.bar.mic.talk.isChecked()
-    app.on_hotkey()
-    assert app.bar.mic.talk.isChecked()
+    assert app.bar.orb.mode == "listening"
+    click_orb(app)
+    assert not app.voice.active
 
 
-def test_talk_button_unmutes_a_muted_mic(offline):
+def test_clicking_the_orb_unmutes_a_muted_mic(offline):
     app = with_voice(offline)
     app.audio.set_mic_muted(True)
-    app.bar.mic.talk.click()
+    click_orb(app)
     assert not app.audio.mic_muted and app.voice.active
+
+
+def test_the_mic_button_mutes_without_listening(offline):
+    app = with_voice(offline)
+    app.bar.mic.mute.click()
+    assert app.audio.mic_muted and not app.voice.active
+
+
+def test_the_orb_is_not_clickable_without_voice(offline):
+    app, _, _ = offline("live_caption")
+    click_orb(app)
+    assert app.bar.orb.mode == "idle" and not app.bar.orb.clickable
 
 
 def test_closing_quits_by_default(offline):
