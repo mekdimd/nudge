@@ -223,6 +223,10 @@ class MacAdapter:
             elapsed_ms=int((time.perf_counter() - started) * 1000),
         )
 
+    def shell_controls(self, app: AppRef) -> list[Control]:
+        # TODO: walk the Dock (com.apple.dock) and menu-bar extras with _Walker
+        return []
+
     def press(self, control: Control) -> None:
         element = control.ref
         if element is None:

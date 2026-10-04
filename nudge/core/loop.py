@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import time
 import traceback
+import re
 from dataclasses import dataclass, replace
 from typing import Protocol
 
@@ -12,6 +13,9 @@ from .jev import JevClient, JevDecision, JevError
 from .models import Action, AppRef, Control, Snapshot
 from .verify import fingerprint, wait_for_change
 from .writer import Writer, WriterError
+
+
+SHELL_WORDS = re.compile(r"\b(task ?bar|dock|start (menu|button)|system tray|tray|menu ?bar|notification area|pinned)\b", re.I)
 
 
 class Events(Protocol):
@@ -97,6 +101,7 @@ class NudgeLoop:
         self.drafted_fields: set[str] = set()
         self.jev_ms: list[int] = []
         self.fresh: Snapshot | None = None
+        self.shell_on = bool(SHELL_WORDS.search(goal))
         try:
             with self.adapter.thread_context():
                 message = self._run()
@@ -134,6 +139,8 @@ class NudgeLoop:
             self._check_app()
 
             snapshot, self.fresh = self.fresh or self.adapter.snapshot(self.app), None
+            if self.shell_on:
+                snapshot = self._with_shell(snapshot)
             options = build_options(snapshot, self.excluded, self.drafted_fields)
             self.events.observed(snapshot)
             looked = False
@@ -152,6 +159,9 @@ class NudgeLoop:
                     f"Done in {steps} step{'s' if steps != 1 else ''} · {time.monotonic() - started:.1f} s · "
                     f"Jev {average} ms per decision"
                 )
+            if decision.chose_none and not self.shell_on:
+                self.shell_on = True  # nothing in the app fits, so try the taskbar / Dock
+                continue
             if len(self.history) >= self.max_steps:
                 raise Stop("step_budget", f"Stopped after {self.max_steps} steps.")
 
@@ -290,6 +300,11 @@ class NudgeLoop:
         by_click = False
         while True:
             self._execute(action, snapshot, by_click)
+            if self._is_shell_press(action, snapshot) and self._follow_front():
+                self.history.append(f"{action.describe()}: worked")
+                self.excluded.clear()
+                self.fresh = None
+                return
             after, changed = wait_for_change(
                 lambda: self.adapter.snapshot(self.app),
                 before,
@@ -311,9 +326,34 @@ class NudgeLoop:
                 return
             raise Stop("no_change", "Stopped because the last step didn't work.")
 
+    def _is_shell_press(self, action: Action, snapshot: Snapshot) -> bool:
+        control = snapshot.by_id(action.target_id or "") if action.kind == "press" else None
+        return control is not None and control.shell
+
+    def _follow_front(self) -> bool:
+        """A taskbar or Dock press usually switches apps, so keep working in whichever app came to the front."""
+        deadline = time.monotonic() + self.settle_timeout
+        while time.monotonic() < deadline:
+            front = self.adapter.frontmost_app()
+            if front is not None and front.pid not in (self.app.pid, self.own_pid):
+                self.app = front
+                self.events.status(f"Working in {front.name}")
+                return True
+            time.sleep(0.05)
+        return False
+
+    def _with_shell(self, snapshot: Snapshot) -> Snapshot:
+        try:
+            extra = self.adapter.shell_controls(self.app)
+        except Exception:  # the shell is a bonus source; never let it break a run
+            traceback.print_exc()
+            return snapshot
+        return replace(snapshot, controls=snapshot.controls + extra) if extra else snapshot
+
     def _execute(self, action: Action, snapshot: Snapshot, by_click: bool = False) -> None:
         adapter = self.adapter
-        adapter.activate_app(self.app)
+        if not self._is_shell_press(action, snapshot):
+            adapter.activate_app(self.app)
         if action.kind == "press":
             control = snapshot.by_id(action.target_id or "")
             if control is None:
@@ -321,7 +361,7 @@ class NudgeLoop:
             if action.double:
                 adapter.click(control, double=True)
                 return
-            if by_click or control.source == "vision":
+            if by_click or control.source == "vision" or control.shell:  # taskbar Invoke often succeeds without doing anything
                 adapter.click(control)
                 return
             try:

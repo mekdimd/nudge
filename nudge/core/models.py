@@ -50,6 +50,7 @@ class Control:
     is_text_field: bool = False
     ref: Any = field(default=None, compare=False, repr=False)
     source: Literal["tree", "vision"] = "tree"
+    shell: bool = False  # belongs to the OS shell (taskbar, Dock), not the target app
 
     def describe(self) -> str:
         label = self.label or "unlabeled"

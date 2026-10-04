@@ -105,7 +105,7 @@ def test_pick_another_excludes_the_failed_control():
 def test_target_absent_asks_user_then_stops_when_dismissed():
     adapter = FakeAdapter.from_fixture("live_caption")
     events = RecordingEvents(ask_answers=[None])
-    outcome = make_loop(adapter, ScriptedJev(["__none__"]), events).run("turn on Live Caption", adapter.app)
+    outcome = make_loop(adapter, ScriptedJev(["__none__", "__none__"]), events).run("turn on Live Caption", adapter.app)
     assert outcome.reason == "cancelled"
     assert any(line.startswith("ask") for line in events.log)
 
@@ -145,3 +145,34 @@ def test_go_to_url_types_approved_address():
         "open the SFU students page", adapter.app
     )
     assert adapter.log[:3] == ["key address_bar", "type 'https://www.sfu.ca/students.html'", "key enter"]
+
+
+def shell_adapter():
+    screens = {"home": {"title": "Notes", "controls": [{"id": "a1", "label": "Save"}]}}
+    shell = [{"id": "s1", "label": "Spotify", "app": "Spotify", "pid": 9}]
+    return FakeAdapter(screens, "home", shell=shell)
+
+
+def test_taskbar_word_in_goal_exposes_taskbar_and_follows_the_new_app():
+    adapter = shell_adapter()
+    jev = ScriptedJev(["Spotify"])
+    outcome = make_loop(adapter, jev, RecordingEvents()).run("open Spotify from the taskbar", adapter.app)
+
+    assert outcome.ok, outcome.message
+    assert adapter.log == ["press s1"]
+    assert adapter.app.name == "Spotify"
+
+
+def test_taskbar_is_hidden_until_needed():
+    adapter = shell_adapter()
+    events = RecordingEvents()
+    make_loop(adapter, ScriptedJev(["Save"]), events).run("save the note", adapter.app)
+    assert all(not c.shell for s in events.snapshots for c in s.controls)
+
+
+def test_taskbar_is_tried_when_nothing_in_the_app_fits():
+    adapter = shell_adapter()
+    events = RecordingEvents()
+    jev = ScriptedJev(["__none__", "Spotify"])
+    outcome = make_loop(adapter, jev, events).run("open Spotify", adapter.app)
+    assert adapter.log == ["press s1"], (outcome.message, events.log)

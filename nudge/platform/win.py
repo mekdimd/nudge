@@ -31,6 +31,8 @@ PRESSABLE = {
 TEXT_ROLES = {"EditControl": "text field"}
 CONTEXT_ROLES = {"MenuControl", "ToolBarControl", "GroupControl", "DocumentControl", "ListControl", "TabControl", "WindowControl"}
 
+SHELL_CLASSES = {"Shell_TrayWnd", "Shell_SecondaryTrayWnd", "NotifyIconOverflowWindow", "TopLevelWindowForOverflowXamlIsland"}
+
 MAX_NODES = 4000
 TIME_BUDGET = 2.5
 
@@ -183,6 +185,25 @@ class WinAdapter:
             except Exception:
                 continue
         return popups
+
+    def shell_controls(self, app: AppRef) -> list[Control]:
+        started = time.perf_counter()
+        found: list[Control] = []
+        for top in auto.GetRootControl().GetChildren():
+            try:
+                if top.ClassName not in SHELL_CLASSES or top.IsOffscreen:
+                    continue
+                _, raw = self._rect(top.BoundingRectangle)
+            except Exception:
+                continue
+            walker = _Walker(self, raw, None, started, False)
+            walker.walk(top, "taskbar")
+            found.extend(walker.controls)
+        for i, control in enumerate(found, 1):
+            control.id = f"s{i}"
+            control.context = "taskbar"
+            control.shell = True
+        return found
 
     def press(self, control: Control) -> None:
         element = control.ref
