@@ -22,6 +22,18 @@ dependencies = [
 [project.scripts]
 nudge = "nudge.__main__:main"
 
+[project.optional-dependencies]
+vision = [
+    "einops>=0.8.2",
+    "huggingface-hub>=1.33.0",
+    "mss>=10.2.0",
+    "pyobjc-framework-vision>=12.2.2 ; sys_platform == 'darwin'",
+    "rapidocr-onnxruntime>=1.4.4 ; sys_platform == 'win32'",
+    "timm>=1.0.30",
+    "transformers>=4.49",
+    "ultralytics>=8.4.172",
+]
+
 [dependency-groups]
 dev = ["pytest>=8"]
 

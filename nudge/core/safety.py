@@ -8,7 +8,9 @@ DONE_THRESHOLD = 0.70
 MIN_TOP_PROBABILITY = 0.60
 MIN_MARGIN = 0.15
 MAX_STEPS = 12
-HOLD_SECONDS = 0.8
+HOLD_SECONDS = 0.5
+ABSENT_THRESHOLD = 0.5
+SPARSE_TREE = 8  # fewer pressable controls than this and the app probably draws its own UI
 
 CONSEQUENTIAL_WORDS = (
     "send",

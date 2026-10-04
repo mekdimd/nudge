@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import time
 import traceback
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Protocol
 
 from . import safety
@@ -26,6 +26,10 @@ class Events(Protocol):
     def writer_started(self) -> None: ...
 
     def writer_used(self, milliseconds: int) -> None: ...
+
+    def observed(self, snapshot: Snapshot) -> None: ...
+
+    def vision_used(self, milliseconds: int, found: int) -> None: ...
 
     def propose(self, action: Action, target: Control | None) -> None: ...
 
@@ -71,9 +75,11 @@ class NudgeLoop:
         hold_seconds: float = safety.HOLD_SECONDS,
         own_pid: int | None = None,
         settle_timeout: float = 2.5,
-        startup_delay: float = 0.3,
+        startup_delay: float = 0.0,
+        vision=None,
     ):
         self.adapter = adapter
+        self.vision = vision
         self.jev = jev
         self.writer = writer
         self.events = events
@@ -89,6 +95,8 @@ class NudgeLoop:
         self.history: list[str] = []
         self.excluded: set[str] = set()
         self.drafted_fields: set[str] = set()
+        self.jev_ms: list[int] = []
+        self.fresh: Snapshot | None = None
         try:
             with self.adapter.thread_context():
                 message = self._run()
@@ -114,6 +122,7 @@ class NudgeLoop:
 
     def _run(self) -> str:
         self.events.status(f"Working in {self.app.name}")
+        started = time.monotonic()
         self.adapter.activate_app(self.app)
         time.sleep(self.startup_delay)
         rounds = 0
@@ -124,16 +133,25 @@ class NudgeLoop:
             self._check()
             self._check_app()
 
-            snapshot = self.adapter.snapshot(self.app)
+            snapshot, self.fresh = self.fresh or self.adapter.snapshot(self.app), None
             options = build_options(snapshot, self.excluded, self.drafted_fields)
-            self.events.status(f"Jev is choosing from {len(options.criteria)} options")
-            decision = self.jev.decide(self.goal, snapshot, self.history, options)
-            self._check()
-            labels = {k: option_label(k, snapshot) for k, _ in decision.top(5, include_none=True)}
-            self.events.decided(len(self.history) + 1, decision, labels)
+            self.events.observed(snapshot)
+            looked = False
+            if self._tree_is_sparse(options):
+                snapshot, options, looked = self._look(snapshot)
+            decision = self._decide(snapshot, options)
+            if not looked and not safety.is_done(decision) and self._wants_a_closer_look(decision):
+                snapshot, options, looked = self._look(snapshot)
+                if looked:
+                    decision = self._decide(snapshot, options)
 
             if safety.is_done(decision):
-                return f"Done after {len(self.history)} step{'s' if len(self.history) != 1 else ''}."
+                steps = len(self.history)
+                average = sum(self.jev_ms) // max(len(self.jev_ms), 1)
+                return (
+                    f"Done in {steps} step{'s' if steps != 1 else ''} · {time.monotonic() - started:.1f} s · "
+                    f"Jev {average} ms per decision"
+                )
             if len(self.history) >= self.max_steps:
                 raise Stop("step_budget", f"Stopped after {self.max_steps} steps.")
 
@@ -144,6 +162,32 @@ class NudgeLoop:
             if not self._prepare(action, snapshot):
                 continue
             self._act(action, snapshot)
+
+    def _decide(self, snapshot: Snapshot, options: OptionSet) -> JevDecision:
+        self.events.status(f"Jev is choosing from {len(options.criteria)} options")
+        decision = self.jev.decide(self.goal, snapshot, self.history, options)
+        self._check()
+        self.jev_ms.append(decision.milliseconds)
+        labels = {k: option_label(k, snapshot) for k, _ in decision.top(5, include_none=True)}
+        self.events.decided(len(self.history) + 1, decision, labels)
+        return decision
+
+    def _tree_is_sparse(self, options: OptionSet) -> bool:
+        return self.vision is not None and len(options.controls) < safety.SPARSE_TREE
+
+    def _wants_a_closer_look(self, decision: JevDecision) -> bool:
+        return self.vision is not None and (decision.chose_none or safety.is_unsure(decision))
+
+    def _look(self, snapshot: Snapshot) -> tuple[Snapshot, OptionSet, bool]:
+        """Add what vision sees on screen that the accessibility tree doesn't expose."""
+        self.events.status("Looking at the screen")
+        found, ms = self.vision.find(snapshot)
+        self._check()
+        self.events.vision_used(ms, len(found))
+        if found:
+            snapshot = replace(snapshot, controls=snapshot.controls + found)
+            self.events.observed(snapshot)
+        return snapshot, build_options(snapshot, self.excluded, self.drafted_fields), bool(found)
 
     def _choose_key(self, decision: JevDecision, snapshot: Snapshot, options: OptionSet) -> str | None:
         if decision.chose_none:
@@ -176,9 +220,13 @@ class NudgeLoop:
             if self.writer is not None:
                 self.events.status("Gemini is drafting the text")
                 self.events.writer_started()
-                draft = self.writer.fill(self.goal, fields)
+                draft = self.writer.fill(self.goal, fields, page=snapshot.window_title)
                 self.events.writer_used(draft.milliseconds)
                 values = draft.values
+                if not draft.rejected and not any(v.strip() for v in values.values()):
+                    self.drafted_fields |= {field_key(f) for f in fields}
+                    self.excluded.add(action.option_key)
+                    return False
                 if draft.rejected:
                     note = "I left some fields blank because the goal didn't include them. " + note
             else:
@@ -245,12 +293,14 @@ class NudgeLoop:
             after, changed = wait_for_change(
                 lambda: self.adapter.snapshot(self.app),
                 before,
-                timeout=self.settle_timeout,
+                timeout=self.settle_timeout * (3 if action.kind == "go_to_url" else 1),
+                expect_load=action.kind == "go_to_url",
                 cancelled=self.events.cancelled,
             )
             if changed:
                 self.history.append(f"{action.describe()}: worked")
                 self.excluded.clear()
+                self.fresh = after
                 return
             choice = self.events.recover(f"“{action.describe()}” didn't seem to change anything.")
             if choice in ("retry", "click"):
@@ -268,7 +318,10 @@ class NudgeLoop:
             control = snapshot.by_id(action.target_id or "")
             if control is None:
                 raise Stop("missing", "That control disappeared before I could press it.")
-            if by_click:
+            if action.double:
+                adapter.click(control, double=True)
+                return
+            if by_click or control.source == "vision":
                 adapter.click(control)
                 return
             try:
@@ -278,7 +331,13 @@ class NudgeLoop:
         elif action.kind == "fill":
             for field_id, text in action.text_by_field.items():
                 control = snapshot.by_id(field_id)
-                if control is not None:
+                if control is None:
+                    continue
+                if control.source == "vision":
+                    adapter.click(control)
+                    time.sleep(0.15)
+                    adapter.type_text(text)
+                else:
                     adapter.set_text(control, text)
         elif action.kind == "scroll":
             adapter.scroll(action.direction or "down", None, snapshot)

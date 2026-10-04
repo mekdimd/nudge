@@ -52,7 +52,7 @@ class FakeWriter:
         self._url = url
         self.fill_calls = 0
 
-    def fill(self, goal, fields, filled=None) -> FillDraft:
+    def fill(self, goal, fields, page="") -> FillDraft:
         self.fill_calls += 1
         return FillDraft(values={f.id: self.values_by_label.get(f.label, "") for f in fields}, milliseconds=800)
 
@@ -71,6 +71,7 @@ class RecordingEvents:
     ask_answers: list = field(default_factory=lambda: [None])
     cancel_after_proposals: int | None = None
     log: list[str] = field(default_factory=list)
+    snapshots: list = field(default_factory=list)
     proposals: int = 0
     result: tuple[bool, str] | None = None
 
@@ -88,6 +89,12 @@ class RecordingEvents:
 
     def writer_used(self, ms):
         self.log.append("writer")
+
+    def observed(self, snapshot):
+        self.snapshots.append(snapshot)
+
+    def vision_used(self, ms, found):
+        self.log.append(f"vision {found}")
 
     def propose(self, action, target):
         self.proposals += 1

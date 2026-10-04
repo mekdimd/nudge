@@ -25,10 +25,16 @@ Rules:
   If a field needs one and the goal does not contain it, return an empty string for that field.
 - A recipient field ("To", "Cc", "Recipients") gets only the address from the goal.
 - If a field is unrelated to the goal, return an empty string.
-- Search boxes and AI-assistant prompts ("Search", "Ask ...", "Describe your message", "Help me write")
-  are not part of the message. Always return an empty string for them."""
+- A search box gets a short query (just what to find, e.g. "how to change a tire") only when the goal is to
+  find, watch, play, or look something up. Otherwise leave it empty.
+- AI-assistant prompt boxes ("Ask ...", "Describe your message", "Help me write") are never filled.
+- If the goal names a particular site or app (YouTube, Spotify, Gmail, ...) and the page is not it,
+  leave every field empty: the person has to go there first."""
 
 URL_SYSTEM = """Return the single web address that best matches what the person wants to open.
+If they want to find, watch, or listen to something, return that site's search results page with the query,
+for example https://www.youtube.com/results?search_query=how+to+change+a+tire or
+https://www.google.com/search?q=..., https://www.google.com/maps/search/..., https://open.spotify.com/search/...
 Only return a URL you are confident exists. If you are not confident, set confident to false and url to an empty string."""
 
 
@@ -124,7 +130,7 @@ class Writer:
         except json.JSONDecodeError as exc:
             raise WriterError(f"Gemini returned unreadable JSON: {exc}") from exc
 
-    def fill(self, goal: str, fields: list[Control], filled: dict[str, str] | None = None) -> FillDraft:
+    def fill(self, goal: str, fields: list[Control], page: str = "") -> FillDraft:
         schema = {
             "type": "object",
             "properties": {f.id: {"type": "string", "description": f.label or "text field"} for f in fields},
@@ -133,8 +139,8 @@ class Writer:
         prompt = json.dumps(
             {
                 "goal": goal,
+                "page": page,
                 "fields": [{"id": f.id, "label": f.label or "unlabeled", "kind": f.role} for f in fields],
-                "already_filled": filled or {},
             },
             ensure_ascii=False,
         )

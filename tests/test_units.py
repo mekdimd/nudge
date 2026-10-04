@@ -1,4 +1,5 @@
 import json
+from dataclasses import replace
 
 import httpx
 import pytest
@@ -205,6 +206,41 @@ def test_wait_for_change_waits_for_stability():
     reads = iter([a, a, b, b, b])
     result, changed = wait_for_change(lambda: next(reads), fingerprint(a), timeout=5, interval=0, sleep=lambda s: None)
     assert changed and result.controls[0].id == "b"
+
+
+def test_vision_field_is_not_offered_again_once_its_text_changes():
+    before = ctl("v7", "What do you want to play?", role="search field", is_text_field=True, source="vision")
+    after = ctl("v17", "What do you want to play? L", role="search field", is_text_field=True, source="vision")
+    assert build_options(snap([after]), skipped={field_key(before)}).fields == []
+
+
+def test_vision_text_can_be_double_clicked_to_play():
+    s = snap([ctl("v1", "drop dead 3:12 Olivia Rodrigo", role="text", source="vision"), ctl("e1", "Home")])
+    keys = build_options(s).keys
+    assert "double:v1" in keys and "double:e1" not in keys
+    action = to_action("double:v1", s)
+    assert action.double and action.describe() == "Double-click “drop dead 3:12 Olivia Rodrigo”"
+
+
+def test_browser_address_bar_is_left_to_go_to_url():
+    s = snap([
+        ctl("a", "Address and search bar", role="text field", is_text_field=True),
+        ctl("b", "Email address", role="text field", is_text_field=True, y=50),
+    ])
+    assert [f.id for f in build_options(s).fields] == ["b"]
+
+
+def test_wait_for_change_waits_for_a_page_to_finish_filling_in():
+    old = snap([ctl("a", "Old page")])
+    url_typed = snap([ctl("a", "Old page"), ctl("u", "youtube.com")])
+    loading = replace(url_typed, loading=True)
+    partial = snap([ctl("u", "youtube.com"), ctl("v1", "Video 1")])
+    full = snap([ctl("u", "youtube.com"), ctl("v1", "Video 1"), ctl("v2", "Video 2")])
+    reads = iter([url_typed, url_typed, url_typed, loading, partial, partial, full, full, full])
+    result, changed = wait_for_change(
+        lambda: next(reads), fingerprint(old), timeout=5, interval=0, sleep=lambda s: None, expect_load=True
+    )
+    assert changed and len(result.controls) == 3
 
 
 def test_wait_for_change_times_out_unchanged():

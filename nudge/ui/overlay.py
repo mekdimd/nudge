@@ -11,6 +11,7 @@ from PySide6.QtGui import QColor, QCursor, QGuiApplication, QPainter, QPainterPa
 from PySide6.QtWidgets import QWidget
 
 from ..core.models import Rect
+from ..vision.screen import exclude_from_capture
 from . import theme
 
 CURSOR_SIZE = 52
@@ -71,6 +72,8 @@ class Overlay(QWidget):
         self.bubble_color = theme.BLUE
         self.hold: tuple[float, float] | None = None
         self.on_landed: Callable[[], None] | None = None
+        self.boxes: list[tuple[QRectF, str, str]] = []
+        self.picked: QRectF | None = None
 
         self.timer = QTimer(self)
         self.timer.setInterval(16)
@@ -82,6 +85,7 @@ class Overlay(QWidget):
             from .mac_window import float_over_everything
 
             float_over_everything(self, level=1000, ignore_mouse=True)
+        exclude_from_capture(self)
 
     def _local(self, x: float, y: float) -> QPointF:
         origin = self.geometry().topLeft()
@@ -142,8 +146,33 @@ class Overlay(QWidget):
             "cp2": QPointF(end.x() - ux * reach - nx * arc * 0.65, end.y() - uy * reach - ny * arc * 0.65),
             "end": end,
             "t0": time.monotonic(),
-            "duration": min(max(0.35 + dist / 2600, 0.35), 0.9),
+            "duration": min(max(0.22 + dist / 3600, 0.22), 0.5),
         }
+        self._animate()
+
+    def show_boxes(self, controls) -> None:
+        """Debug view: every element Nudge can see, coloured by where it came from."""
+        self.boxes = []
+        for c in controls:
+            if c.bounds is None or c.bounds.is_empty:
+                continue
+            tl = self._local(c.bounds.x, c.bounds.y)
+            kind = "vision" if c.source == "vision" else ("field" if c.is_text_field else "tree")
+            self.boxes.append((QRectF(tl.x(), tl.y(), c.bounds.w, c.bounds.h), f"{c.id} {c.label}"[:40], kind))
+        self.picked = None
+        if self.boxes and not self.isVisible():
+            self.show()
+        self.update()
+
+    def pick_box(self, rect: Rect | None) -> None:
+        if rect is not None:
+            tl = self._local(rect.x, rect.y)
+            self.picked = QRectF(tl.x(), tl.y(), rect.w, rect.h)
+            self.update()
+
+    def clear_boxes(self) -> None:
+        self.boxes, self.picked = [], None
+        self.update()
         self._animate()
 
     def start_hold(self, seconds: float) -> None:
@@ -210,20 +239,48 @@ class Overlay(QWidget):
         self.update()
         if not busy:
             self.timer.stop()
-            if self.alpha <= 0.01:
+            if self.alpha <= 0.01 and not self.boxes:
                 self.hide()
 
     def paintEvent(self, _event) -> None:
-        if self.alpha <= 0.01:
-            return
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self._paint_boxes(painter)
+        if self.alpha <= 0.01:
+            return
         painter.setOpacity(self.alpha)
         self._paint_ring(painter)
         self._paint_trail(painter)
         self._paint_cursor(painter)
         self._paint_hold(painter)
         self._paint_bubble(painter)
+
+    def _paint_boxes(self, painter: QPainter) -> None:
+        if not self.boxes:
+            return
+        colors = {"tree": QColor(79, 142, 247), "field": QColor(52, 199, 123), "vision": QColor(245, 165, 36)}
+        painter.setFont(theme.font(10, theme.QFont.Weight.DemiBold))
+        metrics = painter.fontMetrics()
+        for rect, label, kind in self.boxes:
+            color = colors[kind]
+            fill = QColor(color)
+            fill.setAlpha(28)
+            painter.setBrush(fill)
+            painter.setPen(QPen(color, 1.2))
+            painter.drawRect(rect)
+            text = metrics.elidedText(label, Qt.TextElideMode.ElideRight, max(int(rect.width()), 60))
+            chip = QRectF(rect.x(), rect.y() - metrics.height() - 2, metrics.horizontalAdvance(text) + 8, metrics.height() + 2)
+            if chip.y() < 0:
+                chip.moveTop(rect.y())
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(color)
+            painter.drawRect(chip)
+            painter.setPen(QColor("#10131a") if kind == "vision" else QColor("white"))
+            painter.drawText(chip, Qt.AlignmentFlag.AlignCenter, text)
+        if self.picked is not None:
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.setPen(QPen(QColor("white"), 3))
+            painter.drawRect(self.picked.adjusted(-2, -2, 2, 2))
 
     def _paint_ring(self, painter: QPainter) -> None:
         if self.target is None or self.ring_alpha <= 0:

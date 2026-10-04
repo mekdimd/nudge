@@ -27,18 +27,32 @@ def wait_for_change(
     interval: float = POLL_INTERVAL,
     cancelled: Callable[[], bool] = lambda: False,
     sleep: Callable[[float], None] = time.sleep,
+    expect_load: bool = False,
 ) -> tuple[Snapshot, bool]:
-    """Poll until the UI differs from `before` and holds still for one poll, or time runs out."""
+    """Poll until the UI differs from `before`, has finished loading and holds still, or time runs out.
+
+    Browsers keep showing the old page for a second or more after navigating and then fill the
+    new one in over several polls, so once a load is seen (or expected) it must hold still longer.
+    """
     deadline = time.monotonic() + timeout
     latest = read()
     latest_fp = fingerprint(latest)
     changed = latest_fp != before
+    seen_load = latest.loading
+    steady = 0
     while time.monotonic() < deadline and not cancelled():
         sleep(interval)
         current = read()
         current_fp = fingerprint(current)
-        if changed and current_fp == latest_fp:
-            return current, True
+        if current.loading and not seen_load:
+            seen_load = True
+            deadline = max(deadline, time.monotonic() + timeout)
+        if changed and current_fp == latest_fp and not current.loading:
+            steady += 1
+            if steady >= (2 if seen_load else 8 if expect_load else 1):
+                return current, True
+        else:
+            steady = 0
         changed = changed or current_fp != before
         latest, latest_fp = current, current_fp
     return latest, latest_fp != before

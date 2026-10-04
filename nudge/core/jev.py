@@ -62,7 +62,9 @@ def build_request(task: str, snapshot: Snapshot, history: list[str], options: Op
             "type": "noul",
             "instructions": (
                 f'Judging only by what is on screen now and the actions already taken, '
-                f'has this task been completed: "{task}"?'
+                f'has this task been completed: "{task}"? '
+                "Music and video apps put the playing artist and title in the window title; "
+                "if it shows only the app's name, nothing is playing yet."
             ),
         },
         "absent": {
@@ -75,7 +77,9 @@ def build_request(task: str, snapshot: Snapshot, history: list[str], options: Op
                 f'Which single action should be taken next to make progress on the task: "{task}"? '
                 "Consider what has already been done; do not repeat a step that already succeeded. "
                 "To write text into fields, choose the option to type into the empty text fields; "
-                "do not press a field label or a button that opens a picker first."
+                "do not press a field label or a button that opens a picker first. "
+                "Play controls in a bottom bar only resume whatever is already loaded; to play a particular "
+                "song or artist, double-click it in the results or press the large play button on its page."
             ),
             "criteria": options.criteria,
         },

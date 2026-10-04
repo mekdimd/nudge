@@ -9,6 +9,7 @@ from typing import Any, Literal
 import uiautomation as auto
 from pynput.keyboard import Controller as KeyboardController
 from pynput.keyboard import Key
+from pynput.mouse import Button
 from pynput.mouse import Controller as MouseController
 
 from ..core.actions import is_browser
@@ -215,11 +216,28 @@ class WinAdapter:
                 pass
         raise AdapterError(f"could not press {control.label!r}")
 
-    def click(self, control: Control) -> None:
+    def click(self, control: Control, double: bool = False) -> None:
         left, top, right, bottom = getattr(control, "raw_rect", (0, 0, 0, 0))
-        if right <= left or bottom <= top:
+        if right > left and bottom > top:
+            x, y = (left + right) // 2, (top + bottom) // 2
+        elif control.bounds is not None:
+            x, y = self._physical(*control.bounds.center)
+        else:
             raise AdapterError(f"{control.label!r} has no position to click")
-        auto.Click((left + right) // 2, (top + bottom) // 2, waitTime=0)
+        if double:
+            self.mouse.position = (x, y)
+            time.sleep(0.05)
+            self.mouse.click(Button.left, 2)
+        else:
+            auto.Click(x, y, waitTime=0)
+
+    def _physical(self, x: float, y: float) -> tuple[int, int]:
+        """Vision controls carry only logical bounds; to_logical is linear per screen, so invert it from two samples."""
+        ax, ay, _, _ = self.to_logical(x, y, 0, 0)
+        bx, by, _, _ = self.to_logical(x + 100, y + 100, 0, 0)
+        rx = 100 / (bx - ax) if bx != ax else 1.0
+        ry = 100 / (by - ay) if by != ay else 1.0
+        return int(x + (x - ax) * rx), int(y + (y - ay) * ry)
 
     def set_text(self, control: Control, text: str) -> None:
         element = control.ref
