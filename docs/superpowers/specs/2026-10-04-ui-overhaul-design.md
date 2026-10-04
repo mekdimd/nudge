@@ -19,7 +19,7 @@ Top to bottom:
 3. **Question card** (only while Nudge is waiting for you): sits as the last item of the feed.
 4. **Input row**: orb, input field, mic button with ▾, and one action button.
 
-A single muted **hint line** under the input carries messages that aren't part of a run. By default it reads "in {app} · ⌘⇧Space" (Ctrl+Shift+Space on Windows). It's replaced by setup problems (permissions, missing keys), voice state ("Listening…" followed by the live partial transcript, "Didn't hear anything", "Mic is muted"), and Peek counts. Problems are amber; the rest is muted. During a run the hint line is hidden, except for the live transcript when you answer by voice.
+A single muted **hint line** under the input carries messages that aren't part of a run. By default it reads "in {app} · ⌘⇧Space" (Ctrl+Shift+Space on Windows). It's replaced by setup problems (permissions, missing keys), voice state ("Listening…" followed by the live partial transcript, "Didn't hear anything", "Mic is muted"), and Peek counts. Problems are amber; the rest is muted. During a run the hint line is hidden, except for the live transcript when you answer by voice. During a run it shows "Step N of 12 · Esc stops".
 
 ### States
 
@@ -39,13 +39,13 @@ The feed clears when the next run starts.
 
 ### Entry model
 
-`TimelineEntry(actor, text, detail, state, ms)`:
+`Entry(actor, verb, subject, state, detail, app)`:
 
 - `actor`: `you | jev | gemini | app | nudge | vision`
-- `text`: one short sentence, bold for the control name (rendered with simple rich text)
-- `detail`: muted suffix, e.g. "92% · 130 ms"
+- `verb` and `subject`: one short sentence; the `subject` (the control name) is bold
 - `state`: `running | done | failed | waiting`
-- `ms`: optional timing
+- `detail`: muted suffix with the timing, e.g. "92% · 130 ms"
+- `app`: the app an `app` entry acted in, for its icon
 
 `running` entries show a spinner and shimmering text (the Cursor/Codex "thinking" look). When the next event for the same step arrives, the running entry is updated in place to `done` or `failed` rather than appending a duplicate.
 
@@ -69,13 +69,14 @@ Other `status` strings that don't map to an entry are ignored by the feed (the f
 
 ### Core change
 
-Add one method to `Events` in `nudge/core/loop.py`:
+Add two methods to `Events` in `nudge/core/loop.py`:
 
 ```python
 def acted(self, action: Action, changed: bool) -> None: ...
+def switched(self, app: AppRef) -> None: ...
 ```
 
-The loop calls it after `wait_for_change` returns. `Bridge` forwards it as `sig_acted`. Test doubles in `tests/helpers.py` get a no-op implementation.
+The loop calls `acted` after `wait_for_change` returns, and `switched` when it follows a taskbar or Dock press into another app. `Bridge` forwards them as `sig_acted` and `sig_switched`. Test doubles in `tests/helpers.py` get a no-op implementation.
 
 ### Icons
 
@@ -109,7 +110,7 @@ Levels are smoothed (attack 0.5, release 0.15) before drawing.
 All question cards share one layout: a heading sentence, an optional muted explanation, then answer controls. Enter triggers the primary answer, and voice works as it does today (`bar.spoken`).
 
 - **Choose**: "Which one should I press?" Numbered rows "1  Search  41%". Number keys 1 to 3 select.
-- **Confirm (risky)**: amber heading "Press "Send"?", muted "This sends the email and can't be undone." Buttons: the action verb ("Send it", amber, Enter) and "Not yet".
+- **Confirm (risky)**: amber heading "Press "Send"?", muted "This sends the email and can't be undone." Buttons: the action verb ("Yes, send", amber; no Enter shortcut, so a stray Enter can't send) and "Not yet".
 - **Recover**: "Pressing "Play" didn't change anything." Buttons: "↻ Retry" (primary, Enter), "Click it instead", and a text-style "Pick another…".
 - **Draft**: "Check what I'll type" with editable fields, button "Type it" (primary).
 - **URL**: "Open this address?" with editable field, button "Open" (primary).
@@ -126,8 +127,7 @@ No card has Stop; replying "stop" by voice still works.
 
 ## Animations
 
-- Bar height changes animate over 160 ms (ease-out) instead of jumping. Implemented by animating a fixed height on the content container; `_keep_anchored` runs each frame so the bottom edge stays put.
-- New feed entries fade and slide up 6 px over 180 ms.
+- Bar height changes are immediate (animating a bottom-anchored frameless window's height risked jitter); feed rows fade in over 180 ms.
 - Border glow pulses (alpha 140 to 220, 1.6 s) while working; fades in/out over 200 ms on state change.
 - Remove the overlay's completion flash text duplication: the overlay keeps its cursor and ring; the result message lives only in the feed.
 

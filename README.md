@@ -7,7 +7,7 @@ Nudge is for people who find precise mouse work tiring or painful: tremor, RSI, 
 ## How it works
 
 1. Nudge reads the app's accessibility tree (AX on macOS, UI Automation on Windows) and gets a list of named controls with their positions, usually in 20 to 150 ms.
-2. It sends Jev, TypeSafe's decision model, the goal, what's already been done, and those control labels as numbered options. Jev answers with a choice, a probability for every option, and whether the task is finished. One call per step, typically 80 to 200 ms. The bar shows each step's screen, vision, and Jev time.
+2. It sends Jev, TypeSafe's decision model, the goal, what's already been done, and those control labels as numbered options. Jev answers with a choice, a probability for every option, and whether the task is finished. One call per step, typically 80 to 200 ms. The bar's feed shows each step in order, with who did it (you, Jev, Gemini, the app) and how long it took. The terminal prints the same log.
 3. The cursor flies to the chosen control and holds for half a second so you can see what's about to happen and press Stop. Then Nudge presses it through the accessibility API, or clicks it if the control was found by vision.
 4. It waits for the screen to change and, in a browser, for the page to finish loading, then repeats.
 
@@ -17,10 +17,10 @@ Gemini is only called when text has to be written: an email body, a form value, 
 
 ## You stay in control
 
-- **Stop** is always on the bar, and **Esc** stops from anywhere.
+- **Stop** is always next to the input, and **Esc** stops from anywhere. The bar glows blue while Nudge works and amber when it needs you.
 - When Jev is unsure (top choice under 60%, or within 15 points of the runner-up), Nudge shows the top three options and you pick.
 - Anything labelled send, delete, remove, buy, purchase, pay, submit, clear, and similar asks for confirmation first. The cursor and ring turn amber.
-- If a step doesn't change anything, Nudge never retries on its own. You choose: try again, click it instead, pick something else, or stop.
+- If a step doesn't change anything, Nudge never retries on its own. You choose Retry, Click it instead, or Pick another. After a failed run, Go becomes Retry.
 - If a different app comes to the front, Nudge stops.
 - A run is capped at 12 steps.
 - Gemini never invents email addresses, phone numbers, or names. Any address in a draft that wasn't in your goal is blanked.
@@ -74,7 +74,8 @@ Summon the bar with **Ctrl+Shift+Space**.
 
 1. Click into the app you want help with. The bar shows it as "in Google Chrome".
 2. Press the hotkey, type a goal, and press Enter.
-3. Watch the cursor. Press Stop or Esc at any point. Ctrl+C in the terminal quits.
+3. With an ElevenLabs key, the mic button next to the input mutes the mic; its arrow picks a microphone and toggles Nudge's voice and sound effects.
+4. Watch the cursor. Press Stop or Esc at any point. Ctrl+C in the terminal quits.
 
 **Peek** (the button on the bar, or `uv run nudge --debug`) draws a box around everything Nudge can see in the app: blue for accessibility controls, green for text fields, orange for things only vision found, and a white outline on Jev's pick.
 
@@ -102,18 +103,17 @@ Jev took 80 to 230 ms per decision across these runs, averaging about 130 ms.
 
 - Apps that draw their own UI without accessibility labels need the vision fallback. Vision's icon names are guesses ("Play button", "Home icon"), so Jev is less sure there and the picker appears more often. Without vision, Nudge says it can't see the control and asks you for help.
 - Controls that only appear on hover (Spotify's per-song play buttons) can't be seen; Nudge double-clicks the song instead.
-- Typed input only. No voice.
 - One app at a time. Tasks that need switching apps stop when the app changes.
 - English labels only in testing.
 
 ## Privacy
 
-The bar shows what leaves your computer. Jev receives your goal, the app and window name, and the labels of on-screen controls. Gemini receives your goal, the window title, and the names of empty text fields, only when drafting. When vision runs, the screenshot of the target window is processed on your computer and never sent anywhere; only the resulting labels go to Jev. Password fields are never read.
+Hover the Jev, Gemini, or vision icon in the feed to see what leaves your computer. Jev receives your goal, the app and window name, and the labels of on-screen controls. Gemini receives your goal, the window title, and the names of empty text fields, only when drafting. When vision runs, the screenshot of the target window is processed on your computer and never sent anywhere; only the resulting labels go to Jev. Password fields are never read.
 
 ## For developers
 
 ```bash
-uv run pytest                                   # 52 tests, fake adapter, no network
+uv run pytest                                   # 151 tests, headless Qt, fake adapter, no network
 uv run python scripts/check_platform.py --show  # dump what Nudge can see in the frontmost app
 uv run python scripts/check_platform.py --press "Settings"
 ```
