@@ -56,21 +56,23 @@ class Nudge(QObject):
         self.sig_peeked.connect(self.on_peeked)
 
         b = self.bridge
-        b.sig_status.connect(self.bar.set_status)
+        b.sig_status.connect(self.recorder.status)
         b.sig_observed.connect(self.on_observed)
-        b.sig_vision.connect(self.on_vision)
+        b.sig_vision.connect(self.recorder.vision_used)
         b.sig_decided.connect(self.on_decided)
-        b.sig_writer_started.connect(lambda: None)
-        b.sig_writer_used.connect(lambda ms: None)
+        b.sig_writer_started.connect(self.recorder.writer_started)
+        b.sig_writer_used.connect(self.recorder.writer_used)
         b.sig_propose.connect(self.on_propose)
+        b.sig_acted.connect(self.recorder.acted)
+        b.sig_switched.connect(self.on_switched)
         b.sig_hold.connect(self.overlay.start_hold)
         self.bar.panel_closed.connect(self.on_panel_closed)
-        b.sig_choose.connect(lambda reason, options: self.prompt(self.bar.show_choice, reason, options, b.reply, said=spoken_choice(reason, options)))
-        b.sig_draft.connect(lambda note, fields: self.prompt(self.bar.show_draft, note, fields, b.reply, said="Check what I'll type, then say yes to type it, or stop."))
-        b.sig_url.connect(lambda url, fallback: self.prompt(self.bar.show_url, url, fallback, b.reply, said="Go to this address?" if url else "I'm not sure of the address. Search for this instead?"))
-        b.sig_confirm.connect(lambda message: self.prompt(self.bar.show_confirm, message, b.reply, said=message))
-        b.sig_recover.connect(lambda message: self.prompt(self.bar.show_recover, message, b.reply, said=message))
-        b.sig_ask.connect(lambda message: self.prompt(self.bar.show_ask, message, b.reply, said=message))
+        b.sig_choose.connect(lambda reason, options: self.prompt(self.bar.show_choice, reason, options, b.reply, said=spoken_choice(reason, options), feed="Pick the next step below"))
+        b.sig_draft.connect(lambda note, fields: self.prompt(self.bar.show_draft, note, fields, b.reply, said="Check what I'll type, then say yes to type it, or stop.", feed="Check the text before I type it"))
+        b.sig_url.connect(lambda url, fallback: self.prompt(self.bar.show_url, url, fallback, b.reply, said="Open this address?" if url else "I'm not sure of the address. Search for this instead?", feed="Check the address"))
+        b.sig_confirm.connect(lambda message: self.prompt(self.bar.show_confirm, message, b.reply, said=message, feed="Waiting for your OK"))
+        b.sig_recover.connect(lambda message: self.prompt(self.bar.show_recover, message, b.reply, said=message, feed="That didn't work. What next?"))
+        b.sig_ask.connect(lambda message: self.prompt(self.bar.show_ask, message, b.reply, said=message, feed="Waiting for your help"))
         b.sig_finished.connect(self.on_finished)
 
         if offline_goal is not None:
@@ -86,18 +88,18 @@ class Nudge(QObject):
 
         problem = adapter.permission_problem()
         if problem:
-            self.bar.set_status(problem)
+            self.bar.set_status(problem, tone="warn")
         elif jev is None:
-            self.bar.set_status("Add TYPESAFE_API_KEY to .env to let Jev choose steps, then restart Nudge.")
+            self.bar.set_status("Add TYPESAFE_API_KEY to .env to let Jev choose steps, then restart Nudge.", tone="warn")
         if voice is not None:
             voice.state.connect(self.on_voice_state)
-            voice.heard.connect(lambda text: self.bar.set_status(f"Listening: {text}"))
+            voice.heard.connect(lambda text: self.bar.set_status(f"Listening: {text}", during_run=True))
             voice.request.connect(self.on_voice_request)
         if speaker is not None:
             speaker.finished.connect(self.on_spoken_prompt)
         if wake is not None:
             wake.detected.connect(self.on_wake)
-            wake.failed.connect(lambda why: self.bar.set_status(f"Wake word is off ({why})."))
+            wake.failed.connect(lambda why: self.bar.set_status(f"Wake word is off ({why}).", tone="warn"))
             wake.start()
         self.bar.summon()
         if debug:
@@ -110,6 +112,7 @@ class Nudge(QObject):
         self.voice.listen()
 
     def on_voice_state(self, state: str) -> None:
+        self.sync_orb()
         if self.wake is not None:
             self.wake.pause() if state == "listening" else self.wake.start()
         if self.running and self.bar.spoken is None:
@@ -120,11 +123,14 @@ class Nudge(QObject):
             "timeout": "Didn't hear anything. Press the hotkey to try again.",
             "no_mic": "No microphone found, so voice is off.",
         }
-        self.bar.set_status(messages.get(state, f"Voice is off ({state.removeprefix('error: ')})."))
+        text = messages.get(state, f"Voice is off ({state.removeprefix('error: ')}).")
+        self.bar.set_status(text, tone="warn" if state not in messages or state == "no_mic" else "muted", during_run=True)
 
-    def prompt(self, show, *args, said: str = "") -> None:
+    def prompt(self, show, *args, said: str = "", feed: str = "") -> None:
         """Show a question, read it aloud, then listen for the answer by voice as well."""
         show(*args)
+        if feed and self.running:
+            self.recorder.waiting(feed)  # after show(): opening a panel closes the previous one, which settles waits
         if self.voice is None:
             return
         if self.speaker is not None and said:
@@ -133,6 +139,7 @@ class Nudge(QObject):
             self.speaker.say(said)
         else:
             self.voice.listen()
+        self.sync_orb()
 
     def on_spoken_prompt(self) -> None:
         """The question has been read out (or couldn't be); the mic opens only now so it doesn't hear the speaker."""
@@ -140,17 +147,31 @@ class Nudge(QObject):
             self.voice.listen()
         elif self.wake is not None and not (self.voice is not None and self.voice.active):
             self.wake.start()
+        self.sync_orb()
 
     def on_panel_closed(self) -> None:
+        self.recorder.answered()
         if self.speaker is not None:
             self.speaker.stop()
         if self.voice is not None and self.running:
             self.voice.cancel()
+        self.sync_orb()
+
+    def sync_orb(self) -> None:
+        if self.speaker is not None and self.speaker.speaking:
+            mode = "speaking"
+        elif self.voice is not None and self.voice.active:
+            mode = "listening"
+        elif self.running:
+            mode = "thinking"
+        else:
+            mode = "idle"
+        self.bar.orb.set_mode(mode)
 
     def on_voice_request(self, goal: str) -> None:
         if self.bar.spoken is not None:
             if not self.bar.spoken(goal):
-                self.bar.set_status(f'Heard "{goal}", but not what to do with it. Try again or click.')
+                self.bar.set_status(f'Heard "{goal}", but not what to do with it. Try again or click.', during_run=True)
                 self.voice.listen()
             return
         if self.running:
@@ -189,18 +210,20 @@ class Nudge(QObject):
         if self.running:
             return
         if self.jev is None:
-            self.bar.set_status("Jev isn't set up. Add TYPESAFE_API_KEY to .env and restart Nudge.")
+            self.bar.set_status("Jev isn't set up. Add TYPESAFE_API_KEY to .env and restart Nudge.", tone="warn")
             return
         if self.target is None:
-            self.bar.set_status("Click into the app you want help with first.")
+            self.bar.set_status("Click into the app you want help with first.", tone="warn")
             return
         if problem := self.adapter.permission_problem():
-            self.bar.set_status(problem)
+            self.bar.set_status(problem, tone="warn")
             return
         self.bridge.reset()
         loop = NudgeLoop(self.adapter, self.jev, self.writer, self.bridge, vision=self.vision)
         self.worker = Worker(loop, goal, self.target)
         self.bar.set_running(True)
+        self.recorder.started(goal, self.target)
+        self.sync_orb()
         self.overlay.appear()
         self.worker.start()
 
@@ -210,7 +233,7 @@ class Nudge(QObject):
                 self.voice.cancel()
             self.bridge.cancel()
             self.bar.clear_panel()
-            self.bar.set_status("Stopping…")
+            self.bar.set_status("Stopping…", during_run=True)
 
     def quit(self) -> None:
         self.debug = False
@@ -267,14 +290,17 @@ class Nudge(QObject):
         if self.debug:
             self.overlay.show_boxes(snapshot.controls)
 
-    def on_vision(self, milliseconds: int, found: int) -> None:
-        pass
-
     def on_decided(self, step: int, decision: JevDecision, labels: dict[str, str]) -> None:
         self.last_jev_ms = decision.milliseconds
+        self.recorder.decided(decision, labels)
         self.bar.set_step(step)
 
+    def on_switched(self, app: AppRef) -> None:
+        self.bar.set_target(app)
+        self.recorder.switched(app)
+
     def on_propose(self, action: Action, target: Control | None) -> None:
+        self.recorder.proposed(action)
         warn = action.kind == "press" and safety.consequential_word(action.label) is not None
         bounds = target.bounds if target is not None else None
         if self.debug:
@@ -283,10 +309,11 @@ class Nudge(QObject):
         self.overlay.fly_to(bounds, label, warn=warn, on_landed=lambda: self.bridge.reply(True))
 
     def on_finished(self, ok: bool, message: str) -> None:
+        self.recorder.finished(ok, message)
         self.bar.set_running(False)
         self.bar.show_result(ok)
-        self.bar.set_status(message, tone="muted" if ok else "warn")
-        self.overlay.flash(message, ok)
+        self.overlay.fade()
+        self.sync_orb()
 
 
 def spoken_choice(reason: str, options: list[tuple[str, str, float]]) -> str:

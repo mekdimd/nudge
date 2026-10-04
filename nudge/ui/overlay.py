@@ -179,15 +179,6 @@ class Overlay(QWidget):
         self.hold = (time.monotonic(), seconds)
         self._animate()
 
-    def flash(self, text: str, ok: bool) -> None:
-        self.appear()
-        self.target = None
-        self.hold = None
-        self.bubble = text
-        self.bubble_color = theme.GREEN if ok else theme.MUTED
-        self._animate()
-        self.fade(2200)
-
     def _land(self) -> None:
         callback, self.on_landed = self.on_landed, None
         if callback:
