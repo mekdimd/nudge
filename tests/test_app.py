@@ -109,6 +109,26 @@ def test_talk_button_unmutes_a_muted_mic(offline):
     assert not app.audio.mic_muted and app.voice.active
 
 
+def test_closing_quits_by_default(offline):
+    app, _, _ = offline("live_caption")
+    quits = []
+    app.quit = lambda: quits.append(True)
+    app.bar.close_button.click()
+    assert quits == [True]
+
+
+def test_persistent_close_hides_and_the_hotkey_brings_it_back(offline):
+    app, _, _ = offline("live_caption", persistent=True)
+    quits = []
+    app.quit = lambda: quits.append(True)
+    app.bar.summon()
+    app.bar.close_button.click()
+    assert quits == [] and not app.bar.isVisible()
+    app.on_hotkey()
+    assert app.bar.isVisible()
+    assert "brings it back" in app.bar.close_button.toolTip()
+
+
 def test_voice_states_play_listen_cues(offline):
     app, _, _ = offline("live_caption")
     played = []

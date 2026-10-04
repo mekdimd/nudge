@@ -17,7 +17,7 @@ from .core.loop import NudgeLoop
 from .core.models import Action, AppRef, Control, Snapshot
 from .core.writer import Writer
 from .ui.audio_settings import AudioSettings
-from .ui.bar import Bar
+from .ui.bar import HOTKEY, Bar
 from .ui.bridge import Bridge, Worker
 from .ui.console import Console
 from .ui.coords import logical_to_physical, physical_to_logical
@@ -32,8 +32,9 @@ PEEK_INTERVAL = 1.0
 class Nudge(QObject):
     sig_peeked = Signal(object)
 
-    def __init__(self, adapter, jev, writer, vision=None, offline_goal: str | None = None, debug: bool = False, voice=None, wake=None, speaker=None, audio: AudioSettings | None = None):
+    def __init__(self, adapter, jev, writer, vision=None, offline_goal: str | None = None, debug: bool = False, voice=None, wake=None, speaker=None, audio: AudioSettings | None = None, persistent: bool = False):
         super().__init__()
+        self.persistent = persistent
         self.adapter, self.jev, self.writer, self.vision = adapter, jev, writer, vision
         self.voice = voice
         self.wake = wake
@@ -65,6 +66,14 @@ class Nudge(QObject):
         self.bar.go_requested.connect(self.start)
         self.bar.stop_requested.connect(self.stop)
         self.bar.quit_requested.connect(self.quit)
+        self.bar.close_requested.connect(self.on_close)
+        self.bar.set_persistent(persistent)
+        self.tray = None
+        if persistent:
+            from .ui.tray import Tray
+
+            if Tray.available():
+                self.tray = Tray(self.summon, self.quit)
         self.bar.peek_toggled.connect(self.set_debug)
         self.hotkeys.summon.connect(self.on_hotkey)
         self.hotkeys.escape.connect(self.stop)
@@ -290,8 +299,19 @@ class Nudge(QObject):
             self.bar.clear_panel()
             self.bar.set_status("Stopping…", during_run=True)
 
+    def on_close(self) -> None:
+        if not self.persistent:
+            self.quit()
+            return
+        if self.voice is not None and not self.running:
+            self.voice.cancel()
+        self.bar.hide()
+        self.console.note(f"Nudge is still running. Press {HOTKEY} to bring it back.")
+
     def quit(self) -> None:
         self.debug = False
+        if self.tray is not None:
+            self.tray.hide()
         if self.running:
             self.bridge.cancel()
             self.worker.wait(1000)
@@ -397,7 +417,25 @@ def main() -> None:
     parser.add_argument("--offline", choices=["live_caption", "gmail"], help="rehearse the UI on a scripted screen, no keys needed")
     parser.add_argument("--debug", action="store_true", help="start with Peek on: box every element Nudge can see")
     parser.add_argument("--no-vision", action="store_true", help="never use the screenshot fallback")
+    parser.add_argument("--persistent", action="store_true", help="✕ hides the bar instead of quitting; the hotkey or the menu bar icon brings it back")
+    parser.add_argument("--background", action="store_true", help="like --persistent, but detached from this terminal (logs go to a file)")
+    parser.add_argument("--stop", action="store_true", help="quit a Nudge running with --persistent or --background")
     args = parser.parse_args()
+
+    from . import background
+
+    if args.stop:
+        pid = background.stop()
+        print(f"Stopped Nudge (pid {pid})." if pid else "Nudge isn't running in the background.")
+        return
+    if (args.background or args.persistent) and (pid := background.running_pid()):
+        print(f"Nudge is already running (pid {pid}). Press {HOTKEY} to open it, or run `nudge --stop`.")
+        return
+    if args.background:
+        pid = background.detach(sys.argv[1:])
+        print(f"Nudge is running in the background (pid {pid}). Press {HOTKEY} to open it.")
+        print(f"Quit from the menu bar icon or with `nudge --stop`. Logs: {background.log_path()}")
+        return
 
     app = QApplication(sys.argv)
     app.setApplicationName("Nudge")
@@ -412,7 +450,7 @@ def main() -> None:
         from .platform.fake import FakeAdapter
 
         adapter = FakeAdapter.from_fixture(args.offline)
-        controller = Nudge(adapter, OfflineJev(PATHS[args.offline]), OfflineWriter(), offline_goal=GOALS[args.offline], debug=args.debug)
+        controller = Nudge(adapter, OfflineJev(PATHS[args.offline]), OfflineWriter(), offline_goal=GOALS[args.offline], debug=args.debug, persistent=args.persistent)
     else:
         from .platform.base import load_adapter
 
@@ -439,14 +477,18 @@ def main() -> None:
             except Exception as exc:  # missing model file, or no network on the first download
                 print(f"Wake word disabled: {exc}", file=sys.stderr)
         vision = None if args.no_vision else load_vision()
-        controller = Nudge(load_adapter(physical_to_logical), jev, writer, vision, debug=args.debug, voice=voice, wake=wake, speaker=speaker, audio=audio)
+        controller = Nudge(load_adapter(physical_to_logical), jev, writer, vision, debug=args.debug, voice=voice, wake=wake, speaker=speaker, audio=audio, persistent=args.persistent)
 
     app._nudge = controller
     signal.signal(signal.SIGINT, lambda *_: controller.quit())
+    signal.signal(signal.SIGTERM, lambda *_: controller.quit())
+    if args.persistent:
+        background.write_pid()
     heartbeat = QTimer()  # Qt's loop blocks Python signal handlers unless Python code runs now and then
     heartbeat.timeout.connect(lambda: None)
     heartbeat.start(200)
     code = app.exec()
+    background.clear_pid()
     os._exit(code)  # a run may be stuck in a network call; don't wait for it
 
 

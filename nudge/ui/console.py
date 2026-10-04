@@ -24,6 +24,9 @@ class Console:
         parts = [self._paint(name, "32") if on else self._paint(f"{name} off", "90") for name, on in features.items()]
         self._write("Nudge · " + "  ".join(parts))
 
+    def note(self, text: str) -> None:
+        self._write(self._paint(text, "90"))
+
     def format(self, entry: Entry) -> str:
         text = entry.verb + (f" “{entry.subject}”" if entry.subject else "")
         if entry.actor == "you":

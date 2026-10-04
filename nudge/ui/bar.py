@@ -101,6 +101,7 @@ class Bar(QWidget):
     go_requested = Signal(str)
     stop_requested = Signal()
     quit_requested = Signal()
+    close_requested = Signal()
     panel_closed = Signal()
     peek_toggled = Signal(bool)
 
@@ -150,12 +151,12 @@ class Bar(QWidget):
         )
         self.peek.toggled.connect(self.peek_toggled.emit)
         header.addWidget(self.peek)
-        close = QPushButton("✕")
-        close.setToolTip("Quit Nudge")
-        close.setFixedSize(30, 30)
-        close.setStyleSheet("padding:0; border-radius:15px; font-size:13px;")
-        close.clicked.connect(self.quit_requested.emit)
-        header.addWidget(close)
+        self.close_button = QPushButton("✕")
+        self.close_button.setToolTip("Quit Nudge")
+        self.close_button.setFixedSize(30, 30)
+        self.close_button.setStyleSheet("padding:0; border-radius:15px; font-size:13px;")
+        self.close_button.clicked.connect(self.close_requested.emit)
+        header.addWidget(self.close_button)
         root.addLayout(header)
 
         self.feed = Feed(timeline)
@@ -319,6 +320,9 @@ class Bar(QWidget):
             self.stop_requested.emit()
         else:
             self.hide()
+
+    def set_persistent(self, on: bool) -> None:
+        self.close_button.setToolTip(f"Hide Nudge. {HOTKEY} brings it back." if on else "Quit Nudge")
 
     def add_mic(self, widget: QWidget) -> None:
         self.mic = widget
