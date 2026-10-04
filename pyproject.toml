@@ -46,3 +46,6 @@ packages = ["nudge"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.uv]
+environments = ["sys_platform == 'win32'", "sys_platform == 'darwin'"]
