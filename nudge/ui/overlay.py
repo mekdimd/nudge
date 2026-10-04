@@ -81,7 +81,7 @@ class Overlay(QWidget):
 
     def showEvent(self, event):
         super().showEvent(event)
-        if sys.platform == "darwin":
+        if sys.platform == "darwin" and QGuiApplication.platformName() == "cocoa":
             from .mac_window import float_over_everything
 
             float_over_everything(self, level=1000, ignore_mouse=True)
