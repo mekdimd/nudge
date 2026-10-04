@@ -2,27 +2,32 @@ from __future__ import annotations
 
 from typing import Callable
 
-from PySide6.QtCore import QPoint, QRectF, QSize, Qt
+from PySide6.QtCore import QPoint, QRectF, QSize, Qt, Signal
 from PySide6.QtGui import QActionGroup, QColor, QIcon, QKeySequence, QPainter, QPen
 from PySide6.QtMultimedia import QMediaDevices
 from PySide6.QtWidgets import QHBoxLayout, QMenu, QStyleFactory, QToolButton, QWidget
 
+from . import theme
 from .audio_settings import AudioSettings
 from .icons import svg_pixmap
 
-HEIGHT = 54
-MUTE_W = 44
-ARROW_W = 28
+HEIGHT = 44
+TALK_W = 40
+ARROW_W = 24
+RADIUS = 10
 
 
 class MicButton(QWidget):
-    """One rounded control: the mic mutes, the chevron opens the audio menu. Neither draws past the edge."""
+    """One rounded control: the mic talks to Nudge, the chevron opens the audio menu (mute lives there)."""
+
+    talk_requested = Signal()
 
     def __init__(self, settings: AudioSettings):
         super().__init__()
         self.settings = settings
+        self.listening = False
         self.setObjectName("mic")
-        self.setFixedSize(MUTE_W + ARROW_W, HEIGHT)
+        self.setFixedSize(TALK_W + ARROW_W, HEIGHT)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAutoFillBackground(False)
 
@@ -30,13 +35,14 @@ class MicButton(QWidget):
         row.setContentsMargins(1, 1, 1, 1)
         row.setSpacing(0)
 
-        self.mute = self._half("micMute", MUTE_W - 1, "Mute the mic")
-        self.mute.clicked.connect(lambda: settings.set_mic_muted(not settings.mic_muted))
-        self.arrow = self._half("micArrow", ARROW_W - 1, "Choose a microphone")
-        self.arrow.setIcon(QIcon(svg_pixmap("chevron", 14)))
-        self.arrow.setIconSize(QSize(14, 14))
+        self.talk = self._half("micTalk", TALK_W - 1, "")
+        self.talk.setCheckable(True)
+        self.talk.clicked.connect(self._on_talk)
+        self.arrow = self._half("micArrow", ARROW_W - 1, "Choose a microphone, or mute")
+        self.arrow.setIcon(QIcon(svg_pixmap("chevron", 12)))
+        self.arrow.setIconSize(QSize(12, 12))
         self.arrow.clicked.connect(self._popup)
-        row.addWidget(self.mute)
+        row.addWidget(self.talk)
         row.addWidget(self.arrow)
 
         self.menu_ = QMenu(self)
@@ -62,18 +68,35 @@ class MicButton(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         box = QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5)
-        painter.setPen(QPen(QColor(255, 255, 255, 26), 1))
+        border = QColor(theme.BLUE) if self.listening else QColor(255, 255, 255, 26)
+        painter.setPen(QPen(border, 1))
         painter.setBrush(QColor(255, 255, 255, 20))
-        painter.drawRoundedRect(box, 12, 12)
+        painter.drawRoundedRect(box, RADIUS, RADIUS)
         painter.setPen(QPen(QColor(255, 255, 255, 32), 1))
-        split = self.mute.geometry().right() + 1
-        painter.drawLine(QPoint(split, 14), QPoint(split, self.height() - 14))
+        split = self.talk.geometry().right() + 1
+        painter.drawLine(QPoint(split, 12), QPoint(split, self.height() - 12))
+
+    def _on_talk(self) -> None:
+        self.talk.setChecked(self.listening)  # the voice state decides, so the button never drifts from it
+        self.talk_requested.emit()
+
+    def set_listening(self, on: bool) -> None:
+        self.listening = on
+        self.talk.setChecked(on)
+        self._refresh()
+        self.update()
 
     def _refresh(self) -> None:
         muted = self.settings.mic_muted
-        self.mute.setIcon(QIcon(svg_pixmap("mic-off" if muted else "mic", 20)))
-        self.mute.setIconSize(QSize(20, 20))
-        self.mute.setToolTip("Unmute the mic" if muted else "Mute the mic")
+        self.talk.setIcon(QIcon(svg_pixmap("mic-off" if muted and not self.listening else "mic", 18)))
+        self.talk.setIconSize(QSize(18, 18))
+        if self.listening:
+            tip = "Stop listening"
+        elif muted:
+            tip = "Talk to Nudge (unmutes the mic)"
+        else:
+            tip = "Talk to Nudge, or say the wake word"
+        self.talk.setToolTip(tip)
 
     def _popup(self) -> None:
         self.menu_.popup(self.arrow.mapToGlobal(QPoint(0, self.arrow.height() + 4)))

@@ -32,9 +32,9 @@ def offline(qapp, monkeypatch, tmp_path):
     audio.set_sounds_muted(True)
     made = []
 
-    def make(fixture):
+    def make(fixture, **extra):
         adapter = FakeAdapter.from_fixture(fixture)
-        app = main.Nudge(adapter, OfflineJev(PATHS[fixture]), OfflineWriter(), offline_goal=GOALS[fixture], audio=audio)
+        app = main.Nudge(adapter, OfflineJev(PATHS[fixture]), OfflineWriter(), offline_goal=GOALS[fixture], audio=audio, **extra)
         made.append(app)
         return app, adapter, GOALS[fixture]
 
@@ -50,6 +50,63 @@ def offline(qapp, monkeypatch, tmp_path):
 def finished(app):
     entries = app.timeline.entries
     return not app.running and entries and entries[-1].actor == "nudge" and entries[-1].state != "waiting"
+
+
+class FakeVoice(QObject):
+    state = Signal(str)
+    heard = Signal(str)
+    request = Signal(str)
+    level = Signal(float)
+
+    def __init__(self, settings):
+        super().__init__()
+        self.settings = settings
+        self.active = False
+
+    def listen(self):
+        if self.active:
+            return
+        if self.settings.mic_muted:
+            self.state.emit("muted")
+            return
+        self.active = True
+        self.state.emit("listening")
+
+    def cancel(self, timed_out=False):
+        if self.active:
+            self.active = False
+            self.state.emit("idle")
+
+
+def with_voice(offline):
+    app, _, _ = offline("live_caption", voice=FakeVoice(None))
+    app.voice.settings = app.audio
+    return app
+
+
+def test_talk_button_starts_and_stops_listening(offline):
+    app = with_voice(offline)
+    app.bar.mic.talk.click()
+    assert app.voice.active and app.bar.mic.talk.isChecked() and app.bar.orb.mode == "listening"
+    app.bar.mic.talk.click()
+    assert not app.voice.active and not app.bar.mic.talk.isChecked()
+
+
+def test_talk_button_lights_up_when_the_wake_word_or_hotkey_listens(offline):
+    app = with_voice(offline)
+    app.on_wake()
+    assert app.bar.mic.talk.isChecked()
+    app.on_hotkey()
+    assert not app.bar.mic.talk.isChecked()
+    app.on_hotkey()
+    assert app.bar.mic.talk.isChecked()
+
+
+def test_talk_button_unmutes_a_muted_mic(offline):
+    app = with_voice(offline)
+    app.audio.set_mic_muted(True)
+    app.bar.mic.talk.click()
+    assert not app.audio.mic_muted and app.voice.active
 
 
 def test_voice_states_play_listen_cues(offline):

@@ -178,6 +178,7 @@ class Bar(QWidget):
         self.input.setMinimumHeight(54)
         self.input.returnPressed.connect(self._go)
         self.input.textEdited.connect(self._on_edited)
+        self.mic: QWidget | None = None
         self.mic_slot = QHBoxLayout()
         self.mic_slot.setContentsMargins(0, 0, 0, 0)
         self.mic_slot.setSpacing(0)
@@ -320,6 +321,7 @@ class Bar(QWidget):
             self.hide()
 
     def add_mic(self, widget: QWidget) -> None:
+        self.mic = widget
         self.mic_slot.addWidget(widget)
 
     def set_target(self, app: AppRef | None) -> None:

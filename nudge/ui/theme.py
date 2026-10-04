@@ -58,10 +58,12 @@ QPushButton[kind="stop"]:hover {{ background: rgba(242,84,91,0.14); }}
 QPushButton[kind="link"] {{ background: transparent; border: none; color: {MUTED.name()}; padding: 10px 6px; }}
 QPushButton[kind="link"]:hover {{ color: {TEXT.name()}; }}
 QPushButton[kind="choice"] {{ text-align: left; padding: 0; }}
-QToolButton#micMute, QToolButton#micArrow {{ background: transparent; border: none; padding: 0; margin: 0; }}
-QToolButton#micMute:hover {{ background: rgba(255,255,255,0.08); border-top-left-radius: 11px; border-bottom-left-radius: 11px; }}
-QToolButton#micArrow:hover {{ background: rgba(255,255,255,0.08); border-top-right-radius: 11px; border-bottom-right-radius: 11px; }}
-QToolButton#micMute:pressed, QToolButton#micArrow:pressed {{ background: rgba(255,255,255,0.12); }}
+QToolButton#micTalk, QToolButton#micArrow {{ background: transparent; border: none; padding: 0; margin: 0; }}
+QToolButton#micTalk {{ border-top-left-radius: 9px; border-bottom-left-radius: 9px; }}
+QToolButton#micArrow {{ border-top-right-radius: 9px; border-bottom-right-radius: 9px; }}
+QToolButton#micTalk:hover, QToolButton#micArrow:hover {{ background: rgba(255,255,255,0.08); }}
+QToolButton#micTalk:pressed, QToolButton#micArrow:pressed {{ background: rgba(255,255,255,0.12); }}
+QToolButton#micTalk:checked {{ background: rgba(79,142,247,0.30); }}
 QMenu {{ background: #1A1F2A; color: {TEXT.name()}; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 6px; }}
 QMenu::item {{ padding: 7px 14px; border-radius: 7px; }}
 QMenu::item:selected {{ background: rgba(79,142,247,0.22); }}
