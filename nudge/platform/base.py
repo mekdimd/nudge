@@ -52,7 +52,7 @@ class Adapter(Protocol):
 ToLogical = Callable[[float, float, float, float], tuple[float, float, float, float]]
 
 
-def load_adapter(to_logical: ToLogical | None = None, to_physical: ToLogical | None = None) -> Adapter:
+def load_adapter(to_logical: ToLogical | None = None) -> Adapter:
     if sys.platform == "darwin":
         from .mac import MacAdapter
 
@@ -60,5 +60,5 @@ def load_adapter(to_logical: ToLogical | None = None, to_physical: ToLogical | N
     if sys.platform == "win32":
         from .win import WinAdapter
 
-        return WinAdapter(to_logical=to_logical, to_physical=to_physical)
+        return WinAdapter(to_logical=to_logical)
     raise AdapterError(f"Nudge supports macOS and Windows, not {sys.platform}")
