@@ -5,6 +5,8 @@ import threading
 from PySide6.QtCore import QBuffer, QByteArray, QIODevice, QObject, QTimer, Signal
 from PySide6.QtMultimedia import QAudio, QAudioFormat, QAudioSink, QMediaDevices
 
+from .levels import envelope
+
 SAMPLE_RATE = 24000
 URL = "https://api.elevenlabs.io/v1/text-to-speech/{voice}?output_format=pcm_24000"
 MODEL = "eleven_flash_v2_5"  # lowest latency
@@ -14,6 +16,7 @@ class Speaker(QObject):
     """Reads a question aloud with ElevenLabs text-to-speech. `finished` fires when the audio ends or can't play."""
 
     finished = Signal()
+    level = Signal(float)  # loudness of what's playing, 0..1
 
     _audio = Signal(bytes, int)  # pcm, generation (crosses from the request thread)
     _failed = Signal(int)
@@ -26,6 +29,10 @@ class Speaker(QObject):
         self._sink: QAudioSink | None = None
         self._buffer: QBuffer | None = None
         self._data: QByteArray | None = None  # QBuffer doesn't own its bytes; keep them alive while playing
+        self._envelope: list[float] = []
+        self._meter = QTimer(self)
+        self._meter.setInterval(30)
+        self._meter.timeout.connect(self._emit_level)
         self._audio.connect(self._play)
         self._failed.connect(self._on_failed)
 
@@ -44,6 +51,8 @@ class Speaker(QObject):
         self._release()
 
     def _release(self) -> None:
+        self._meter.stop()
+        self.level.emit(0.0)
         sink, buffer = self._sink, self._buffer
         self._sink = self._buffer = self._data = None
         if sink is not None:
@@ -87,6 +96,14 @@ class Speaker(QObject):
         self._sink = QAudioSink(QMediaDevices.defaultAudioOutput(), fmt, self)
         self._sink.stateChanged.connect(lambda state: self._on_state(state))
         self._sink.start(self._buffer)
+        self._envelope = envelope(pcm, SAMPLE_RATE, 30)
+        self._meter.start()
+
+    def _emit_level(self) -> None:
+        if self._sink is None:
+            return
+        index = int(self._sink.processedUSecs() / 30000)
+        self.level.emit(self._envelope[index] if index < len(self._envelope) else 0.0)
 
     def _on_state(self, state) -> None:
         if state == QAudio.State.IdleState and self._sink is not None:  # the buffer is drained

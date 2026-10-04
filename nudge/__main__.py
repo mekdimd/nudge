@@ -16,6 +16,7 @@ from .core.jev import JevClient, JevDecision
 from .core.loop import NudgeLoop
 from .core.models import Action, AppRef, Control, Snapshot
 from .core.writer import Writer
+from .ui.audio_settings import AudioSettings
 from .ui.bar import Bar
 from .ui.bridge import Bridge, Worker
 from .ui.coords import logical_to_physical, physical_to_logical
@@ -29,12 +30,14 @@ PEEK_INTERVAL = 1.0
 class Nudge(QObject):
     sig_peeked = Signal(object)
 
-    def __init__(self, adapter, jev, writer, vision=None, offline_goal: str | None = None, debug: bool = False, voice=None, wake=None, speaker=None):
+    def __init__(self, adapter, jev, writer, vision=None, offline_goal: str | None = None, debug: bool = False, voice=None, wake=None, speaker=None, audio: AudioSettings | None = None):
         super().__init__()
         self.adapter, self.jev, self.writer, self.vision = adapter, jev, writer, vision
         self.voice = voice
         self.wake = wake
         self.speaker = speaker
+        self.audio = audio if audio is not None else AudioSettings()
+        self.audio.changed.connect(self.on_audio_changed)
         self.target: AppRef | None = None
         self.worker: Worker | None = None
         self.debug = False
@@ -95,8 +98,13 @@ class Nudge(QObject):
             voice.state.connect(self.on_voice_state)
             voice.heard.connect(lambda text: self.bar.set_status(f"Listening: {text}", during_run=True))
             voice.request.connect(self.on_voice_request)
+            from .ui.mic import MicButton
+
+            self.bar.add_mic(MicButton(self.audio))
+            voice.level.connect(self.bar.orb.set_level)
         if speaker is not None:
             speaker.finished.connect(self.on_spoken_prompt)
+            speaker.level.connect(self.bar.orb.set_level)
         if wake is not None:
             wake.detected.connect(self.on_wake)
             wake.failed.connect(lambda why: self.bar.set_status(f"Wake word is off ({why}).", tone="warn"))
@@ -122,6 +130,7 @@ class Nudge(QObject):
             "idle": "",
             "timeout": "Didn't hear anything. Press the hotkey to try again.",
             "no_mic": "No microphone found, so voice is off.",
+            "muted": "Mic is muted. Unmute it with the mic button.",
         }
         text = messages.get(state, f"Voice is off ({state.removeprefix('error: ')}).")
         self.bar.set_status(text, tone="warn" if state not in messages or state == "no_mic" else "muted", during_run=True)
@@ -133,7 +142,7 @@ class Nudge(QObject):
             self.recorder.waiting(feed)  # after show(): opening a panel closes the previous one, which settles waits
         if self.voice is None:
             return
-        if self.speaker is not None and said:
+        if self.speaker is not None and said and not self.audio.voice_muted:
             if self.wake is not None:
                 self.wake.pause()  # don't let the speaker trigger the wake word
             self.speaker.say(said)
@@ -155,6 +164,18 @@ class Nudge(QObject):
             self.speaker.stop()
         if self.voice is not None and self.running:
             self.voice.cancel()
+        self.sync_orb()
+
+    def on_audio_changed(self) -> None:
+        if self.audio.mic_muted and self.voice is not None:
+            self.voice.cancel()
+        if self.audio.voice_muted and self.speaker is not None and self.speaker.speaking:
+            self.speaker.stop()
+            self.on_spoken_prompt()
+        if self.wake is not None:
+            self.wake.pause()
+            if not (self.voice is not None and self.voice.active):
+                self.wake.start()  # re-reads the chosen mic; does nothing while muted
         self.sync_orb()
 
     def sync_orb(self) -> None:
@@ -356,13 +377,14 @@ def main() -> None:
         from .platform.base import load_adapter
 
         config = load_config()
+        audio = AudioSettings()
         jev = JevClient(config.typesafe_api_key) if config.typesafe_api_key else None
         writer = Writer(config.gemini_api_key) if config.gemini_api_key else None
         voice = None
         if config.elevenlabs_api_key:
             from .ui.voice import Voice
 
-            voice = Voice(config.elevenlabs_api_key)
+            voice = Voice(config.elevenlabs_api_key, audio)
         speaker = None
         if voice is not None:
             from .ui.speaker import Speaker
@@ -373,11 +395,11 @@ def main() -> None:
             from .ui.wake import WakeWord
 
             try:
-                wake = WakeWord(config.wake_word, config.wake_threshold)
+                wake = WakeWord(config.wake_word, config.wake_threshold, settings=audio)
             except Exception as exc:  # missing model file, or no network on the first download
                 print(f"Wake word disabled: {exc}", file=sys.stderr)
         vision = None if args.no_vision else load_vision()
-        controller = Nudge(load_adapter(physical_to_logical), jev, writer, vision, debug=args.debug, voice=voice, wake=wake, speaker=speaker)
+        controller = Nudge(load_adapter(physical_to_logical), jev, writer, vision, debug=args.debug, voice=voice, wake=wake, speaker=speaker, audio=audio)
 
     app._nudge = controller
     signal.signal(signal.SIGINT, lambda *_: controller.quit())

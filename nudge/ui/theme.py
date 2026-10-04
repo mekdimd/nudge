@@ -58,6 +58,14 @@ QPushButton[kind="stop"]:hover {{ background: rgba(242,84,91,0.14); }}
 QPushButton[kind="link"] {{ background: transparent; border: none; color: {MUTED.name()}; padding: 10px 6px; }}
 QPushButton[kind="link"]:hover {{ color: {TEXT.name()}; }}
 QPushButton[kind="choice"] {{ text-align: left; padding: 0; }}
+QToolButton#mic {{ background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 0 22px 0 12px; }}
+QToolButton#mic:hover {{ background: rgba(255,255,255,0.14); }}
+QToolButton#mic::menu-button {{ border: none; width: 20px; }}
+QMenu {{ background: #1A1F2A; color: {TEXT.name()}; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 6px; }}
+QMenu::item {{ padding: 7px 14px; border-radius: 7px; }}
+QMenu::item:selected {{ background: rgba(79,142,247,0.22); }}
+QMenu::item:disabled {{ color: {MUTED.name()}; }}
+QMenu::separator {{ height: 1px; background: rgba(255,255,255,0.08); margin: 4px 6px; }}
 QScrollArea#feed, QWidget#feedBody {{ background: transparent; border: none; }}
 QScrollBar:vertical {{ background: transparent; width: 6px; }}
 QScrollBar::handle:vertical {{ background: rgba(255,255,255,0.16); border-radius: 3px; min-height: 24px; }}

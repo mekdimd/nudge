@@ -15,8 +15,9 @@ class WakeWord(QObject):
     detected = Signal()
     failed = Signal(str)
 
-    def __init__(self, model: str, threshold: float = 0.5):
+    def __init__(self, model: str, threshold: float = 0.5, settings=None):
         super().__init__()
+        self.settings = settings
         from openwakeword.model import Model
         from openwakeword.utils import download_models
 
@@ -31,7 +32,9 @@ class WakeWord(QObject):
     def start(self) -> None:
         if self._source is not None:
             return
-        device = QMediaDevices.defaultAudioInput()
+        if self.settings is not None and self.settings.mic_muted:
+            return
+        device = self.settings.input_device() if self.settings is not None else QMediaDevices.defaultAudioInput()
         fmt = QAudioFormat()
         fmt.setSampleRate(16000)
         fmt.setChannelCount(1)

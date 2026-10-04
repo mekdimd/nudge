@@ -9,6 +9,8 @@ from urllib.parse import urlencode
 from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtMultimedia import QAudioFormat, QAudioSource, QMediaDevices
 
+from .levels import rms_level
+
 URL = "wss://api.elevenlabs.io/v1/speech-to-text/realtime?" + urlencode(
     {
         "model_id": "scribe_v2_realtime",
@@ -24,16 +26,18 @@ LISTEN_WINDOW_MS = 10000
 class Voice(QObject):
     """One spoken request at a time with ElevenLabs realtime speech-to-text. The mic is only open while listening."""
 
-    state = Signal(str)  # listening | idle | no_mic | error: <detail>
+    state = Signal(str)  # listening | idle | muted | no_mic | error: <detail>
     heard = Signal(str)  # live partial transcript
     request = Signal(str)  # the finished request
+    level = Signal(float)  # mic loudness while listening, 0..1
 
     _transcript = Signal(str, bool)  # text, committed (crosses from the socket thread)
     _failed = Signal(str)
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, settings=None):
         super().__init__()
         self.api_key = api_key
+        self.settings = settings
         self.active = False
         self._source: QAudioSource | None = None
         self._io = None
@@ -48,7 +52,10 @@ class Voice(QObject):
     def listen(self) -> None:
         if self.active:
             return
-        device = QMediaDevices.defaultAudioInput()
+        if self.settings is not None and self.settings.mic_muted:
+            self.state.emit("muted")
+            return
+        device = self.settings.input_device() if self.settings is not None else QMediaDevices.defaultAudioInput()
         if device.isNull():
             self.state.emit("no_mic")
             return
@@ -83,6 +90,7 @@ class Voice(QObject):
             self._source = None
         self._done.set()
         self._audio.put(None)
+        self.level.emit(0.0)
 
     # main thread
 
@@ -90,6 +98,7 @@ class Voice(QObject):
         data = bytes(self._io.readAll())
         if data and self.active:
             self._audio.put(data)
+            self.level.emit(rms_level(data))
 
     def _on_transcript(self, text: str, committed: bool) -> None:
         if not self.active:
