@@ -28,11 +28,12 @@ PEEK_INTERVAL = 1.0
 class Nudge(QObject):
     sig_peeked = Signal(object)
 
-    def __init__(self, adapter, jev, writer, vision=None, offline_goal: str | None = None, debug: bool = False, voice=None, wake=None):
+    def __init__(self, adapter, jev, writer, vision=None, offline_goal: str | None = None, debug: bool = False, voice=None, wake=None, speaker=None):
         super().__init__()
         self.adapter, self.jev, self.writer, self.vision = adapter, jev, writer, vision
         self.voice = voice
         self.wake = wake
+        self.speaker = speaker
         self.target: AppRef | None = None
         self.worker: Worker | None = None
         self.debug = False
@@ -64,12 +65,12 @@ class Nudge(QObject):
         b.sig_propose.connect(self.on_propose)
         b.sig_hold.connect(self.overlay.start_hold)
         self.bar.panel_closed.connect(self.on_panel_closed)
-        b.sig_choose.connect(lambda reason, options: self.prompt(self.bar.show_choice, reason, options, b.reply))
-        b.sig_draft.connect(lambda note, fields: self.prompt(self.bar.show_draft, note, fields, b.reply))
-        b.sig_url.connect(lambda url, fallback: self.prompt(self.bar.show_url, url, fallback, b.reply))
-        b.sig_confirm.connect(lambda message: self.prompt(self.bar.show_confirm, message, b.reply))
-        b.sig_recover.connect(lambda message: self.prompt(self.bar.show_recover, message, b.reply))
-        b.sig_ask.connect(lambda message: self.prompt(self.bar.show_ask, message, b.reply))
+        b.sig_choose.connect(lambda reason, options: self.prompt(self.bar.show_choice, reason, options, b.reply, said=spoken_choice(reason, options)))
+        b.sig_draft.connect(lambda note, fields: self.prompt(self.bar.show_draft, note, fields, b.reply, said="Check what I'll type, then say yes to type it, or stop."))
+        b.sig_url.connect(lambda url, fallback: self.prompt(self.bar.show_url, url, fallback, b.reply, said="Go to this address?" if url else "I'm not sure of the address. Search for this instead?"))
+        b.sig_confirm.connect(lambda message: self.prompt(self.bar.show_confirm, message, b.reply, said=message))
+        b.sig_recover.connect(lambda message: self.prompt(self.bar.show_recover, message, b.reply, said=message))
+        b.sig_ask.connect(lambda message: self.prompt(self.bar.show_ask, message, b.reply, said=message))
         b.sig_finished.connect(self.on_finished)
 
         if offline_goal is not None:
@@ -92,6 +93,8 @@ class Nudge(QObject):
             voice.state.connect(self.on_voice_state)
             voice.heard.connect(lambda text: self.bar.set_status(f"Listening: {text}"))
             voice.request.connect(self.on_voice_request)
+        if speaker is not None:
+            speaker.finished.connect(self.on_spoken_prompt)
         if wake is not None:
             wake.detected.connect(self.on_wake)
             wake.failed.connect(lambda why: self.bar.set_status(f"Wake word is off ({why})."))
@@ -119,13 +122,28 @@ class Nudge(QObject):
         }
         self.bar.set_status(messages.get(state, f"Voice is off ({state.removeprefix('error: ')})."))
 
-    def prompt(self, show, *args) -> None:
-        """Show a question and listen for the answer by voice as well."""
+    def prompt(self, show, *args, said: str = "") -> None:
+        """Show a question, read it aloud, then listen for the answer by voice as well."""
         show(*args)
-        if self.voice is not None:
+        if self.voice is None:
+            return
+        if self.speaker is not None and said:
+            if self.wake is not None:
+                self.wake.pause()  # don't let the speaker trigger the wake word
+            self.speaker.say(said)
+        else:
             self.voice.listen()
 
+    def on_spoken_prompt(self) -> None:
+        """The question has been read out (or couldn't be); the mic opens only now so it doesn't hear the speaker."""
+        if self.voice is not None and self.running and self.bar.spoken is not None:
+            self.voice.listen()
+        elif self.wake is not None and not (self.voice is not None and self.voice.active):
+            self.wake.start()
+
     def on_panel_closed(self) -> None:
+        if self.speaker is not None:
+            self.speaker.stop()
         if self.voice is not None and self.running:
             self.voice.cancel()
 
@@ -201,6 +219,8 @@ class Nudge(QObject):
         if self.running:
             self.bridge.cancel()
             self.worker.wait(1000)
+        if self.speaker is not None:
+            self.speaker.stop()
         if self.voice is not None:
             self.voice.cancel()
         if self.wake is not None:
@@ -281,6 +301,11 @@ class Nudge(QObject):
         self.overlay.flash(message, ok)
 
 
+def spoken_choice(reason: str, options: list[tuple[str, str, float]]) -> str:
+    names = ", ".join(f"{number}, {label}" for number, (_, label, _) in enumerate(options, 1))
+    return f"{reason} Say a number: {names}."
+
+
 def load_vision():
     try:
         import ultralytics  # noqa: F401  (optional "vision" extra)
@@ -323,6 +348,11 @@ def main() -> None:
             from .ui.voice import Voice
 
             voice = Voice(config.elevenlabs_api_key)
+        speaker = None
+        if voice is not None:
+            from .ui.speaker import Speaker
+
+            speaker = Speaker(config.elevenlabs_api_key, config.elevenlabs_voice_id)
         wake = None
         if voice is not None and config.wake_word:
             from .ui.wake import WakeWord
@@ -332,7 +362,7 @@ def main() -> None:
             except Exception as exc:  # missing model file, or no network on the first download
                 print(f"Wake word disabled: {exc}", file=sys.stderr)
         vision = None if args.no_vision else load_vision()
-        controller = Nudge(load_adapter(physical_to_logical), jev, writer, vision, debug=args.debug, voice=voice, wake=wake)
+        controller = Nudge(load_adapter(physical_to_logical), jev, writer, vision, debug=args.debug, voice=voice, wake=wake, speaker=speaker)
 
     app._nudge = controller
     signal.signal(signal.SIGINT, lambda *_: controller.quit())
