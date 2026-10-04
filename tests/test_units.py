@@ -162,11 +162,14 @@ def test_ordinary_labels(label):
 def test_unsure_thresholds():
     sure = JevDecision("a", [("a", 0.8), ("b", 0.1)], 0, 0, 1)
     clear_lead = JevDecision("a", [("a", 0.55), ("b", 0.38), ("c", 0.06)], 0, 0, 1)
+    float_margin = JevDecision("a", [("a", 0.49), ("b", 0.34), ("c", 0.07)], 0, 0, 1)
     close = JevDecision("a", [("a", 0.62), ("b", 0.5)], 0, 0, 1)
     weak = JevDecision("a", [("a", 0.5), ("b", 0.1)], 0, 0, 1)
     flat = JevDecision("a", [("a", 0.35), ("b", 0.33)], 0, 0, 1)
     assert not safety.is_unsure(sure)
     assert not safety.is_unsure(clear_lead)
+    assert not safety.is_unsure(float_margin)
+    assert float_margin.margin < safety.MIN_MARGIN  # raw float is below 0.15 without rounding
     assert not safety.is_unsure(weak)
     assert safety.is_unsure(close) and safety.is_unsure(flat)
 

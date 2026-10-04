@@ -41,7 +41,11 @@ def consequential_word(label: str) -> str | None:
 
 
 def is_unsure(decision: JevDecision) -> bool:
-    return decision.top_probability < MIN_TOP_PROBABILITY or decision.margin < MIN_MARGIN
+    # Compare on the same scale as the bar (whole-percent). Raw floats like 0.49 - 0.34
+    # are often 0.14999… and would spuriously fail a 15% margin gate.
+    top = round(decision.top_probability, 3)
+    margin = round(decision.margin, 3)
+    return top < MIN_TOP_PROBABILITY or margin < MIN_MARGIN
 
 
 def is_done(decision: JevDecision) -> bool:
