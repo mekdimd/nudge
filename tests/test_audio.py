@@ -73,6 +73,47 @@ def test_muted_voice_never_opens_the_mic(settings):
     assert states == ["muted"] and not voice.active
 
 
+def test_synth_writes_a_short_mono_wav():
+    import io
+    import wave
+
+    from nudge.ui.sounds import RATE, synth
+
+    with wave.open(io.BytesIO(synth([(880.0, 0.08), (880.0, 0.08)]))) as w:
+        assert (w.getnchannels(), w.getsampwidth(), w.getframerate()) == (1, 2, RATE)
+        assert 0.18 <= w.getnframes() / RATE <= 0.22
+
+
+def test_sounds_are_generated_once_into_the_folder(settings, tmp_path):
+    from nudge.ui.sounds import TONES, Sounds
+
+    folder = tmp_path / "sounds"
+    Sounds(settings, folder)
+    files = sorted(p.name for p in folder.iterdir())
+    assert files == sorted(f"{name}-v1.wav" for name in TONES)
+    stamp = (folder / "tick-v1.wav").stat().st_mtime_ns
+    Sounds(settings, folder)
+    assert (folder / "tick-v1.wav").stat().st_mtime_ns == stamp
+
+
+def test_muted_sounds_do_not_play(settings, tmp_path):
+    from nudge.ui.sounds import Sounds
+
+    played = []
+
+    class Effect:
+        def play(self):
+            played.append(True)
+
+    sounds = Sounds(settings, tmp_path / "sounds")
+    sounds.effects = {"tick": Effect()}
+    sounds.play("tick")
+    settings.set_sounds_muted(True)
+    sounds.play("tick")
+    sounds.play("unknown")
+    assert played == [True]
+
+
 def test_mic_button_toggles_mute_and_lists_toggles(settings):
     from nudge.ui.mic import MicButton
 

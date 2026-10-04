@@ -1,7 +1,7 @@
 import time
 
 import pytest
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, QSettings, Signal
 from PySide6.QtWidgets import QApplication
 
 
@@ -21,17 +21,20 @@ def wait_until(condition, timeout=30.0):
 
 
 @pytest.fixture
-def offline(qapp, monkeypatch):
+def offline(qapp, monkeypatch, tmp_path):
     import nudge.__main__ as main
     from nudge.dev import GOALS, PATHS, OfflineJev, OfflineWriter
     from nudge.platform.fake import FakeAdapter
+    from nudge.ui.audio_settings import AudioSettings
 
     monkeypatch.setattr(main, "Hotkeys", StubHotkeys)
+    audio = AudioSettings(QSettings(str(tmp_path / "nudge.ini"), QSettings.Format.IniFormat))
+    audio.set_sounds_muted(True)
     made = []
 
     def make(fixture):
         adapter = FakeAdapter.from_fixture(fixture)
-        app = main.Nudge(adapter, OfflineJev(PATHS[fixture]), OfflineWriter(), offline_goal=GOALS[fixture])
+        app = main.Nudge(adapter, OfflineJev(PATHS[fixture]), OfflineWriter(), offline_goal=GOALS[fixture], audio=audio)
         made.append(app)
         return app, adapter, GOALS[fixture]
 

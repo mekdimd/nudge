@@ -22,6 +22,7 @@ from .ui.bridge import Bridge, Worker
 from .ui.coords import logical_to_physical, physical_to_logical
 from .ui.hotkeys import Hotkeys
 from .ui.overlay import Overlay
+from .ui.sounds import Sounds
 from .ui.timeline import RunRecorder, Timeline
 
 PEEK_INTERVAL = 1.0
@@ -38,6 +39,7 @@ class Nudge(QObject):
         self.speaker = speaker
         self.audio = audio if audio is not None else AudioSettings()
         self.audio.changed.connect(self.on_audio_changed)
+        self.sounds = Sounds(self.audio)
         self.target: AppRef | None = None
         self.worker: Worker | None = None
         self.debug = False
@@ -66,7 +68,7 @@ class Nudge(QObject):
         b.sig_writer_started.connect(self.recorder.writer_started)
         b.sig_writer_used.connect(self.recorder.writer_used)
         b.sig_propose.connect(self.on_propose)
-        b.sig_acted.connect(self.recorder.acted)
+        b.sig_acted.connect(self.on_acted)
         b.sig_switched.connect(self.on_switched)
         b.sig_hold.connect(self.overlay.start_hold)
         self.bar.panel_closed.connect(self.on_panel_closed)
@@ -138,6 +140,7 @@ class Nudge(QObject):
     def prompt(self, show, *args, said: str = "", feed: str = "") -> None:
         """Show a question, read it aloud, then listen for the answer by voice as well."""
         show(*args)
+        self.sounds.play("attention")
         if feed and self.running:
             self.recorder.waiting(feed)  # after show(): opening a panel closes the previous one, which settles waits
         if self.voice is None:
@@ -244,6 +247,7 @@ class Nudge(QObject):
         self.worker = Worker(loop, goal, self.target)
         self.bar.set_running(True)
         self.recorder.started(goal, self.target)
+        self.sounds.play("start")
         self.sync_orb()
         self.overlay.appear()
         self.worker.start()
@@ -316,6 +320,11 @@ class Nudge(QObject):
         self.recorder.decided(decision, labels)
         self.bar.set_step(step)
 
+    def on_acted(self, action: Action, changed: bool) -> None:
+        self.recorder.acted(action, changed)
+        if changed:
+            self.sounds.play("tick")
+
     def on_switched(self, app: AppRef) -> None:
         self.bar.set_target(app)
         self.recorder.switched(app)
@@ -331,6 +340,7 @@ class Nudge(QObject):
 
     def on_finished(self, ok: bool, message: str) -> None:
         self.recorder.finished(ok, message)
+        self.sounds.play("success" if ok else "failure")
         self.bar.set_running(False)
         self.bar.show_result(ok)
         self.overlay.fade()
