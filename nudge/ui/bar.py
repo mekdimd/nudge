@@ -20,7 +20,9 @@ from .icons import actor_icon
 from .orb import Orb
 from .timeline import Timeline
 
-WIDTH = 760
+WIDTH = 700
+CARD_INSET = 4  # room for the glow pen outside the card's edge
+RADIUS = 18
 HOTKEY = "⌘⇧Space" if sys.platform == "darwin" else "Ctrl+Shift+Space"
 GLOW = {"working": theme.BLUE, "waiting": theme.AMBER, "success": theme.GREEN}
 QUOTED = re.compile(r"“(.+?)”")
@@ -30,8 +32,8 @@ def _button(text: str, kind: str = "", min_width: int = 0) -> QPushButton:
     b = QPushButton(text)
     if kind:
         b.setProperty("kind", kind)
-    b.setFont(theme.font(16, QFont.Weight.DemiBold))
-    b.setMinimumHeight(48)
+    b.setFont(theme.font(15, QFont.Weight.DemiBold))
+    b.setMinimumHeight(40)
     if min_width:
         b.setMinimumWidth(min_width)
     b.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -84,12 +86,12 @@ class ChoiceButton(QPushButton):
     def __init__(self, number: int, label: str, probability: float):
         super().__init__()
         self.setProperty("kind", "choice")
-        self.setMinimumHeight(52)
+        self.setMinimumHeight(42)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         row = QHBoxLayout(self)
-        row.setContentsMargins(16, 0, 16, 0)
-        row.setSpacing(12)
-        parts = [_label(str(number), 16, weight=QFont.Weight.Bold), _label(label, 16), _label(f"{probability:.0%}", 14, muted=True)]
+        row.setContentsMargins(14, 0, 14, 0)
+        row.setSpacing(10)
+        parts = [_label(str(number), 15, weight=QFont.Weight.Bold), _label(label, 15), _label(f"{probability:.0%}", 13, muted=True)]
         parts[0].setStyleSheet(f"color: {theme.BLUE.name()};")
         for i, part in enumerate(parts):
             part.setWordWrap(False)
@@ -130,12 +132,12 @@ class Bar(QWidget):
         self._glow_timer.timeout.connect(self._tick_glow)
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(26, 22, 26, 22)
-        root.setSpacing(12)
+        root.setContentsMargins(CARD_INSET + 14, CARD_INSET + 12, CARD_INSET + 14, CARD_INSET + 12)
+        root.setSpacing(10)
 
         header = QHBoxLayout()
-        header.setSpacing(8)
-        title = _label("Nudge", 15, weight=QFont.Weight.Bold)
+        header.setSpacing(6)
+        title = _label("Nudge", 14, weight=QFont.Weight.Bold)
         title.setWordWrap(False)
         self.target = TargetChip()
         header.addWidget(title)
@@ -144,17 +146,17 @@ class Bar(QWidget):
         self.peek = QPushButton("Peek")
         self.peek.setCheckable(True)
         self.peek.setToolTip("Show everything Nudge can see on screen (blue: accessibility, green: text fields, orange: vision)")
-        self.peek.setFixedHeight(30)
+        self.peek.setFixedHeight(26)
         self.peek.setStyleSheet(
-            "QPushButton { padding:0 12px; border-radius:15px; font-size:12px; }"
+            "QPushButton { padding:0 10px; border-radius:13px; font-size:12px; }"
             f"QPushButton:checked {{ background:{theme.AMBER.name()}; color:#1b1300; border:none; }}"
         )
         self.peek.toggled.connect(self.peek_toggled.emit)
         header.addWidget(self.peek)
         self.close_button = QPushButton("✕")
         self.close_button.setToolTip("Quit Nudge")
-        self.close_button.setFixedSize(30, 30)
-        self.close_button.setStyleSheet("padding:0; border-radius:15px; font-size:13px;")
+        self.close_button.setFixedSize(26, 26)
+        self.close_button.setStyleSheet("padding:0; border-radius:13px; font-size:12px;")
         self.close_button.clicked.connect(self.close_requested.emit)
         header.addWidget(self.close_button)
         root.addLayout(header)
@@ -165,29 +167,31 @@ class Bar(QWidget):
         self.panel = QFrame()
         self.panel.setObjectName("card")
         self.panel_layout = QVBoxLayout(self.panel)
-        self.panel_layout.setContentsMargins(16, 14, 16, 16)
-        self.panel_layout.setSpacing(10)
+        self.panel_layout.setContentsMargins(14, 12, 14, 14)
+        self.panel_layout.setSpacing(8)
         self.panel.hide()
         root.addWidget(self.panel)
 
         row = QHBoxLayout()
-        row.setSpacing(10)
+        row.setSpacing(8)
         self.orb = Orb()
         self.input = QLineEdit()
+        self.input.setObjectName("goal")
+        self.input.setAttribute(Qt.WidgetAttribute.WA_MacShowFocusRect, False)
         self.input.setPlaceholderText("Ask Nudge…  e.g. turn on Live Caption")
-        self.input.setFont(theme.font(20))
-        self.input.setMinimumHeight(54)
+        self.input.setFont(theme.font(16))
+        self.input.setFixedHeight(44)
         self.input.returnPressed.connect(self._go)
         self.input.textEdited.connect(self._on_edited)
         self.mic: QWidget | None = None
         self.mic_slot = QHBoxLayout()
         self.mic_slot.setContentsMargins(0, 0, 0, 0)
         self.mic_slot.setSpacing(0)
-        self.go = _button("Go", "primary", 112)
-        self.go.setMinimumHeight(54)
+        self.go = _button("Go", "primary", 88)
+        self.go.setFixedHeight(44)
         self.go.clicked.connect(self._go)
-        self.stop = _button("Stop", "stop", 112)
-        self.stop.setMinimumHeight(54)
+        self.stop = _button("Stop", "stop", 88)
+        self.stop.setFixedHeight(44)
         self.stop.clicked.connect(self.stop_requested.emit)
         self.stop.hide()
         row.addWidget(self.orb)
@@ -197,7 +201,7 @@ class Bar(QWidget):
         row.addWidget(self.stop)
         root.addLayout(row)
 
-        self.hint = _label("", 13, muted=True)
+        self.hint = _label("", 12, muted=True)
         root.addWidget(self.hint)
         self.set_status(f"Click into an app, then press {HOTKEY} or type here.")
 
@@ -213,13 +217,9 @@ class Bar(QWidget):
     def paintEvent(self, _event) -> None:
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        card = QRectF(self.rect()).adjusted(10, 8, -10, -12)
-        for i in range(8, 0, -1):
-            p.setPen(Qt.PenStyle.NoPen)
-            p.setBrush(QColor(0, 0, 0, 6))
-            p.drawRoundedRect(card.adjusted(-i, -i + 3, i, i + 3), 24 + i, 24 + i)
+        card = QRectF(self.rect()).adjusted(CARD_INSET + 0.5, CARD_INSET + 0.5, -CARD_INSET - 0.5, -CARD_INSET - 0.5)
         path = QPainterPath()
-        path.addRoundedRect(card, 24, 24)
+        path.addRoundedRect(card, RADIUS, RADIUS)
         p.fillPath(path, theme.PANEL)
         p.setPen(QPen(theme.LINE, 1))
         p.drawPath(path)
@@ -252,7 +252,7 @@ class Bar(QWidget):
         if sys.platform == "darwin" and QGuiApplication.platformName() == "cocoa":
             from .mac_window import float_over_everything
 
-            float_over_everything(self, level=101)
+            float_over_everything(self, level=101, shadow=False)
         exclude_from_capture(self)
 
     def _place(self) -> None:
@@ -382,12 +382,12 @@ class Bar(QWidget):
 
     def _open_panel(self, title: str, tone: str = "", detail: str = "") -> None:
         self.clear_panel()
-        heading = _label(title, 17, weight=QFont.Weight.DemiBold)
+        heading = _label(title, 15, weight=QFont.Weight.DemiBold)
         if tone == "warn":
             heading.setStyleSheet(f"color: {theme.AMBER.name()};")
         self.panel_layout.addWidget(heading)
         if detail:
-            self.panel_layout.addWidget(_label(detail, 14, muted=True))
+            self.panel_layout.addWidget(_label(detail, 13, muted=True))
         self.panel.show()
         if self.running:
             self._set_state("waiting")
@@ -400,7 +400,7 @@ class Bar(QWidget):
 
     def _buttons(self, specs: list[tuple[str, str, Callable[[], None]]]) -> list[QPushButton]:
         row = QHBoxLayout()
-        row.setSpacing(10)
+        row.setSpacing(8)
         made = []
         for text, kind, callback in specs:
             b = _button(text, kind)
@@ -455,16 +455,16 @@ class Bar(QWidget):
         editors: dict[str, QLineEdit | QPlainTextEdit] = {}
         first = None
         for field_id, label, text in fields:
-            self.panel_layout.addWidget(_label(label, 13, muted=True))
+            self.panel_layout.addWidget(_label(label, 12, muted=True))
             multiline = "body" in label.lower() or "message" in label.lower() or len(text) > 80
             if multiline:
                 editor = QPlainTextEdit(text)
-                editor.setFont(theme.font(16))
-                editor.setFixedHeight(130)
+                editor.setFont(theme.font(14))
+                editor.setFixedHeight(110)
             else:
                 editor = QLineEdit(text)
-                editor.setFont(theme.font(16))
-                editor.setMinimumHeight(44)
+                editor.setFont(theme.font(14))
+                editor.setMinimumHeight(38)
                 if not text:
                     editor.setPlaceholderText("Left blank. Type it here if needed")
             editors[field_id] = editor
@@ -483,8 +483,8 @@ class Bar(QWidget):
     def show_url(self, url: str | None, fallback: str, reply: Callable[[object], None]) -> None:
         self._open_panel("Open this address?" if url else "I'm not sure of the address. Search for this instead?")
         editor = QLineEdit(url or fallback)
-        editor.setFont(theme.font(17))
-        editor.setMinimumHeight(48)
+        editor.setFont(theme.font(14))
+        editor.setMinimumHeight(38)
         self.panel_layout.addWidget(editor)
         go = lambda: reply(editor.text())
         self._buttons([("Open", "primary", go)])
@@ -524,8 +524,8 @@ class Bar(QWidget):
         self._open_panel(message)
         editor = QLineEdit()
         editor.setPlaceholderText("Optional: add a detail")
-        editor.setFont(theme.font(16))
-        editor.setMinimumHeight(46)
+        editor.setFont(theme.font(14))
+        editor.setMinimumHeight(38)
         self.panel_layout.addWidget(editor)
         go = lambda: reply(editor.text())
         self._buttons([("Continue", "primary", go)])

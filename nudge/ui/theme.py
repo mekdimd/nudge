@@ -33,17 +33,18 @@ QLineEdit, QPlainTextEdit {{
     background: rgba(255,255,255,0.06);
     color: {TEXT.name()};
     border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 12px;
-    padding: 10px 14px;
+    border-radius: 10px;
+    padding: 6px 12px;
     selection-background-color: {BLUE.name()};
 }}
-QLineEdit:focus, QPlainTextEdit:focus {{ border: 1px solid {BLUE.name()}; }}
+QLineEdit:focus, QPlainTextEdit:focus {{ border: 1px solid rgba(255,255,255,0.24); }}
+QLineEdit#goal:focus {{ border: 1px solid rgba(255,255,255,0.10); }}
 QPushButton {{
     color: {TEXT.name()};
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 12px;
-    padding: 10px 18px;
+    border-radius: 10px;
+    padding: 8px 16px;
 }}
 QPushButton:hover {{ background: rgba(255,255,255,0.14); }}
 QPushButton:focus {{ border: 2px solid {BLUE.name()}; }}
@@ -52,7 +53,7 @@ QPushButton[kind="primary"]:hover {{ background: {BLUE_DEEP.name()}; }}
 QPushButton[kind="danger"] {{ background: {RED.name()}; border: none; color: white; }}
 QPushButton[kind="danger"]:hover {{ background: #d9434a; }}
 QPushButton[kind="warn"] {{ background: {AMBER.name()}; border: none; color: #1b1300; }}
-QFrame#card {{ background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; }}
+QFrame#card {{ background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }}
 QPushButton[kind="stop"] {{ background: transparent; border: 1px solid rgba(242,84,91,0.6); color: #F2A0A4; }}
 QPushButton[kind="stop"]:hover {{ background: rgba(242,84,91,0.14); }}
 QPushButton[kind="link"] {{ background: transparent; border: none; color: {MUTED.name()}; padding: 10px 6px; }}

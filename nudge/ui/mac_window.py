@@ -15,7 +15,7 @@ def _ns_window(widget):
     return view.window()
 
 
-def float_over_everything(widget, level: int, ignore_mouse: bool = False) -> None:
+def float_over_everything(widget, level: int, ignore_mouse: bool = False, shadow: bool = True) -> None:
     """Keep a Qt window visible across Spaces and above other apps, even when Nudge is not active."""
     window = _ns_window(widget)
     if window is None:
@@ -29,7 +29,8 @@ def float_over_everything(widget, level: int, ignore_mouse: bool = False) -> Non
     window.setHidesOnDeactivate_(False)
     if ignore_mouse:
         window.setIgnoresMouseEvents_(True)
-        window.setHasShadow_(False)
+    if ignore_mouse or not shadow:
+        window.setHasShadow_(False)  # macOS traces a shadow from the alpha mask, which goes stale as the bar resizes
 
 
 def run_as_accessory() -> None:

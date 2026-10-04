@@ -13,7 +13,7 @@ ATTACK, RELEASE = 0.5, 0.15
 class Orb(QWidget):
     """Nudge's avatar: breathes when idle, ripples while listening, swirls while thinking, wobbles with its voice."""
 
-    SIZE = 36
+    SIZE = 32
     MODES = ("idle", "listening", "thinking", "speaking")
 
     def __init__(self):
