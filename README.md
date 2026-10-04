@@ -84,7 +84,7 @@ uv run nudge --background   # detaches from the terminal; logs go to nudge.log
 uv run nudge --stop         # quits the background copy
 ```
 
-In the background, the × button hides the bar instead of quitting, the hotkey brings it back, and a menu bar (or tray) icon offers Show and Quit. `--persistent` gives the same close-to-hide behavior while staying attached to the terminal. The log lives in `~/Library/Logs/Nudge` on macOS.
+In the background, the × button hides the bar instead of quitting, the hotkey brings it back, and a menu bar (or tray) icon offers Show and Quit. `--persistent` gives the same close-to-hide behavior while staying attached to the terminal. The log lives in `~/Library/Logs/Nudge` on macOS and `%LOCALAPPDATA%\Nudge` on Windows.
 
 **Peek** (the button on the bar, or `uv run nudge --debug`) draws a box around everything Nudge can see in the app: blue for accessibility controls, green for text fields, orange for things only vision found, and a white outline on Jev's pick.
 
