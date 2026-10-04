@@ -25,10 +25,14 @@ Rules:
   If a field needs one and the goal does not contain it, return an empty string for that field.
 - A recipient field ("To", "Cc", "Recipients") gets only the address from the goal.
 - If a field is unrelated to the goal, return an empty string.
-- Search boxes and AI-assistant prompts ("Search", "Ask ...", "Describe your message", "Help me write")
-  are not part of the message. Always return an empty string for them."""
+- A search box gets a short query (just what to find, e.g. "how to change a tire") only when the goal is to
+  find, watch, play, or look something up. Otherwise leave it empty.
+- AI-assistant prompt boxes ("Ask ...", "Describe your message", "Help me write") are never filled."""
 
 URL_SYSTEM = """Return the single web address that best matches what the person wants to open.
+If they want to find, watch, or listen to something, return that site's search results page with the query,
+for example https://www.youtube.com/results?search_query=how+to+change+a+tire or
+https://www.google.com/search?q=..., https://www.google.com/maps/search/..., https://open.spotify.com/search/...
 Only return a URL you are confident exists. If you are not confident, set confident to false and url to an empty string."""
 
 

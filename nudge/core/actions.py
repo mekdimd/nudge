@@ -88,7 +88,10 @@ def build_options(snapshot: Snapshot, excluded: set[str] | None = None, skipped:
             criteria[key] = meaning
 
     if is_browser(snapshot.app.name) and GO_TO_URL_KEY not in excluded:
-        criteria[GO_TO_URL_KEY] = "Go to a different website or web page by typing its address"
+        criteria[GO_TO_URL_KEY] = (
+            "Go to a different website or web page by typing its address, "
+            "including a site's search results (YouTube videos, Google, maps)"
+        )
 
     criteria[NONE_KEY] = "None of these would advance the task; the control needed is not on screen"
     return OptionSet(criteria=criteria, controls=controls, fields=empty)

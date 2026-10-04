@@ -16,6 +16,8 @@ class Bridge(QObject):
     sig_decided = Signal(int, object, object)
     sig_writer_started = Signal()
     sig_writer_used = Signal(int)
+    sig_observed = Signal(object)
+    sig_vision = Signal(int, int)
     sig_propose = Signal(object, object)
     sig_hold = Signal(float)
     sig_choose = Signal(str, object)
@@ -71,6 +73,12 @@ class Bridge(QObject):
 
     def writer_used(self, milliseconds: int) -> None:
         self.sig_writer_used.emit(milliseconds)
+
+    def observed(self, snapshot) -> None:
+        self.sig_observed.emit(snapshot)
+
+    def vision_used(self, milliseconds: int, found: int) -> None:
+        self.sig_vision.emit(milliseconds, found)
 
     def propose(self, action, target) -> None:
         self._request(self.sig_propose, action, target, timeout=3.0)

@@ -49,6 +49,7 @@ class Control:
     value: str | None = None
     is_text_field: bool = False
     ref: Any = field(default=None, compare=False, repr=False)
+    source: Literal["tree", "vision"] = "tree"
 
     def describe(self) -> str:
         label = self.label or "unlabeled"

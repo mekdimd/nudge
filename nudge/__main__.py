@@ -2,29 +2,40 @@ from __future__ import annotations
 
 import argparse
 import os
+import signal
 import sys
+import threading
+import time
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtWidgets import QApplication
 
 from .config import load_config
 from .core import safety
 from .core.jev import JevClient, JevDecision
 from .core.loop import NudgeLoop
-from .core.models import Action, AppRef, Control
+from .core.models import Action, AppRef, Control, Snapshot
 from .core.writer import Writer
 from .ui.bar import Bar
 from .ui.bridge import Bridge, Worker
-from .ui.coords import physical_to_logical
+from .ui.coords import logical_to_physical, physical_to_logical
 from .ui.hotkeys import Hotkeys
 from .ui.overlay import Overlay
 
+PEEK_INTERVAL = 1.0
 
-class Nudge:
-    def __init__(self, adapter, jev, writer, offline_goal: str | None = None):
-        self.adapter, self.jev, self.writer = adapter, jev, writer
+
+class Nudge(QObject):
+    sig_peeked = Signal(object)
+
+    def __init__(self, adapter, jev, writer, vision=None, offline_goal: str | None = None, debug: bool = False):
+        super().__init__()
+        self.adapter, self.jev, self.writer, self.vision = adapter, jev, writer, vision
         self.target: AppRef | None = None
         self.worker: Worker | None = None
+        self.debug = False
+        self.timing: dict[str, int] = {}
+        self.last_jev_ms = 0
         self.bridge = Bridge()
         self.bar = Bar()
         self.overlay = Overlay()
@@ -36,11 +47,15 @@ class Nudge:
         self.bar.go_requested.connect(self.start)
         self.bar.stop_requested.connect(self.stop)
         self.bar.quit_requested.connect(self.quit)
+        self.bar.peek_toggled.connect(self.set_debug)
         self.hotkeys.summon.connect(self.summon)
         self.hotkeys.escape.connect(self.stop)
+        self.sig_peeked.connect(self.on_peeked)
 
         b = self.bridge
         b.sig_status.connect(self.bar.set_status)
+        b.sig_observed.connect(self.on_observed)
+        b.sig_vision.connect(self.on_vision)
         b.sig_decided.connect(self.on_decided)
         b.sig_writer_started.connect(lambda: self.bar.set_gemini("busy"))
         b.sig_writer_used.connect(lambda ms: self.bar.set_gemini("done", ms))
@@ -71,6 +86,8 @@ class Nudge:
         elif jev is None:
             self.bar.set_status("Add TYPESAFE_API_KEY to .env to let Jev choose steps, then restart Nudge.")
         self.bar.summon()
+        if debug:
+            self.bar.peek.setChecked(True)
 
     def set_target(self, app: AppRef) -> None:
         self.target = app
@@ -106,9 +123,10 @@ class Nudge:
             self.bar.set_status(problem)
             return
         self.bridge.reset()
-        loop = NudgeLoop(self.adapter, self.jev, self.writer, self.bridge)
+        loop = NudgeLoop(self.adapter, self.jev, self.writer, self.bridge, vision=self.vision)
         self.worker = Worker(loop, goal, self.target)
         self.bar.set_running(True)
+        self.bar.set_timing({})
         self.bar.set_gemini("off" if self.writer is None else "idle")
         self.overlay.appear()
         self.worker.start()
@@ -120,19 +138,79 @@ class Nudge:
             self.bar.set_status("Stopping…")
 
     def quit(self) -> None:
+        self.debug = False
         if self.running:
             self.bridge.cancel()
-            self.worker.wait(3000)
+            self.worker.wait(1000)
         QApplication.quit()
 
+    # debug view
+
+    def set_debug(self, on: bool) -> None:
+        self.debug = on
+        if not on:
+            self.overlay.clear_boxes()
+            return
+        threading.Thread(target=self._peek_loop, name="peek", daemon=True).start()
+
+    def _peek_loop(self) -> None:
+        with self.adapter.thread_context():
+            while self.debug:
+                target = self.target
+                if not self.running and target is not None:
+                    try:
+                        snapshot = self.adapter.snapshot(target)
+                        vision_ms = None
+                        if self.vision is not None and len(snapshot.pressables) < safety.SPARSE_TREE:
+                            found, vision_ms = self.vision.find(snapshot)
+                            snapshot.controls += found
+                        if self.debug and not self.running:
+                            self.sig_peeked.emit((snapshot, vision_ms))
+                    except Exception:
+                        pass
+                time.sleep(PEEK_INTERVAL)
+
+    def on_peeked(self, payload) -> None:
+        snapshot, vision_ms = payload
+        if not self.debug or self.running:
+            return
+        self.overlay.show_boxes(snapshot.controls)
+        vision = sum(c.source == "vision" for c in snapshot.controls)
+        parts = {"screen": snapshot.elapsed_ms} | ({"vision": vision_ms} if vision_ms is not None else {})
+        self.bar.set_timing(parts)
+        self.bar.set_status(
+            f"Peek: {len(snapshot.controls) - vision} from the accessibility tree"
+            + (f", {vision} from vision" if vision_ms is not None else "")
+            + f" in {snapshot.app.name}"
+        )
+
+    # run events
+
+    def on_observed(self, snapshot: Snapshot) -> None:
+        if not any(c.source == "vision" for c in snapshot.controls):
+            self.timing = {"screen": snapshot.elapsed_ms}
+            self.bar.set_timing(self.timing)
+        if self.debug:
+            self.overlay.show_boxes(snapshot.controls)
+
+    def on_vision(self, milliseconds: int, found: int) -> None:
+        self.timing["vision"] = milliseconds
+        self.bar.set_timing(self.timing)
+
     def on_decided(self, step: int, decision: JevDecision, labels: dict[str, str]) -> None:
+        self.last_jev_ms = decision.milliseconds
+        self.timing["Jev"] = decision.milliseconds
+        self.bar.set_timing(self.timing)
         rows = [(labels.get(k, k), p, k == decision.choice) for k, p in decision.top(3, include_none=True)]
         self.bar.set_jev(step, decision.milliseconds, rows, decision.done)
 
     def on_propose(self, action: Action, target: Control | None) -> None:
         warn = action.kind == "press" and safety.consequential_word(action.label) is not None
         bounds = target.bounds if target is not None else None
-        self.overlay.fly_to(bounds, action.describe(), warn=warn, on_landed=lambda: self.bridge.reply(True))
+        if self.debug:
+            self.overlay.pick_box(bounds)
+        label = f"{action.describe()}  ·  Jev {self.last_jev_ms} ms"
+        self.overlay.fly_to(bounds, label, warn=warn, on_landed=lambda: self.bridge.reply(True))
 
     def on_finished(self, ok: bool, message: str) -> None:
         self.bar.set_running(False)
@@ -140,9 +218,21 @@ class Nudge:
         self.overlay.flash(message, ok)
 
 
+def load_vision():
+    try:
+        import ultralytics  # noqa: F401  (optional "vision" extra)
+    except ImportError:
+        return None
+    from .vision.parser import ScreenParser
+
+    return ScreenParser(to_physical=logical_to_physical if sys.platform == "win32" else None)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="nudge", description="Type a goal; Nudge points to and presses each step.")
     parser.add_argument("--offline", choices=["live_caption", "gmail"], help="rehearse the UI on a scripted screen, no keys needed")
+    parser.add_argument("--debug", action="store_true", help="start with Peek on: box every element Nudge can see")
+    parser.add_argument("--no-vision", action="store_true", help="never use the screenshot fallback")
     args = parser.parse_args()
 
     app = QApplication(sys.argv)
@@ -157,17 +247,24 @@ def main() -> None:
         from .dev import GOALS, PATHS, OfflineJev, OfflineWriter
         from .platform.fake import FakeAdapter
 
-        controller = Nudge(FakeAdapter.from_fixture(args.offline), OfflineJev(PATHS[args.offline]), OfflineWriter(), GOALS[args.offline])
+        adapter = FakeAdapter.from_fixture(args.offline)
+        controller = Nudge(adapter, OfflineJev(PATHS[args.offline]), OfflineWriter(), offline_goal=GOALS[args.offline], debug=args.debug)
     else:
         from .platform.base import load_adapter
 
         config = load_config()
         jev = JevClient(config.typesafe_api_key) if config.typesafe_api_key else None
         writer = Writer(config.gemini_api_key) if config.gemini_api_key else None
-        controller = Nudge(load_adapter(physical_to_logical), jev, writer)
+        vision = None if args.no_vision else load_vision()
+        controller = Nudge(load_adapter(physical_to_logical), jev, writer, vision, debug=args.debug)
 
     app._nudge = controller
-    sys.exit(app.exec())
+    signal.signal(signal.SIGINT, lambda *_: controller.quit())
+    heartbeat = QTimer()  # Qt's loop blocks Python signal handlers unless Python code runs now and then
+    heartbeat.timeout.connect(lambda: None)
+    heartbeat.start(200)
+    code = app.exec()
+    os._exit(code)  # a run may be stuck in a network call; don't wait for it
 
 
 if __name__ == "__main__":

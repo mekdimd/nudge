@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..vision.screen import exclude_from_capture
 from . import theme
 
 WIDTH = 760
@@ -102,6 +103,7 @@ class Bar(QWidget):
     go_requested = Signal(str)
     stop_requested = Signal()
     quit_requested = Signal()
+    peek_toggled = Signal(bool)
 
     def __init__(self):
         flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool
@@ -113,6 +115,7 @@ class Bar(QWidget):
         self.setStyleSheet(theme.STYLE)
         self.setFixedWidth(WIDTH)
         self._drag: QPoint | None = None
+        self._anchor_bottom = QGuiApplication.primaryScreen().availableGeometry().bottom() - 40
         self._enter_action: Callable[[], None] | None = None
         self.running = False
 
@@ -132,6 +135,16 @@ class Bar(QWidget):
         header.addStretch(1)
         header.addWidget(self.jev)
         header.addWidget(self.gemini)
+        self.peek = QPushButton("Peek")
+        self.peek.setCheckable(True)
+        self.peek.setToolTip("Under the hood: box every element Nudge can see (blue: accessibility tree, green: text fields, orange: vision)")
+        self.peek.setFixedHeight(30)
+        self.peek.setStyleSheet(
+            "QPushButton { padding:0 12px; border-radius:15px; font-size:12px; }"
+            f"QPushButton:checked {{ background:{theme.AMBER.name()}; color:#1b1300; border:none; }}"
+        )
+        self.peek.toggled.connect(self.peek_toggled.emit)
+        header.addWidget(self.peek)
         close = QPushButton("✕")
         close.setToolTip("Quit Nudge")
         close.setFixedSize(30, 30)
@@ -167,6 +180,11 @@ class Bar(QWidget):
         status_row.addWidget(self.status, 1)
         status_row.addWidget(self.step)
         root.addLayout(status_row)
+
+        self.timing = _label("", 12, muted=True)
+        self.timing.setFont(theme.font(12, QFont.Weight.Medium))
+        self.timing.hide()
+        root.addWidget(self.timing)
 
         self.bars = Bars()
         root.addWidget(self.bars)
@@ -212,10 +230,30 @@ class Bar(QWidget):
             from .mac_window import float_over_everything
 
             float_over_everything(self, level=101)
+        exclude_from_capture(self)
 
     def _place(self) -> None:
         screen = QGuiApplication.primaryScreen().availableGeometry()
-        self.move(screen.center().x() - self.width() // 2, screen.bottom() - self.height() - 40)
+        self._anchor_bottom = screen.bottom() - 40
+        self.move(screen.center().x() - self.width() // 2, self._anchor_bottom - self.height())
+
+    def _screen_area(self):
+        screen = QGuiApplication.screenAt(self.geometry().center()) or QGuiApplication.primaryScreen()
+        return screen.availableGeometry()
+
+    def _keep_anchored(self) -> None:
+        """The bar grows upward from where its bottom edge sits, and never leaves the screen."""
+        area = self._screen_area()
+        bottom = min(self._anchor_bottom, area.bottom())
+        y = max(area.top(), bottom - self.height())
+        x = min(max(self.x(), area.left()), area.right() - self.width())
+        if (x, y) != (self.x(), self.y()):
+            self.move(x, y)
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        if self._drag is None:
+            self._keep_anchored()
 
     def mousePressEvent(self, e) -> None:
         if e.button() == Qt.MouseButton.LeftButton:
@@ -226,12 +264,13 @@ class Bar(QWidget):
             self.move(e.globalPosition().toPoint() - self._drag)
 
     def mouseReleaseEvent(self, _e) -> None:
+        if self._drag is not None:
+            self._anchor_bottom = self.geometry().bottom()
         self._drag = None
 
     def _resize(self) -> None:
-        bottom = self.geometry().bottom()
         self.adjustSize()
-        self.move(self.x(), bottom - self.height())
+        self._keep_anchored()
 
     def summon(self) -> None:
         self.show()
@@ -274,10 +313,14 @@ class Bar(QWidget):
         self.status.setText(text)
 
     def set_jev(self, step: int, milliseconds: int, rows: list[tuple[str, float, bool]], done: float) -> None:
-        self.jev.set(f"Jev · {milliseconds} ms", "idle")
+        self.jev.set(f"Jev · {milliseconds} ms", "busy")
         self.step.setText(f"step {step} · done {done:.0%}")
         self.bars.set_rows(rows)
         self._resize()
+
+    def set_timing(self, parts: dict[str, int]) -> None:
+        self.timing.setText("   ".join(f"{name} {ms} ms" for name, ms in parts.items()))
+        self.timing.setVisible(bool(parts))
 
     def set_jev_idle(self, ok: bool) -> None:
         self.jev.set("Jev · sends control labels" if ok else "Jev · add TYPESAFE_API_KEY", "idle" if ok else "warn")
