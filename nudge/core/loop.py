@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import time
 import traceback
+import re
 from dataclasses import dataclass, replace
 from typing import Protocol
 
@@ -12,6 +13,12 @@ from .jev import JevClient, JevDecision, JevError
 from .models import Action, AppRef, Control, Snapshot
 from .verify import fingerprint, wait_for_change
 from .writer import Writer, WriterError
+
+
+SHELL_WORDS = re.compile(r"\b(task ?bar|dock|start (menu|button)|system tray|tray|menu ?bar|notification area|pinned)\b", re.I)
+
+
+FOLLOW_GRACE = 10.0  # seconds after our own action during which a new front app is followed, not treated as a hijack
 
 
 class Events(Protocol):
@@ -77,7 +84,9 @@ class NudgeLoop:
         settle_timeout: float = 2.5,
         startup_delay: float = 0.0,
         vision=None,
+        step_delay: float = 0.5,
     ):
+        self.step_delay = step_delay
         self.adapter = adapter
         self.vision = vision
         self.jev = jev
@@ -97,6 +106,8 @@ class NudgeLoop:
         self.drafted_fields: set[str] = set()
         self.jev_ms: list[int] = []
         self.fresh: Snapshot | None = None
+        self.last_acted = float("-inf")
+        self.shell_on = bool(SHELL_WORDS.search(goal))
         try:
             with self.adapter.thread_context():
                 message = self._run()
@@ -118,6 +129,12 @@ class NudgeLoop:
     def _check_app(self) -> None:
         front = self.adapter.frontmost_app()
         if front is not None and front.pid not in (self.app.pid, self.own_pid):
+            if time.monotonic() - self.last_acted < FOLLOW_GRACE:
+                # our own action launched or raised it, just after the settle check gave up waiting
+                self.app = front
+                self.events.status(f"Working in {front.name}")
+                self.fresh = None
+                return
             raise Stop("app_changed", f"{front.name} came to the front, so I stopped. Start again in the app you want.")
 
     def _run(self) -> str:
@@ -134,12 +151,18 @@ class NudgeLoop:
             self._check_app()
 
             snapshot, self.fresh = self.fresh or self.adapter.snapshot(self.app), None
+            if self.shell_on:
+                snapshot = self._with_shell(snapshot)
             options = build_options(snapshot, self.excluded, self.drafted_fields)
             self.events.observed(snapshot)
             looked = False
             if self._tree_is_sparse(options):
                 snapshot, options, looked = self._look(snapshot)
             decision = self._decide(snapshot, options)
+            if decision.chose_none and not self.shell_on and not safety.is_done(decision):
+                self.shell_on = True  # the taskbar / Dock is a 50 ms read; try it before a vision look
+                self.fresh = None if looked else snapshot
+                continue
             if not looked and not safety.is_done(decision) and self._wants_a_closer_look(decision):
                 snapshot, options, looked = self._look(snapshot)
                 if looked:
@@ -152,6 +175,9 @@ class NudgeLoop:
                     f"Done in {steps} step{'s' if steps != 1 else ''} · {time.monotonic() - started:.1f} s · "
                     f"Jev {average} ms per decision"
                 )
+            if decision.chose_none and not self.shell_on:
+                self.shell_on = True  # nothing in the app fits, so try the taskbar / Dock
+                continue
             if len(self.history) >= self.max_steps:
                 raise Stop("step_budget", f"Stopped after {self.max_steps} steps.")
 
@@ -173,7 +199,8 @@ class NudgeLoop:
         return decision
 
     def _tree_is_sparse(self, options: OptionSet) -> bool:
-        return self.vision is not None and len(options.controls) < safety.SPARSE_TREE
+        app_controls = [c for c in options.controls if not c.shell]
+        return self.vision is not None and len(app_controls) < safety.SPARSE_TREE
 
     def _wants_a_closer_look(self, decision: JevDecision) -> bool:
         return self.vision is not None and (decision.chose_none or safety.is_unsure(decision))
@@ -290,8 +317,14 @@ class NudgeLoop:
         by_click = False
         while True:
             self._execute(action, snapshot, by_click)
+            self.last_acted = time.monotonic()
+            if self._is_shell_press(action, snapshot) and self._follow_front():
+                self.history.append(f"{action.describe()}: worked")
+                self.excluded.clear()
+                self._pause_then_refetch()
+                return
             after, changed = wait_for_change(
-                lambda: self.adapter.snapshot(self.app),
+                self._read_following_front,
                 before,
                 timeout=self.settle_timeout * (3 if action.kind == "go_to_url" else 1),
                 expect_load=action.kind == "go_to_url",
@@ -300,7 +333,7 @@ class NudgeLoop:
             if changed:
                 self.history.append(f"{action.describe()}: worked")
                 self.excluded.clear()
-                self.fresh = after
+                self._pause_then_refetch()
                 return
             choice = self.events.recover(f"“{action.describe()}” didn't seem to change anything.")
             if choice in ("retry", "click"):
@@ -311,9 +344,48 @@ class NudgeLoop:
                 return
             raise Stop("no_change", "Stopped because the last step didn't work.")
 
+    def _read_following_front(self) -> Snapshot:
+        """Read the UI after our own action; if it launched or raised another app, carry on in that one."""
+        front = self.adapter.frontmost_app()
+        if front is not None and front.pid not in (self.app.pid, self.own_pid):
+            self.app = front
+            self.events.status(f"Working in {front.name}")
+        return self.adapter.snapshot(self.app)
+
+    def _pause_then_refetch(self) -> None:
+        """Let the UI settle after a step, then drop the cached snapshot so the next round reads it fresh."""
+        time.sleep(self.step_delay)
+        self.fresh = None
+
+    def _is_shell_press(self, action: Action, snapshot: Snapshot) -> bool:
+        control = snapshot.by_id(action.target_id or "") if action.kind == "press" else None
+        return control is not None and control.shell
+
+    def _follow_front(self) -> bool:
+        """A taskbar or Dock press usually switches apps, so keep working in whichever app came to the front."""
+        deadline = time.monotonic() + self.settle_timeout
+        while time.monotonic() < deadline:
+            front = self.adapter.frontmost_app()
+            if front is not None and front.pid not in (self.app.pid, self.own_pid):
+                self.app = front
+                self.events.status(f"Working in {front.name}")
+                return True
+            time.sleep(0.05)
+        return False
+
+    def _with_shell(self, snapshot: Snapshot) -> Snapshot:
+        try:
+            extra = self.adapter.shell_controls(self.app)
+        except Exception:  # the shell is a bonus source; never let it break a run
+            traceback.print_exc()
+            return snapshot
+        extra = [c for c in extra if c.label != self.app.name]  # pressing the app you're already in does nothing
+        return replace(snapshot, controls=snapshot.controls + extra) if extra else snapshot
+
     def _execute(self, action: Action, snapshot: Snapshot, by_click: bool = False) -> None:
         adapter = self.adapter
-        adapter.activate_app(self.app)
+        if not self._is_shell_press(action, snapshot):
+            adapter.activate_app(self.app)
         if action.kind == "press":
             control = snapshot.by_id(action.target_id or "")
             if control is None:
@@ -321,7 +393,7 @@ class NudgeLoop:
             if action.double:
                 adapter.click(control, double=True)
                 return
-            if by_click or control.source == "vision":
+            if by_click or control.source == "vision" or control.shell:  # taskbar Invoke often succeeds without doing anything
                 adapter.click(control)
                 return
             try:

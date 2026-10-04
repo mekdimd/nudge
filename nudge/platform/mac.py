@@ -49,6 +49,14 @@ SKIPPED_SUBROLES = {
     "AXFullScreenButton",
 }
 
+DOCK_KINDS = {
+    "AXApplicationDockItem": "app",
+    "AXFolderDockItem": "folder",
+    "AXURLDockItem": "link",
+    "AXMinimizedWindowDockItem": "minimized window",
+    "AXTrashDockItem": "trash",
+}
+
 OPEN_MENU = "open menu"
 MAX_NODES = 6000
 TIME_BUDGET = 2.5
@@ -223,6 +231,37 @@ class MacAdapter:
             elapsed_ms=int((time.perf_counter() - started) * 1000),
         )
 
+    def shell_controls(self, app: AppRef) -> list[Control]:
+        """The Dock's icons, the macOS counterpart of the Windows taskbar."""
+        dock = NSRunningApplication.runningApplicationsWithBundleIdentifier_("com.apple.dock")
+        if not dock:
+            return []
+        root = AS.AXUIElementCreateApplication(dock[0].processIdentifier())
+        AS.AXUIElementSetMessagingTimeout(root, 0.5)
+        controls: list[Control] = []
+        for group in _attr(root, "AXChildren") or []:
+            for item in _attr(group, "AXChildren") or []:
+                info = _attrs(item)
+                label = _text(info.get("AXTitle"))
+                kind = DOCK_KINDS.get(_text(info.get("AXSubrole")))
+                rect = _rect(info)
+                if not label or kind is None or rect is None:
+                    continue
+                running = kind == "app" and bool(_attr(item, "AXIsApplicationRunning"))
+                control = MacControl(
+                    id=f"s{len(controls) + 1}",
+                    label=_short(label),
+                    role=kind,
+                    bounds=rect,
+                    context="the Dock",
+                    value="open" if running else None,
+                    ref=item,
+                    shell=True,
+                )
+                control.ref_role = "AXDockItem"
+                controls.append(control)
+        return controls
+
     def press(self, control: Control) -> None:
         element = control.ref
         if element is None:
@@ -239,6 +278,10 @@ class MacAdapter:
         raise AdapterError(f"could not press {control.label!r}")
 
     def click(self, control: Control, double: bool = False) -> None:
+        if control.shell and control.ref is not None:
+            # A hidden Dock keeps its icons off screen, where a click lands on nothing; AXPress works either way
+            self.press(control)
+            return
         if control.bounds is None:
             raise AdapterError(f"{control.label!r} has no position to click")
         point = control.bounds.center

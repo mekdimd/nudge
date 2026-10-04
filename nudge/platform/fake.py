@@ -20,16 +20,17 @@ class FakeAdapter:
 
     name = "fake"
 
-    def __init__(self, screens: dict, start: str, app: AppRef | None = None):
+    def __init__(self, screens: dict, start: str, app: AppRef | None = None, shell: list | None = None):
         self.screens = copy.deepcopy(screens)
         self.screen = start
         self.app = app or AppRef(name="Google Chrome", pid=4242)
+        self.shell = copy.deepcopy(shell or [])
         self.log: list[str] = []
 
     @classmethod
     def from_fixture(cls, name: str) -> FakeAdapter:
         data = json.loads((FIXTURES / f"{name}.json").read_text())
-        return cls(data["screens"], data["start"], AppRef(name=data.get("app", "Google Chrome"), pid=4242))
+        return cls(data["screens"], data["start"], AppRef(name=data.get("app", "Google Chrome"), pid=4242), data.get("shell"))
 
     def thread_context(self):
         return nullcontext()
@@ -44,10 +45,23 @@ class FakeAdapter:
         pass
 
     def _raw(self, control_id: str) -> dict:
-        for raw in self.screens[self.screen]["controls"]:
+        for raw in self.screens[self.screen]["controls"] + self.shell:
             if raw["id"] == control_id:
                 return raw
         raise KeyError(control_id)
+
+    def shell_controls(self, app: AppRef) -> list[Control]:
+        return [
+            Control(
+                id=raw["id"],
+                label=raw.get("label", ""),
+                role=raw.get("role", "button"),
+                bounds=Rect(*raw.get("bounds", [10 + i * 50, 1040, 44, 40])),
+                context="taskbar",
+                shell=True,
+            )
+            for i, raw in enumerate(self.shell)
+        ]
 
     def snapshot(self, app: AppRef) -> Snapshot:
         screen = self.screens[self.screen]
@@ -76,6 +90,8 @@ class FakeAdapter:
             raw["value"] = b if raw.get("value") == a else a
         if "goto" in raw:
             self.screen = raw["goto"]
+        if "app" in raw:
+            self.app = AppRef(name=raw["app"], pid=raw.get("pid", self.app.pid + 1))
 
     def click(self, control: Control, double: bool = False) -> None:
         self.press(control)
