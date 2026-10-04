@@ -5,8 +5,8 @@ import re
 from .jev import JevDecision
 
 DONE_THRESHOLD = 0.70
-MIN_TOP_PROBABILITY = 0.40
-MIN_MARGIN = 0.15
+MIN_TOP_PROBABILITY = 0.35
+MIN_MARGIN = 0.06
 MAX_STEPS = 12
 HOLD_SECONDS = 0.5
 ABSENT_THRESHOLD = 0.5
@@ -41,8 +41,7 @@ def consequential_word(label: str) -> str | None:
 
 
 def is_unsure(decision: JevDecision) -> bool:
-    # Compare on the same scale as the bar (whole-percent). Raw floats like 0.49 - 0.34
-    # are often 0.14999… and would spuriously fail a 15% margin gate.
+    # Compare on the same scale as the bar (whole-percent). Raw float gaps can sit just under the margin gate.
     top = round(decision.top_probability, 3)
     margin = round(decision.margin, 3)
     return top < MIN_TOP_PROBABILITY or margin < MIN_MARGIN
