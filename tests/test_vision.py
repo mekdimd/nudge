@@ -57,6 +57,21 @@ def test_sparse_tree_looks_with_vision_and_clicks_what_it_found():
     assert any(c.source == "vision" for s in events.snapshots for c in s.controls)
 
 
+def test_dock_icons_do_not_hide_a_sparse_app_from_vision():
+    dock = [{"id": f"s{i}", "label": name} for i, name in enumerate(["Spotify", "Finder", "Notes", "Mail", "Maps", "Music", "News", "Photos", "Arc", "Zoom"])]
+    adapter = ClickRecordingAdapter(SPARSE, "home", AppRef("Spotify", 7), shell=dock)
+    play = Control(id="v1", label="Play button icon", role="button", bounds=Rect(10, 10, 40, 40), source="vision")
+    vision = FakeVision([play])
+    events = RecordingEvents()
+    outcome = make_loop(adapter, ScriptedJev(["__none__", "Play button icon"]), events, vision).run("play music", adapter.app)
+
+    assert outcome.ok, outcome.message
+    assert vision.calls >= 2
+    assert "click v1" in adapter.log
+    shell_labels = {c.label for s in events.snapshots for c in s.controls if c.shell}
+    assert "Finder" in shell_labels and "Spotify" not in shell_labels
+
+
 def test_rich_tree_and_confident_jev_never_use_vision():
     adapter = FakeAdapter.from_fixture("live_caption")
     vision = FakeVision([])

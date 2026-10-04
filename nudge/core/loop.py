@@ -147,6 +147,10 @@ class NudgeLoop:
             if self._tree_is_sparse(options):
                 snapshot, options, looked = self._look(snapshot)
             decision = self._decide(snapshot, options)
+            if decision.chose_none and not self.shell_on and not safety.is_done(decision):
+                self.shell_on = True  # the taskbar / Dock is a 50 ms read; try it before a vision look
+                self.fresh = None if looked else snapshot
+                continue
             if not looked and not safety.is_done(decision) and self._wants_a_closer_look(decision):
                 snapshot, options, looked = self._look(snapshot)
                 if looked:
@@ -183,7 +187,8 @@ class NudgeLoop:
         return decision
 
     def _tree_is_sparse(self, options: OptionSet) -> bool:
-        return self.vision is not None and len(options.controls) < safety.SPARSE_TREE
+        app_controls = [c for c in options.controls if not c.shell]
+        return self.vision is not None and len(app_controls) < safety.SPARSE_TREE
 
     def _wants_a_closer_look(self, decision: JevDecision) -> bool:
         return self.vision is not None and (decision.chose_none or safety.is_unsure(decision))
@@ -348,6 +353,7 @@ class NudgeLoop:
         except Exception:  # the shell is a bonus source; never let it break a run
             traceback.print_exc()
             return snapshot
+        extra = [c for c in extra if c.label != self.app.name]  # pressing the app you're already in does nothing
         return replace(snapshot, controls=snapshot.controls + extra) if extra else snapshot
 
     def _execute(self, action: Action, snapshot: Snapshot, by_click: bool = False) -> None:
