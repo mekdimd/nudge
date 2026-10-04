@@ -74,8 +74,17 @@ Summon the bar with **Ctrl+Shift+Space**.
 
 1. Click into the app you want help with. The bar shows it as "in Google Chrome".
 2. Press the hotkey, type a goal, and press Enter.
-3. With an ElevenLabs key, the mic button next to the input mutes the mic; its arrow picks a microphone and toggles Nudge's voice and sound effects.
+3. With an ElevenLabs key, say the wake word or click the mic button next to the input to talk. The button lights up whenever Nudge is listening, however listening started, and clicking it again stops. Its arrow picks a microphone and holds the mutes: mic, Nudge's voice, and sound effects.
 4. Watch the cursor. Press Stop or Esc at any point. Ctrl+C in the terminal quits.
+
+To keep Nudge running like an installed app, start it in the background:
+
+```bash
+uv run nudge --background   # detaches from the terminal; logs go to nudge.log
+uv run nudge --stop         # quits the background copy
+```
+
+In the background, the × button hides the bar instead of quitting, the hotkey brings it back, and a menu bar (or tray) icon offers Show and Quit. `--persistent` gives the same close-to-hide behavior while staying attached to the terminal. The log lives in `~/Library/Logs/Nudge` on macOS.
 
 **Peek** (the button on the bar, or `uv run nudge --debug`) draws a box around everything Nudge can see in the app: blue for accessibility controls, green for text fields, orange for things only vision found, and a white outline on Jev's pick.
 
