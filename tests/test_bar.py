@@ -9,8 +9,9 @@ OPTIONS = [("k1", "Search", 0.41), ("k2", "Home", 0.33), ("k3", "Your Library", 
 @pytest.fixture
 def bar(qapp):
     from nudge.ui.bar import Bar
+    from nudge.ui.timeline import Timeline
 
-    b = Bar()
+    b = Bar(Timeline())
     b.show()
     yield b
     b.close()
@@ -160,3 +161,102 @@ def test_escape_while_running_requests_stop(bar):
     bar.set_running(True)
     bar._escape()
     assert stops == [True]
+
+
+PROMPTS = [
+    ("show_choice", ("Pick one:", OPTIONS)),
+    ("show_draft", ("Check the draft.", [("f1", "Subject", "Hi")])),
+    ("show_url", ("https://www.sfu.ca", "sfu")),
+    ("show_confirm", ("Press “Send”? This will send and may not be undoable.",)),
+    ("show_recover", ("Press “Play” didn't change anything.",)),
+    ("show_ask", ("I can't see the control.",)),
+]
+
+
+@pytest.mark.parametrize("method,args", PROMPTS)
+def test_question_cards_never_have_their_own_stop(bar, method, args):
+    bar.set_running(True)
+    getattr(bar, method)(*args, lambda _: None)
+    assert not [b for b in panel_buttons(bar) if b.property("kind") in ("danger", "stop") or "Stop" in b.text()]
+    assert bar.stop.isVisible()
+
+
+@pytest.mark.parametrize("method,args", PROMPTS)
+def test_waiting_for_an_answer_turns_the_bar_amber_and_back(bar, method, args):
+    bar.set_running(True)
+    getattr(bar, method)(*args, lambda _: None)
+    assert bar.state == "waiting"
+    bar.clear_panel()
+    assert bar.state == "working"
+
+
+def test_confirm_names_the_action(bar):
+    bar.show_confirm("Press “Send”? This will send and may not be undoable.", lambda _: None)
+    texts = [b.text() for b in panel_buttons(bar)]
+    assert texts == ["Yes, send", "Not yet"]
+
+
+def test_confirm_has_no_enter_shortcut(bar):
+    got = []
+    bar.show_confirm("Press “Send”? This will send and may not be undoable.", got.append)
+    QTest.keyClick(bar, Qt.Key.Key_Return)
+    assert got == []
+
+
+def test_recover_enter_retries(bar):
+    got = []
+    bar.show_recover("Press “Play” didn't change anything.", got.append)
+    QTest.keyClick(bar, Qt.Key.Key_Return)
+    assert got == ["retry"]
+
+
+def test_choice_number_keys_pick(bar):
+    got = []
+    bar.set_running(True)
+    bar.show_choice("Pick one:", OPTIONS, got.append)
+    QTest.keyClick(bar, Qt.Key.Key_3)
+    assert got == ["k3"]
+
+
+def test_failed_run_offers_retry_until_the_goal_is_edited(bar):
+    bar.input.setText("turn on Live Caption")
+    bar.set_running(True)
+    bar.set_running(False)
+    bar.show_result(False)
+    assert "Retry" in bar.go.text()
+    QTest.keyClicks(bar.input, "!")
+    assert bar.go.text() == "Go"
+
+
+def test_successful_run_keeps_go(bar):
+    bar.input.setText("x")
+    bar.set_running(True)
+    bar.set_running(False)
+    bar.show_result(True)
+    assert bar.go.text() == "Go"
+
+
+def test_target_chip_shows_the_app(bar):
+    from nudge.core.models import AppRef
+
+    bar.set_target(AppRef("Google Chrome", 4242))
+    assert bar.target.text.text() == "in Google Chrome"
+    bar.set_target(None)
+    assert bar.target.text.text() == "no app selected"
+
+
+def test_hint_is_hidden_during_a_run_unless_asked(bar):
+    bar.set_running(True)
+    bar.set_status("Peek: 12 controls")
+    assert not bar.hint.isVisible()
+    bar.set_status("Listening: open settings", during_run=True)
+    assert bar.hint.isVisible()
+    bar.set_running(False)
+    bar.set_status("Add TYPESAFE_API_KEY to .env", tone="warn")
+    assert bar.hint.isVisible()
+
+
+def test_step_count_shows_in_the_hint(bar):
+    bar.set_running(True)
+    bar.set_step(3)
+    assert bar.hint.isVisible() and bar.hint.text().startswith("Step 3 of 12")

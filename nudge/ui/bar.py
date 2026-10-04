@@ -1,26 +1,29 @@
 from __future__ import annotations
 
+import math
+import re
 import sys
+import time
 from typing import Callable
 
-from PySide6.QtCore import QPoint, QRectF, Qt, Signal
+from PySide6.QtCore import QPoint, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QFont, QGuiApplication, QKeySequence, QPainter, QPainterPath, QPen, QShortcut
-from PySide6.QtWidgets import (
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QPlainTextEdit,
-    QPushButton,
-    QSizePolicy,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
 
+from ..core.models import AppRef
+from ..core.safety import MAX_STEPS
 from ..core.spoken import match_choice, match_intent
 from ..vision.screen import exclude_from_capture
 from . import theme
+from .feed import Feed
+from .icons import actor_icon
+from .orb import Orb
+from .timeline import Timeline
 
 WIDTH = 760
+HOTKEY = "⌘⇧Space" if sys.platform == "darwin" else "Ctrl+Shift+Space"
+GLOW = {"working": theme.BLUE, "waiting": theme.AMBER, "success": theme.GREEN}
+QUOTED = re.compile(r"“(.+?)”")
 
 
 def _button(text: str, kind: str = "", min_width: int = 0) -> QPushButton:
@@ -44,60 +47,54 @@ def _label(text: str = "", size: int = 16, muted: bool = False, weight=QFont.Wei
     return l
 
 
-class Badge(QLabel):
-    def __init__(self, tooltip: str):
-        super().__init__()
-        self.setFont(theme.font(13, QFont.Weight.DemiBold))
-        self.setToolTip(tooltip)
-        self.set("", "off")
-
-    def set(self, text: str, state: str) -> None:
-        colors = {
-            "off": ("rgba(255,255,255,0.06)", theme.MUTED.name()),
-            "idle": ("rgba(79,142,247,0.16)", "#BFD5FF"),
-            "busy": (theme.BLUE.name(), "white"),
-            "warn": ("rgba(245,165,36,0.18)", "#FFD58A"),
-        }
-        bg, fg = colors[state]
-        self.setStyleSheet(f"background:{bg}; color:{fg}; border-radius:10px; padding:4px 10px;")
-        self.setText(text)
-
-
-class Bars(QWidget):
-    """Jev's top options for the current step, as probability bars."""
-
+class TargetChip(QWidget):
     def __init__(self):
         super().__init__()
-        self.rows: list[tuple[str, float, bool]] = []
-        self.setFixedHeight(0)
+        row = QHBoxLayout(self)
+        row.setContentsMargins(10, 4, 12, 4)
+        row.setSpacing(6)
+        self.icon = QLabel()
+        self.icon.setFixedSize(16, 16)
+        self.text = _label("", 13, weight=QFont.Weight.DemiBold)
+        self.text.setWordWrap(False)
+        row.addWidget(self.icon)
+        row.addWidget(self.text)
+        self.setToolTip("The app Nudge will act in. Click into another app to change it.")
+        self.set(None)
 
-    def set_rows(self, rows: list[tuple[str, float, bool]]) -> None:
-        self.rows = rows[:3]
-        self.setFixedHeight(26 * len(self.rows) + (6 if self.rows else 0))
+    def set(self, app: AppRef | None) -> None:
+        self.warn = app is None
+        self.text.setText(f"in {app.name}" if app else "no app selected")
+        self.text.setStyleSheet(f"color: {'#FFD58A' if self.warn else theme.TEXT.name()};")
+        self.icon.setVisible(app is not None)
+        if app is not None:
+            self.icon.setPixmap(actor_icon("app", app, 16))
         self.update()
 
     def paintEvent(self, _event) -> None:
-        if not self.rows:
-            return
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        p.setFont(theme.font(13))
-        w = self.width()
-        label_w = int(w * 0.44)
-        for i, (label, prob, chosen) in enumerate(self.rows):
-            y = i * 26 + 3
-            p.setPen(theme.TEXT if chosen else theme.MUTED)
-            text = p.fontMetrics().elidedText(label, Qt.TextElideMode.ElideRight, label_w - 8)
-            p.drawText(QRectF(0, y, label_w, 20), Qt.AlignmentFlag.AlignVCenter, text)
-            track = QRectF(label_w, y + 6, w - label_w - 52, 8)
-            p.setPen(Qt.PenStyle.NoPen)
-            p.setBrush(QColor(255, 255, 255, 22))
-            p.drawRoundedRect(track, 4, 4)
-            fill = QRectF(track.x(), track.y(), max(track.width() * prob, 3), track.height())
-            p.setBrush(theme.BLUE if chosen else QColor(255, 255, 255, 70))
-            p.drawRoundedRect(fill, 4, 4)
-            p.setPen(theme.TEXT if chosen else theme.MUTED)
-            p.drawText(QRectF(w - 48, y, 48, 20), Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, f"{prob:.0%}")
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(QColor(245, 165, 36, 40) if self.warn else QColor(255, 255, 255, 16))
+        box = QRectF(self.rect())
+        p.drawRoundedRect(box, box.height() / 2, box.height() / 2)
+
+
+class ChoiceButton(QPushButton):
+    def __init__(self, number: int, label: str, probability: float):
+        super().__init__()
+        self.setProperty("kind", "choice")
+        self.setMinimumHeight(52)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        row = QHBoxLayout(self)
+        row.setContentsMargins(16, 0, 16, 0)
+        row.setSpacing(12)
+        parts = [_label(str(number), 16, weight=QFont.Weight.Bold), _label(label, 16), _label(f"{probability:.0%}", 14, muted=True)]
+        parts[0].setStyleSheet(f"color: {theme.BLUE.name()};")
+        for i, part in enumerate(parts):
+            part.setWordWrap(False)
+            part.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+            row.addWidget(part, 1 if i == 1 else 0)
 
 
 class Bar(QWidget):
@@ -107,7 +104,7 @@ class Bar(QWidget):
     panel_closed = Signal()
     peek_toggled = Signal(bool)
 
-    def __init__(self):
+    def __init__(self, timeline: Timeline):
         flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool
         super().__init__(None, flags)
         self.setObjectName("bar")
@@ -119,8 +116,17 @@ class Bar(QWidget):
         self._drag: QPoint | None = None
         self._anchor_bottom = QGuiApplication.primaryScreen().availableGeometry().bottom() - 40
         self._enter_action: Callable[[], None] | None = None
+        self._number_actions: list[Callable[[], None]] = []
         self.spoken: Callable[[str], bool] | None = None  # answers the open prompt from speech; True if it understood
         self.running = False
+        self.state = "idle"
+        self._retry_goal: str | None = None
+        self._glow = 0.0
+        self._glow_kind = "working"
+        self._flash_until = 0.0
+        self._glow_timer = QTimer(self)
+        self._glow_timer.setInterval(33)
+        self._glow_timer.timeout.connect(self._tick_glow)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(26, 22, 26, 22)
@@ -130,17 +136,13 @@ class Bar(QWidget):
         header.setSpacing(8)
         title = _label("Nudge", 15, weight=QFont.Weight.Bold)
         title.setWordWrap(False)
-        self.target = Badge("The app Nudge will act in. Click into another app to change it.")
-        self.jev = Badge("Jev receives the labels of on-screen controls to choose the next step. Screenshots never leave your computer.")
-        self.gemini = Badge("Gemini receives only your goal and the names of empty text fields, and only when text must be written.")
+        self.target = TargetChip()
         header.addWidget(title)
         header.addWidget(self.target)
         header.addStretch(1)
-        header.addWidget(self.jev)
-        header.addWidget(self.gemini)
         self.peek = QPushButton("Peek")
         self.peek.setCheckable(True)
-        self.peek.setToolTip("Under the hood: box every element Nudge can see (blue: accessibility tree, green: text fields, orange: vision)")
+        self.peek.setToolTip("Show everything Nudge can see on screen (blue: accessibility, green: text fields, orange: vision)")
         self.peek.setFixedHeight(30)
         self.peek.setStyleSheet(
             "QPushButton { padding:0 12px; border-radius:15px; font-size:12px; }"
@@ -156,51 +158,48 @@ class Bar(QWidget):
         header.addWidget(close)
         root.addLayout(header)
 
-        row = QHBoxLayout()
-        row.setSpacing(10)
-        self.input = QLineEdit()
-        self.input.setPlaceholderText("What do you want to do?  e.g. turn on Live Caption")
-        self.input.setFont(theme.font(20))
-        self.input.setMinimumHeight(54)
-        self.input.returnPressed.connect(self._go)
-        self.go = _button("Go", "primary", 96)
-        self.go.setMinimumHeight(54)
-        self.go.clicked.connect(self._go)
-        self.stop = _button("Stop", "danger", 112)
-        self.stop.setMinimumHeight(54)
-        self.stop.clicked.connect(self.stop_requested.emit)
-        self.stop.hide()
-        row.addWidget(self.input, 1)
-        row.addWidget(self.go)
-        row.addWidget(self.stop)
-        root.addLayout(row)
+        self.feed = Feed(timeline)
+        root.addWidget(self.feed)
 
-        status_row = QHBoxLayout()
-        self.status = _label("Click into an app, then press " + ("⌘⇧Space" if sys.platform == "darwin" else "Ctrl+Shift+Space") + " or type here.", 17)
-        self.step = _label("", 13, muted=True)
-        self.step.setWordWrap(False)
-        self.step.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        status_row.addWidget(self.status, 1)
-        status_row.addWidget(self.step)
-        root.addLayout(status_row)
-
-        self.timing = _label("", 12, muted=True)
-        self.timing.setFont(theme.font(12, QFont.Weight.Medium))
-        self.timing.hide()
-        root.addWidget(self.timing)
-
-        self.bars = Bars()
-        root.addWidget(self.bars)
-
-        self.panel = QWidget()
+        self.panel = QFrame()
+        self.panel.setObjectName("card")
         self.panel_layout = QVBoxLayout(self.panel)
-        self.panel_layout.setContentsMargins(0, 6, 0, 0)
+        self.panel_layout.setContentsMargins(16, 14, 16, 16)
         self.panel_layout.setSpacing(10)
         self.panel.hide()
         root.addWidget(self.panel)
 
+        row = QHBoxLayout()
+        row.setSpacing(10)
+        self.orb = Orb()
+        self.input = QLineEdit()
+        self.input.setPlaceholderText("Ask Nudge…  e.g. turn on Live Caption")
+        self.input.setFont(theme.font(20))
+        self.input.setMinimumHeight(54)
+        self.input.returnPressed.connect(self._go)
+        self.input.textEdited.connect(self._on_edited)
+        self.mic_slot = QHBoxLayout()
+        self.go = _button("Go", "primary", 112)
+        self.go.setMinimumHeight(54)
+        self.go.clicked.connect(self._go)
+        self.stop = _button("Stop", "stop", 112)
+        self.stop.setMinimumHeight(54)
+        self.stop.clicked.connect(self.stop_requested.emit)
+        self.stop.hide()
+        row.addWidget(self.orb)
+        row.addWidget(self.input, 1)
+        row.addLayout(self.mic_slot)
+        row.addWidget(self.go)
+        row.addWidget(self.stop)
+        root.addLayout(row)
+
+        self.hint = _label("", 13, muted=True)
+        root.addWidget(self.hint)
+        self.set_status(f"Click into an app, then press {HOTKEY} or type here.")
+
         QShortcut(QKeySequence(Qt.Key.Key_Escape), self, activated=self._escape)
         QShortcut(QKeySequence.StandardKey.Quit, self, activated=self.quit_requested.emit)
+        timeline.subscribe(lambda *_: self._resize())
 
         self.adjustSize()
         self._place()
@@ -212,20 +211,37 @@ class Bar(QWidget):
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         card = QRectF(self.rect()).adjusted(10, 8, -10, -12)
         for i in range(8, 0, -1):
-            shadow = QColor(0, 0, 0, 6)
             p.setPen(Qt.PenStyle.NoPen)
-            p.setBrush(shadow)
+            p.setBrush(QColor(0, 0, 0, 6))
             p.drawRoundedRect(card.adjusted(-i, -i + 3, i, i + 3), 24 + i, 24 + i)
         path = QPainterPath()
         path.addRoundedRect(card, 24, 24)
         p.fillPath(path, theme.PANEL)
         p.setPen(QPen(theme.LINE, 1))
         p.drawPath(path)
-        accent = QColor(theme.BLUE)
-        accent.setAlpha(200 if self.running else 0)
-        if self.running:
-            p.setPen(QPen(accent, 2))
-            p.drawPath(path)
+        if self._glow > 0.01:
+            pulse = 0.5 + 0.5 * math.sin(time.monotonic() * 2 * math.pi / 1.6) if self._glow_kind == "working" else 1.0
+            base = QColor(GLOW[self._glow_kind])
+            for width, share in ((7, 0.22), (2, 1.0)):
+                color = QColor(base)
+                color.setAlpha(int(self._glow * (140 + 80 * pulse) * share))
+                p.setPen(QPen(color, width))
+                p.drawPath(path)
+
+    def _set_state(self, state: str) -> None:
+        self.state = state
+        if state in GLOW:
+            self._glow_kind = state
+        self._glow_timer.start()
+
+    def _tick_glow(self) -> None:
+        flashing = time.monotonic() < self._flash_until
+        target = 1.0 if self.state in ("working", "waiting") or flashing else 0.0
+        self._glow += (target - self._glow) * 0.25
+        if target == 0.0 and self._glow < 0.01:
+            self._glow = 0.0
+            self._glow_timer.stop()
+        self.update()
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
@@ -290,14 +306,22 @@ class Bar(QWidget):
         if text and not self.running:
             self.go_requested.emit(text)
 
+    def _on_edited(self, text: str) -> None:
+        if self._retry_goal is not None and text.strip() != self._retry_goal:
+            self._retry_goal = None
+            self.go.setText("Go")
+
     def _escape(self) -> None:
         if self.running:
             self.stop_requested.emit()
         else:
             self.hide()
 
-    def set_target(self, name: str | None) -> None:
-        self.target.set(f"in {name}" if name else "no app selected", "idle" if name else "warn")
+    def add_mic(self, widget: QWidget) -> None:
+        self.mic_slot.addWidget(widget)
+
+    def set_target(self, app: AppRef | None) -> None:
+        self.target.set(app)
 
     def set_running(self, running: bool) -> None:
         self.running = running
@@ -305,59 +329,60 @@ class Bar(QWidget):
         self.stop.setVisible(running)
         self.input.setReadOnly(running)
         if running:
-            self.bars.set_rows([])
-            self.step.setText("")
+            self._retry_goal = None
+            self.go.setText("Go")
+            self.hint.hide()
         else:
             self.clear_panel()
-        self.update()
+            self.set_status("")
+        self._set_state("working" if running else "idle")
         self._resize()
 
-    def set_status(self, text: str) -> None:
-        self.status.setText(text)
-
-    def set_jev(self, step: int, milliseconds: int, rows: list[tuple[str, float, bool]], done: float) -> None:
-        self.jev.set(f"Jev · {milliseconds} ms", "busy")
-        self.step.setText(f"step {step} · done {done:.0%}")
-        self.bars.set_rows(rows)
+    def set_status(self, text: str, tone: str = "muted", during_run: bool = False) -> None:
+        """The hint line under the input: setup problems, voice state, Peek counts, and the step count."""
+        self.hint.setText(text)
+        self.hint.setStyleSheet(f"color: {(theme.AMBER if tone == 'warn' else theme.MUTED).name()};")
+        self.hint.setVisible(bool(text) and (not self.running or during_run))
         self._resize()
 
-    def set_timing(self, parts: dict[str, int]) -> None:
-        self.timing.setText("   ".join(f"{name} {ms} ms" for name, ms in parts.items()))
-        self.timing.setVisible(bool(parts))
+    def set_step(self, step: int) -> None:
+        self.set_status(f"Step {step} of {MAX_STEPS} · Esc stops", during_run=True)
 
-    def set_jev_idle(self, ok: bool) -> None:
-        self.jev.set("Jev · sends control labels" if ok else "Jev · add TYPESAFE_API_KEY", "idle" if ok else "warn")
-
-    def set_gemini(self, state: str, milliseconds: int = 0) -> None:
-        if state == "off":
-            self.gemini.set("Gemini off", "off")
-        elif state == "busy":
-            self.gemini.set("Gemini · sending goal + field names", "busy")
-        elif state == "done":
-            self.gemini.set(f"Gemini · {milliseconds / 1000:.1f} s", "idle")
-        else:
-            self.gemini.set("Gemini · only for typing", "off")
-
-    def show_result(self, ok: bool, message: str) -> None:
-        self.status.setText(("✓ " if ok else "") + message)
+    def show_result(self, ok: bool) -> None:
+        """The outcome itself is the last feed entry; the bar flashes green, or offers Retry."""
+        if ok:
+            self._glow_kind = "success"
+            self._flash_until = time.monotonic() + 0.9
+            self._glow_timer.start()
+            return
+        self._retry_goal = self.input.text().strip() or None
+        if self._retry_goal:
+            self.go.setText("↻ Retry")
 
     # panels
 
     def clear_panel(self) -> None:
         self._enter_action = None
+        self._number_actions = []
         self.spoken = None
         self.panel_closed.emit()
         _clear_layout(self.panel_layout)
         self.panel.hide()
+        if self.running:
+            self._set_state("working")
         self._resize()
 
-    def _open_panel(self, title: str, tone: str = "") -> None:
+    def _open_panel(self, title: str, tone: str = "", detail: str = "") -> None:
         self.clear_panel()
-        heading = _label(title, 18, weight=QFont.Weight.DemiBold)
+        heading = _label(title, 17, weight=QFont.Weight.DemiBold)
         if tone == "warn":
             heading.setStyleSheet(f"color: {theme.AMBER.name()};")
         self.panel_layout.addWidget(heading)
+        if detail:
+            self.panel_layout.addWidget(_label(detail, 14, muted=True))
         self.panel.show()
+        if self.running:
+            self._set_state("waiting")
 
     def _finish_panel(self, focus: QWidget | None = None) -> None:
         self._resize()
@@ -372,7 +397,7 @@ class Bar(QWidget):
         for text, kind, callback in specs:
             b = _button(text, kind)
             b.clicked.connect(lambda _=False, cb=callback: self._answer(cb))
-            row.addWidget(b, 1)
+            row.addWidget(b, 0 if kind == "link" else 1)
             made.append(b)
         self.panel_layout.addLayout(row)
         return made
@@ -381,10 +406,18 @@ class Bar(QWidget):
         self.clear_panel()
         callback()
 
+    def _typing(self) -> bool:
+        focus = self.focusWidget()
+        return isinstance(focus, QPlainTextEdit) or (isinstance(focus, QLineEdit) and not focus.isReadOnly())
+
     def keyPressEvent(self, e) -> None:
         if e.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter) and self._enter_action and not isinstance(self.focusWidget(), QPlainTextEdit):
             action, self._enter_action = self._enter_action, None
             self._answer(action)
+            return
+        index = e.key() - int(Qt.Key.Key_1)
+        if self._number_actions and 0 <= index < len(self._number_actions) and not self._typing():
+            self._answer(self._number_actions[index])
             return
         super().keyPressEvent(e)
 
@@ -392,12 +425,12 @@ class Bar(QWidget):
         self._open_panel(reason)
         first = None
         for number, (key, label, prob) in enumerate(options, 1):
-            b = _button(f"{number}   {label}    {prob:.0%}", "choice")
-            b.setMinimumHeight(56)
-            b.clicked.connect(lambda _=False, k=key: self._answer(lambda: reply(k)))
+            b = ChoiceButton(number, label, prob)
+            pick = lambda k=key: reply(k)
+            b.clicked.connect(lambda _=False, act=pick: self._answer(act))
+            self._number_actions.append(pick)
             self.panel_layout.addWidget(b)
             first = first or b
-        self._buttons([("Stop", "danger", lambda: reply(None))])
 
         def spoken(text: str) -> bool:
             match = match_choice(text, [label for _, label, _ in options])
@@ -410,8 +443,7 @@ class Bar(QWidget):
         self._finish_panel(first)
 
     def show_draft(self, note: str, fields: list[tuple[str, str, str]], reply: Callable[[object], None]) -> None:
-        self._open_panel("Check what I'll type")
-        self.panel_layout.addWidget(_label(note, 14, muted=True))
+        self._open_panel("Check what I'll type", detail=note)
         editors: dict[str, QLineEdit | QPlainTextEdit] = {}
         first = None
         for field_id, label, text in fields:
@@ -426,7 +458,7 @@ class Bar(QWidget):
                 editor.setFont(theme.font(16))
                 editor.setMinimumHeight(44)
                 if not text:
-                    editor.setPlaceholderText("left blank — type it here if needed")
+                    editor.setPlaceholderText("Left blank. Type it here if needed")
             editors[field_id] = editor
             self.panel_layout.addWidget(editor)
             first = first or editor
@@ -435,44 +467,50 @@ class Bar(QWidget):
             return {fid: (e.toPlainText() if isinstance(e, QPlainTextEdit) else e.text()) for fid, e in editors.items()}
 
         approve = lambda: reply(values())
-        self._buttons([("Type it", "primary", approve), ("Stop", "danger", lambda: reply(None))])
+        self._buttons([("Type it", "primary", approve)])
         self._enter_action = approve
         self.spoken = self._yes_or_stop(approve, lambda: reply(None))
         self._finish_panel(first)
 
     def show_url(self, url: str | None, fallback: str, reply: Callable[[object], None]) -> None:
-        self._open_panel("Go to this address?" if url else "I'm not sure of the address. Search for this instead?")
+        self._open_panel("Open this address?" if url else "I'm not sure of the address. Search for this instead?")
         editor = QLineEdit(url or fallback)
         editor.setFont(theme.font(17))
         editor.setMinimumHeight(48)
         self.panel_layout.addWidget(editor)
         go = lambda: reply(editor.text())
-        self._buttons([("Go", "primary", go), ("Stop", "danger", lambda: reply(None))])
+        self._buttons([("Open", "primary", go)])
         self._enter_action = go
         self.spoken = self._yes_or_stop(go, lambda: reply(None))
         self._finish_panel(editor)
 
     def show_confirm(self, message: str, reply: Callable[[object], None]) -> None:
-        self._open_panel(message, tone="warn")
-        yes, _ = self._buttons([("Yes, do it", "warn", lambda: reply(True)), ("No", "", lambda: reply(False))])
+        question, _, rest = message.partition("? ")
+        title = f"{question}?" if rest else message
+        detail = rest[:1].upper() + rest[1:] if rest else ""
+        quoted = QUOTED.search(question)
+        yes = f"Yes, {quoted.group(1).lower()}" if quoted else "Yes, do it"
+        self._open_panel(title, tone="warn", detail=detail)
+        self._buttons([(yes, "warn", lambda: reply(True)), ("Not yet", "", lambda: reply(False))])
         self.spoken = self._intents({"stop": lambda: reply(False), "no": lambda: reply(False), "yes": lambda: reply(True)})
         self._finish_panel(None)
 
     def show_recover(self, message: str, reply: Callable[[object], None]) -> None:
         self._open_panel(message)
-        retry, *_ = self._buttons([
-            ("Try again", "primary", lambda: reply("retry")),
+        retry = lambda: reply("retry")
+        first, *_ = self._buttons([
+            ("↻ Retry", "primary", retry),
             ("Click it instead", "", lambda: reply("click")),
-            ("Pick something else", "", lambda: reply("other")),
-            ("Stop", "danger", lambda: reply("stop")),
+            ("Pick another…", "link", lambda: reply("other")),
         ])
+        self._enter_action = retry
         self.spoken = self._intents({
             "stop": lambda: reply("stop"),
-            "retry": lambda: reply("retry"),
+            "retry": retry,
             "click": lambda: reply("click"),
             "other": lambda: reply("other"),
         })
-        self._finish_panel(retry)
+        self._finish_panel(first)
 
     def show_ask(self, message: str, reply: Callable[[object], None]) -> None:
         self._open_panel(message)
@@ -482,7 +520,7 @@ class Bar(QWidget):
         editor.setMinimumHeight(46)
         self.panel_layout.addWidget(editor)
         go = lambda: reply(editor.text())
-        self._buttons([("Continue", "primary", go), ("Stop", "danger", lambda: reply(None))])
+        self._buttons([("Continue", "primary", go)])
         self._enter_action = go
         intents = self._intents({"stop": lambda: reply(None), "yes": go, "no": go})
 

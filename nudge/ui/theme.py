@@ -52,7 +52,12 @@ QPushButton[kind="primary"]:hover {{ background: {BLUE_DEEP.name()}; }}
 QPushButton[kind="danger"] {{ background: {RED.name()}; border: none; color: white; }}
 QPushButton[kind="danger"]:hover {{ background: #d9434a; }}
 QPushButton[kind="warn"] {{ background: {AMBER.name()}; border: none; color: #1b1300; }}
-QPushButton[kind="choice"] {{ text-align: left; padding: 14px 18px; }}
+QFrame#card {{ background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; }}
+QPushButton[kind="stop"] {{ background: transparent; border: 1px solid rgba(242,84,91,0.6); color: #F2A0A4; }}
+QPushButton[kind="stop"]:hover {{ background: rgba(242,84,91,0.14); }}
+QPushButton[kind="link"] {{ background: transparent; border: none; color: {MUTED.name()}; padding: 10px 6px; }}
+QPushButton[kind="link"]:hover {{ color: {TEXT.name()}; }}
+QPushButton[kind="choice"] {{ text-align: left; padding: 0; }}
 QScrollArea#feed, QWidget#feedBody {{ background: transparent; border: none; }}
 QScrollBar:vertical {{ background: transparent; width: 6px; }}
 QScrollBar::handle:vertical {{ background: rgba(255,255,255,0.16); border-radius: 3px; min-height: 24px; }}

@@ -21,6 +21,7 @@ from .ui.bridge import Bridge, Worker
 from .ui.coords import logical_to_physical, physical_to_logical
 from .ui.hotkeys import Hotkeys
 from .ui.overlay import Overlay
+from .ui.timeline import RunRecorder, Timeline
 
 PEEK_INTERVAL = 1.0
 
@@ -37,15 +38,14 @@ class Nudge(QObject):
         self.target: AppRef | None = None
         self.worker: Worker | None = None
         self.debug = False
-        self.timing: dict[str, int] = {}
         self.last_jev_ms = 0
         self.bridge = Bridge()
-        self.bar = Bar()
+        self.timeline = Timeline()
+        self.recorder = RunRecorder(self.timeline)
+        self.bar = Bar(self.timeline)
         self.overlay = Overlay()
         self.hotkeys = Hotkeys()
 
-        self.bar.set_jev_idle(jev is not None)
-        self.bar.set_gemini("off" if writer is None else "idle")
         self.bar.set_target(None)
         self.bar.go_requested.connect(self.start)
         self.bar.stop_requested.connect(self.stop)
@@ -60,8 +60,8 @@ class Nudge(QObject):
         b.sig_observed.connect(self.on_observed)
         b.sig_vision.connect(self.on_vision)
         b.sig_decided.connect(self.on_decided)
-        b.sig_writer_started.connect(lambda: self.bar.set_gemini("busy"))
-        b.sig_writer_used.connect(lambda ms: self.bar.set_gemini("done", ms))
+        b.sig_writer_started.connect(lambda: None)
+        b.sig_writer_used.connect(lambda ms: None)
         b.sig_propose.connect(self.on_propose)
         b.sig_hold.connect(self.overlay.start_hold)
         self.bar.panel_closed.connect(self.on_panel_closed)
@@ -161,7 +161,7 @@ class Nudge(QObject):
 
     def set_target(self, app: AppRef) -> None:
         self.target = app
-        self.bar.set_target(app.name)
+        self.bar.set_target(app)
 
     def track(self) -> None:
         if self.running:
@@ -201,8 +201,6 @@ class Nudge(QObject):
         loop = NudgeLoop(self.adapter, self.jev, self.writer, self.bridge, vision=self.vision)
         self.worker = Worker(loop, goal, self.target)
         self.bar.set_running(True)
-        self.bar.set_timing({})
-        self.bar.set_gemini("off" if self.writer is None else "idle")
         self.overlay.appear()
         self.worker.start()
 
@@ -259,33 +257,22 @@ class Nudge(QObject):
             return
         self.overlay.show_boxes(snapshot.controls)
         vision = sum(c.source == "vision" for c in snapshot.controls)
-        parts = {"screen": snapshot.elapsed_ms} | ({"vision": vision_ms} if vision_ms is not None else {})
-        self.bar.set_timing(parts)
-        self.bar.set_status(
-            f"Peek: {len(snapshot.controls) - vision} from the accessibility tree"
-            + (f", {vision} from vision" if vision_ms is not None else "")
-            + f" in {snapshot.app.name}"
-        )
+        found = f"{len(snapshot.controls) - vision} from the accessibility tree" + (f", {vision} from vision" if vision_ms is not None else "")
+        timing = f"screen {snapshot.elapsed_ms} ms" + (f", vision {vision_ms} ms" if vision_ms is not None else "")
+        self.bar.set_status(f"Peek: {found} in {snapshot.app.name} · {timing}")
 
     # run events
 
     def on_observed(self, snapshot: Snapshot) -> None:
-        if not any(c.source == "vision" for c in snapshot.controls):
-            self.timing = {"screen": snapshot.elapsed_ms}
-            self.bar.set_timing(self.timing)
         if self.debug:
             self.overlay.show_boxes(snapshot.controls)
 
     def on_vision(self, milliseconds: int, found: int) -> None:
-        self.timing["vision"] = milliseconds
-        self.bar.set_timing(self.timing)
+        pass
 
     def on_decided(self, step: int, decision: JevDecision, labels: dict[str, str]) -> None:
         self.last_jev_ms = decision.milliseconds
-        self.timing["Jev"] = decision.milliseconds
-        self.bar.set_timing(self.timing)
-        rows = [(labels.get(k, k), p, k == decision.choice) for k, p in decision.top(3, include_none=True)]
-        self.bar.set_jev(step, decision.milliseconds, rows, decision.done)
+        self.bar.set_step(step)
 
     def on_propose(self, action: Action, target: Control | None) -> None:
         warn = action.kind == "press" and safety.consequential_word(action.label) is not None
@@ -297,7 +284,8 @@ class Nudge(QObject):
 
     def on_finished(self, ok: bool, message: str) -> None:
         self.bar.set_running(False)
-        self.bar.show_result(ok, message)
+        self.bar.show_result(ok)
+        self.bar.set_status(message, tone="muted" if ok else "warn")
         self.overlay.flash(message, ok)
 
 
