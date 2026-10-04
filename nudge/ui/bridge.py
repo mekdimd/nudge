@@ -19,6 +19,8 @@ class Bridge(QObject):
     sig_observed = Signal(object)
     sig_vision = Signal(int, int)
     sig_propose = Signal(object, object)
+    sig_acted = Signal(object, bool)
+    sig_switched = Signal(object)
     sig_hold = Signal(float)
     sig_choose = Signal(str, object)
     sig_draft = Signal(str, object)
@@ -82,6 +84,12 @@ class Bridge(QObject):
 
     def propose(self, action, target) -> None:
         self._request(self.sig_propose, action, target, timeout=3.0)
+
+    def acted(self, action, changed) -> None:
+        self.sig_acted.emit(action, changed)
+
+    def switched(self, app) -> None:
+        self.sig_switched.emit(app)
 
     def hold(self, seconds: float) -> bool:
         self.sig_hold.emit(seconds)

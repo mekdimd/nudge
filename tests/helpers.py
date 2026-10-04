@@ -74,6 +74,8 @@ class RecordingEvents:
     snapshots: list = field(default_factory=list)
     proposals: int = 0
     result: tuple[bool, str] | None = None
+    acted_log: list = field(default_factory=list)
+    switched_log: list = field(default_factory=list)
 
     def cancelled(self) -> bool:
         return self.cancel_after_proposals is not None and self.proposals >= self.cancel_after_proposals
@@ -99,6 +101,12 @@ class RecordingEvents:
     def propose(self, action, target):
         self.proposals += 1
         self.log.append(f"propose {action.describe()}")
+
+    def acted(self, action, changed):
+        self.acted_log.append((action.describe(), changed))
+
+    def switched(self, app):
+        self.switched_log.append(app.name)
 
     def hold(self, seconds):
         return not self.cancelled()

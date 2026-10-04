@@ -40,6 +40,10 @@ class Events(Protocol):
 
     def propose(self, action: Action, target: Control | None) -> None: ...
 
+    def acted(self, action: Action, changed: bool) -> None: ...
+
+    def switched(self, app: AppRef) -> None: ...
+
     def hold(self, seconds: float) -> bool: ...
 
     def choose(self, reason: str, options: list[tuple[str, str, float]]) -> str | None: ...
@@ -131,8 +135,7 @@ class NudgeLoop:
         if front is not None and front.pid not in (self.app.pid, self.own_pid):
             if time.monotonic() - self.last_acted < FOLLOW_GRACE:
                 # our own action launched or raised it, just after the settle check gave up waiting
-                self.app = front
-                self.events.status(f"Working in {front.name}")
+                self._switch_to(front)
                 self.fresh = None
                 return
             raise Stop("app_changed", f"{front.name} came to the front, so I stopped. Start again in the app you want.")
@@ -319,6 +322,7 @@ class NudgeLoop:
             self._execute(action, snapshot, by_click)
             self.last_acted = time.monotonic()
             if self._is_shell_press(action, snapshot) and self._follow_front():
+                self.events.acted(action, True)
                 self.history.append(f"{action.describe()}: worked")
                 self.excluded.clear()
                 self._pause_then_refetch()
@@ -330,12 +334,13 @@ class NudgeLoop:
                 expect_load=action.kind == "go_to_url",
                 cancelled=self.events.cancelled,
             )
+            self.events.acted(action, changed)
             if changed:
                 self.history.append(f"{action.describe()}: worked")
                 self.excluded.clear()
                 self._pause_then_refetch()
                 return
-            choice = self.events.recover(f"“{action.describe()}” didn't seem to change anything.")
+            choice = self.events.recover(f"{action.describe()} didn't change anything.")
             if choice in ("retry", "click"):
                 by_click = choice == "click" and action.kind == "press"
                 continue
@@ -348,9 +353,13 @@ class NudgeLoop:
         """Read the UI after our own action; if it launched or raised another app, carry on in that one."""
         front = self.adapter.frontmost_app()
         if front is not None and front.pid not in (self.app.pid, self.own_pid):
-            self.app = front
-            self.events.status(f"Working in {front.name}")
+            self._switch_to(front)
         return self.adapter.snapshot(self.app)
+
+    def _switch_to(self, front: AppRef) -> None:
+        self.app = front
+        self.events.status(f"Working in {front.name}")
+        self.events.switched(front)
 
     def _pause_then_refetch(self) -> None:
         """Let the UI settle after a step, then drop the cached snapshot so the next round reads it fresh."""
@@ -367,8 +376,7 @@ class NudgeLoop:
         while time.monotonic() < deadline:
             front = self.adapter.frontmost_app()
             if front is not None and front.pid not in (self.app.pid, self.own_pid):
-                self.app = front
-                self.events.status(f"Working in {front.name}")
+                self._switch_to(front)
                 return True
             time.sleep(0.05)
         return False

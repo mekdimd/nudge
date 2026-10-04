@@ -176,3 +176,30 @@ def test_taskbar_is_tried_when_nothing_in_the_app_fits():
     jev = ScriptedJev(["__none__", "Spotify"])
     outcome = make_loop(adapter, jev, events).run("open Spotify", adapter.app)
     assert adapter.log == ["press s1"], (outcome.message, events.log)
+
+
+def test_acted_reports_every_press_that_worked():
+    adapter = FakeAdapter.from_fixture("live_caption")
+    events = RecordingEvents()
+    make_loop(adapter, ScriptedJev(LIVE_CAPTION), events).run("turn on Live Caption", adapter.app)
+    assert events.acted_log == [
+        ("Press “Chrome”", True),
+        ("Press “Settings”", True),
+        ("Press “Accessibility”", True),
+        ("Press “Live Caption”", True),
+    ]
+
+
+def test_acted_reports_no_change_before_asking_to_recover():
+    adapter = FakeAdapter.from_fixture("live_caption")
+    events = RecordingEvents(recover_answers=["stop"])
+    make_loop(adapter, ScriptedJev(["Reload"]), events).run("reload", adapter.app)
+    assert events.acted_log == [("Press “Reload”", False)]
+    assert events.log[-1] == "recover Press “Reload” didn't change anything."
+
+
+def test_switched_reports_the_app_a_taskbar_press_brought_forward():
+    adapter = shell_adapter()
+    events = RecordingEvents()
+    make_loop(adapter, ScriptedJev(["Spotify"]), events).run("open Spotify from the taskbar", adapter.app)
+    assert events.switched_log == ["Spotify"]
