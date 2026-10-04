@@ -49,16 +49,25 @@ class WakeWord(QObject):
         self._io.readyRead.connect(self._read)
 
     def pause(self) -> None:
+        io = self._io
+        self._io = None  # a queued readyRead can still fire after stop
+        if io is not None:
+            try:
+                io.readyRead.disconnect(self._read)
+            except RuntimeError:
+                pass
         if self._source is not None:
             self._source.stop()
             self._source = None
-            self._io = None
 
     def close(self) -> None:
         self.pause()
 
     def _read(self) -> None:
-        self._pending += bytes(self._io.readAll())
+        io = self._io
+        if io is None:
+            return
+        self._pending += bytes(io.readAll())
         size = FRAME * 2
         while len(self._pending) >= size:
             chunk, self._pending = self._pending[:size], self._pending[size:]
