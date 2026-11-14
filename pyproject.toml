@@ -3,6 +3,8 @@ name = "nudge"
 version = "0.1.0"
 description = "Reach the right controls and finish desktop tasks with fewer precise clicks."
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 requires-python = ">=3.12,<3.14"
 dependencies = [
     "pyside6>=6.8",
@@ -21,6 +23,10 @@ dependencies = [
 
 [project.scripts]
 nudge = "nudge.__main__:main"
+
+[project.urls]
+Repository = "https://github.com/mekdimd/nudge"
+Issues = "https://github.com/mekdimd/nudge/issues"
 
 [project.optional-dependencies]
 vision = [
