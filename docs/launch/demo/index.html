@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Sample bank | Overview</title>
+    <style>
+      html {
+        min-height: 100%;
+      }
+      body {
+        min-height: 100dvh;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        color: #172b3c;
+        background: #f4f6f9;
+        font:
+          16px Arial,
+          sans-serif;
+      }
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+      button,
+      a {
+        cursor: pointer;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible {
+        outline: 3px solid #5787f2;
+        outline-offset: 3px;
+      }
+      button {
+        border: 0;
+        border-radius: 7px;
+        padding: 13px 19px;
+        background: #1761d5;
+        color: white;
+        font-weight: 600;
+      }
+      button.secondary {
+        background: white;
+        border: 1px solid #d5dce5;
+        color: #253b50;
+      }
+      header {
+        height: 80px;
+        background: white;
+        border-bottom: 1px solid #dce1e8;
+        display: flex;
+        align-items: center;
+        padding: 0 34px;
+        gap: 40px;
+      }
+      .brand {
+        font-size: 25px;
+        font-weight: 750;
+        letter-spacing: -0.7px;
+      }
+      .brand span {
+        color: #1761d5;
+      }
+      .header-right {
+        margin-left: auto;
+        font-size: 14px;
+        color: #556375;
+      }
+      .avatar {
+        display: inline-grid;
+        place-items: center;
+        background: #e4ebf8;
+        color: #1b5ebd;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        margin-left: 14px;
+      }
+      aside {
+        position: absolute;
+        top: 80px;
+        bottom: 0;
+        left: 0;
+        width: 222px;
+        background: white;
+        border-right: 1px solid #dce1e8;
+        padding: 35px 18px;
+      }
+      aside button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        margin-bottom: 10px;
+        background: transparent;
+        color: #526274;
+        padding: 14px 18px;
+      }
+      aside button.active {
+        background: #e9f0fd;
+        color: #1459bd;
+      }
+      main {
+        margin-left: 222px;
+        padding: 40px 54px;
+        max-width: 1500px;
+      }
+      h1 {
+        font-size: 34px;
+        letter-spacing: -1px;
+        margin: 0 0 10px;
+      }
+      h2 {
+        font-size: 20px;
+        margin: 0 0 22px;
+      }
+      .sub {
+        color: #6b7987;
+        margin: 0 0 30px;
+      }
+      .panel {
+        background: white;
+        border: 1px solid #dce3eb;
+        border-radius: 12px;
+        padding: 28px;
+        margin-top: 22px;
+      }
+      .balance {
+        font-size: 43px;
+        letter-spacing: -1.5px;
+        margin: 12px 0;
+      }
+      .muted {
+        color: #6b7987;
+        font-size: 14px;
+      }
+      .account-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .account-icon {
+        width: 46px;
+        height: 46px;
+        background: #e6efff;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        color: #1460cb;
+        font-size: 24px;
+      }
+      .line {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        border-bottom: 1px solid #e8edf3;
+        padding: 19px 0;
+      }
+      .line:last-child {
+        border-bottom: 0;
+      }
+      .line .amount {
+        margin-left: auto;
+        font-weight: 600;
+      }
+      .status {
+        display: inline-block;
+        background: #e6f6ed;
+        color: #267451;
+        border-radius: 5px;
+        padding: 6px 9px;
+        font-size: 12px;
+        margin-left: 12px;
+      }
+      .statement {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #e2e7ee;
+        padding: 20px 0;
+      }
+      .file-icon {
+        background: #f0f4fa;
+        padding: 14px;
+        border-radius: 8px;
+        color: #577089;
+        font-size: 14px;
+        font-weight: bold;
+        margin-right: 20px;
+      }
+      .statement-name {
+        font-weight: 600;
+        font-size: 18px;
+      }
+      .statement-info {
+        font-size: 14px;
+        color: #6b7987;
+        margin-top: 8px;
+      }
+      .file-head {
+        display: flex;
+        align-items: center;
+      }
+      .crumb {
+        color: #526778;
+        font-size: 14px;
+        margin: 0 0 22px;
+      }
+      .detail {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        padding: 25px 0 30px;
+      }
+      .detail strong {
+        display: block;
+        font-size: 23px;
+        margin-top: 9px;
+      }
+      .download-action {
+        display: flex;
+        justify-content: flex-end;
+        border-top: 1px solid #e5eaf1;
+        padding-top: 24px;
+      }
+      .success {
+        padding: 17px 20px;
+        background: #e5f7ee;
+        border-radius: 8px;
+        color: #24654b;
+        margin-top: 22px;
+      }
+      #toast:empty {
+        display: none;
+      }
+      .mail-head {
+        color: #315baf;
+      }
+      .mail-nav button:first-child {
+        background: #1761d5;
+        color: white;
+        margin-bottom: 30px;
+      }
+      .message {
+        display: grid;
+        grid-template-columns: 180px 1fr 80px;
+        gap: 25px;
+        padding: 23px 16px;
+        border-bottom: 1px solid #e5eaf0;
+        font-size: 15px;
+      }
+      .message strong {
+        font-weight: 600;
+      }
+      .message time {
+        color: #768397;
+        text-align: right;
+      }
+      .compose {
+        max-width: 850px;
+        margin-top: 24px;
+        background: white;
+        border: 1px solid #d8e0ea;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .compose-title {
+        background: #eaf0fa;
+        padding: 19px 25px;
+        font-weight: 600;
+      }
+      .field {
+        display: grid;
+        grid-template-columns: 85px 1fr;
+        align-items: center;
+        border-bottom: 1px solid #e1e7ef;
+        margin: 0 24px;
+        padding: 16px 0;
+        color: #596c7f;
+        font-size: 14px;
+      }
+      .field input {
+        border: 0;
+        padding: 7px;
+        background: white;
+        color: #172b3c;
+        width: 100%;
+        font-size: 16px;
+      }
+      textarea {
+        display: block;
+        border: 0;
+        width: 100%;
+        height: 235px;
+        padding: 28px;
+        color: #172b3c;
+        resize: none;
+        font-size: 17px;
+        line-height: 1.7;
+      }
+      .compose-actions {
+        padding: 18px 25px;
+        border-top: 1px solid #e4e9f0;
+      }
+      .sent-card {
+        margin-top: 80px;
+        text-align: center;
+        padding: 45px;
+      }
+      .sent-check {
+        display: inline-grid;
+        place-items: center;
+        width: 68px;
+        height: 68px;
+        border-radius: 50%;
+        background: #dff3e8;
+        color: #26734c;
+        font-size: 34px;
+        margin-bottom: 25px;
+      }
+    </style>
+    <link rel="stylesheet" href="bank.css" />
+    <script src="bank.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="brand" id="brand">Sample<span>Bank</span></div>
+      <div class="header-right">Alex Morgan <span class="avatar">AM</span></div>
+    </header>
+    <aside id="nav"></aside>
+    <main id="content"></main>
+    <script>
+      const mail = new URLSearchParams(location.search).get("app") === "mail";
+      const content = document.getElementById("content");
+      const nav = document.getElementById("nav");
+      function mailNav() {
+        nav.className = "mail-nav";
+        nav.innerHTML =
+          '<button id="compose">Compose</button><button class="active">Inbox <span style="float:right">4</span></button><button>Starred</button><button>Sent</button><button>Drafts</button>';
+        document.getElementById("compose").onclick = compose;
+      }
+      function inbox() {
+        document.title = "Mail | Inbox";
+        document.getElementById("brand").innerHTML =
+          '<span class="mail-head">Mail</span>';
+        mailNav();
+        content.innerHTML =
+          '<h1>Inbox</h1><p class="sub">Your recent messages.</p><section class="panel" style="padding:8px"><div class="message"><strong>Professor Lee</strong><span>Next week\'s lecture notes are ready.</span><time>10:42</time></div><div class="message"><strong>Sam</strong><span>Lunch on Friday?</span><time>09:18</time></div><div class="message"><strong>Library</strong><span>Your book is ready to collect.</span><time>Yesterday</time></div><div class="message"><strong>Student society</strong><span>November events on campus</span><time>Yesterday</time></div></section>';
+      }
+      function compose() {
+        document.title = "Mail | New message";
+        mailNav();
+        content.innerHTML =
+          '<h1>New message</h1><form class="compose" id="message-form"><div class="compose-title">New message</div><label class="field">To<input id="to" aria-label="To recipients" type="email"></label><label class="field">Subject<input id="subject" aria-label="Subject"></label><textarea id="body" aria-label="Message Body" placeholder="Write your message"></textarea><div class="compose-actions"><button type="button" id="send">Send</button></div></form>';
+        document.getElementById("send").onclick = send;
+      }
+      function send() {
+        const to = document.getElementById("to").value;
+        const subject = document.getElementById("subject").value;
+        const body = document.getElementById("body").value;
+        if (!to || !subject || !body) return;
+        window.sentMessage = { to, subject, body };
+        document.title = "Message sent to " + to + " | Mail";
+        content.innerHTML =
+          '<section class="panel sent-card"><div class="sent-check">✓</div><h1>Message sent</h1><p class="sub">' +
+          to +
+          "</p><p>" +
+          subject +
+          '</p><button class="secondary" id="back-inbox">Back to inbox</button></section>';
+        document.getElementById("back-inbox").onclick = inbox;
+      }
+      if (mail) inbox();
+      else bankStart();
+    </script>
+  </body>
+</html>
