@@ -8,7 +8,7 @@ from typing import Literal
 
 from ..core.models import AppRef, Control, Rect, Snapshot
 
-FIXTURES = Path(__file__).resolve().parents[2] / "tests" / "fixtures"
+FIXTURES = Path(__file__).parent / "fixtures"
 
 
 class FakeAdapter:

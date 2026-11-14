@@ -19,20 +19,23 @@ class Config:
     wake_threshold: float
 
 
-def _wake_word(value: str) -> str:
-    """A bundled model name stays as is; a model file path is resolved against the project folder."""
+def _wake_word(value: str, base: Path = ROOT) -> str:
+    """Resolve model paths relative to the configuration folder."""
     if value.lower().endswith(".onnx") and not Path(value).is_absolute():
-        return str(ROOT / value)
+        return str(base / value)
     return value
 
 
 def load_config() -> Config:
-    load_dotenv(ROOT / ".env")
+    env_file = Path.cwd() / ".env"
+    if not env_file.is_file() and (ROOT / ".env").is_file():
+        env_file = ROOT / ".env"
+    load_dotenv(env_file)
     return Config(
         typesafe_api_key=os.environ.get("TYPESAFE_API_KEY", "").strip(),
         gemini_api_key=os.environ.get("GEMINI_API_KEY", "").strip(),
         elevenlabs_api_key=os.environ.get("ELEVENLABS_API_KEY", "").strip(),
         elevenlabs_voice_id=os.environ.get("ELEVENLABS_VOICE_ID", "JBFqnCBsd6RMkjVDRZzb").strip(),
-        wake_word=_wake_word(os.environ.get("WAKE_WORD", "hey_jarvis").strip()),
+        wake_word=_wake_word(os.environ.get("WAKE_WORD", "hey_jarvis").strip(), env_file.parent),
         wake_threshold=float(os.environ.get("WAKE_THRESHOLD", "0.5")),
     )
