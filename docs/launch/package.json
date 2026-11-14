@@ -1,0 +1,16 @@
+{
+  "name": "nudge-launch",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.9.47 preview",
+    "check": "npx --yes hyperframes@0.9.47 check --samples 17",
+    "render": "npx --yes hyperframes@0.9.47 render --quality delivery --fps 60 -o ../assets/nudge-launch.mp4"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}

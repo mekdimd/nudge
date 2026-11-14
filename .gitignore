@@ -6,3 +6,9 @@ __pycache__/
 dumps/
 dist/
 .superpowers/
+node_modules/
+docs/launch/.hyperframes/
+docs/launch/.thumbnails/
+docs/launch/.transcode-cache/
+docs/launch/.waveform-cache/
+docs/launch/renders/
