@@ -1,0 +1,36 @@
+{
+  "case": "youtube",
+  "recordingOffset": 2.684,
+  "actions": [
+    {
+      "id": 2,
+      "operation": "type",
+      "control_id": "capture-3",
+      "text": "how to change a tire",
+      "label": "Search",
+      "center": [
+        596.5,
+        28
+      ],
+      "at": 4.921
+    },
+    {
+      "id": 7,
+      "operation": "click",
+      "control_id": "capture-6",
+      "label": "how to change a tire",
+      "center": [
+        420.9140625,
+        81.5
+      ],
+      "at": 6.903
+    }
+  ],
+  "title": "how to change a tire - YouTube",
+  "sent": null,
+  "downloads": [],
+  "outcome": {
+    "ok": true,
+    "message": "Done in 2 steps · 6.9 s · Jev 93 ms per decision"
+  }
+}

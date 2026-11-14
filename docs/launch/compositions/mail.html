@@ -1,0 +1,284 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+  </style>
+  <div
+    id="root"
+    class="scene"
+    data-composition-id="mail"
+    data-width="1920"
+    data-height="1080"
+    data-duration="8.966666666666667"
+  >
+    <h1 id="mail-title" class="headline">Draft an email.</h1>
+    <img
+      class="goal-bar"
+      src="assets/browser/mail-idle.png"
+      alt="Nudge task request"
+    />
+    <div class="screen">
+      <div id="mail-stage" class="screen-stage" data-layout-allow-overflow>
+        <video
+          id="mail-compose-video"
+          class="clip screen-media"
+          src="assets/browser/mail-compose.mp4"
+          muted
+          playsinline
+          data-start="0"
+          data-duration="1.15"
+          data-track-index="1"
+          data-hf-media-start-basis="local"
+        ></video>
+        <div
+          id="mail-empty-hold"
+          class="clip"
+          data-start="1.15"
+          data-duration="2.75"
+          data-track-index="1"
+          data-track-kind="graphics"
+        >
+          <img
+            class="screen-media"
+            src="assets/browser/mail-state-1.png"
+            alt=""
+          />
+        </div>
+        <video
+          id="mail-fill-video"
+          class="clip screen-media"
+          src="assets/browser/mail-fill.mp4"
+          muted
+          playsinline
+          data-start="3.9"
+          data-duration="1.35"
+          data-track-index="1"
+          data-hf-media-start-basis="local"
+        ></video>
+        <div
+          id="mail-filled-hold"
+          class="clip"
+          data-start="5.25"
+          data-duration="1.6"
+          data-track-index="1"
+          data-track-kind="graphics"
+        >
+          <img
+            class="screen-media"
+            src="assets/browser/mail-state-4.png"
+            alt=""
+          />
+        </div>
+        <video
+          id="mail-send-video"
+          class="clip screen-media"
+          src="assets/browser/mail-send.mp4"
+          muted
+          playsinline
+          data-start="6.85"
+          data-duration="2.116667"
+          data-track-index="1"
+          data-hf-media-start-basis="local"
+        ></video>
+        <div
+          id="mail-compose-cursor"
+          class="clip"
+          data-start="0"
+          data-duration="1.15"
+          data-track-index="3"
+          data-track-kind="graphics"
+        >
+          <img
+            id="compose-cursor"
+            class="actor"
+            src="assets/pointer.png"
+            alt=""
+            data-layout-ignore
+          />
+          <div id="compose-ring" class="ring" data-layout-ignore></div>
+        </div>
+        <div
+          id="mail-send-cursor"
+          class="clip"
+          data-start="6.85"
+          data-duration="2.116667"
+          data-track-index="3"
+          data-track-kind="graphics"
+        >
+          <img
+            id="send-cursor"
+            class="actor"
+            src="assets/pointer.png"
+            alt=""
+            data-layout-ignore
+          />
+          <div id="send-ring" class="ring" data-layout-ignore></div>
+        </div>
+      </div>
+    </div>
+    <div
+      id="draft-original"
+      class="clip"
+      data-start="1.15"
+      data-duration="0.45"
+      data-track-index="3"
+      data-track-kind="graphics"
+      data-beat="draft"
+    >
+      <div class="draft-plate">
+        <img class="panel-image" src="assets/browser/mail-draft.png" alt="" />
+      </div>
+    </div>
+    <div
+      id="draft-subject"
+      class="clip"
+      data-start="1.6"
+      data-duration="0.6"
+      data-track-index="3"
+      data-track-kind="graphics"
+      data-beat="before-edit"
+    >
+      <div class="subject-plate">
+        <img class="panel-image" src="assets/browser/mail-subject.png" alt="" />
+      </div>
+    </div>
+    <div
+      id="draft-edited"
+      class="clip"
+      data-start="2.2"
+      data-duration="1.0"
+      data-track-index="3"
+      data-track-kind="graphics"
+      data-beat="edit"
+    >
+      <div class="subject-plate">
+        <img
+          class="panel-image"
+          src="assets/browser/mail-subject-edited.png"
+          alt=""
+        />
+      </div>
+    </div>
+    <div
+      id="draft-type"
+      class="clip"
+      data-start="3.2"
+      data-duration="0.7"
+      data-track-index="3"
+      data-track-kind="graphics"
+      data-beat="type-it"
+    >
+      <div class="type-plate">
+        <img
+          class="panel-image"
+          src="assets/browser/mail-type-focus.png"
+          alt=""
+        />
+      </div>
+    </div>
+    <div
+      id="draft-approval-pointer"
+      class="clip"
+      data-start="3.2"
+      data-duration="0.7"
+      data-track-index="4"
+      data-track-kind="graphics"
+    >
+      <img
+        id="draft-cursor"
+        class="actor human"
+        src="assets/human-cursor.svg"
+        alt=""
+        data-layout-ignore
+      />
+      <div id="draft-ring" class="ring" data-layout-ignore></div>
+    </div>
+    <div
+      id="send-confirmation"
+      class="clip"
+      data-start="5.25"
+      data-duration="1.6"
+      data-track-index="3"
+      data-track-kind="graphics"
+      data-beat="approval"
+    >
+      <div class="confirm-plate">
+        <img
+          class="panel-image"
+          src="assets/browser/mail-confirm-focus.png"
+          alt=""
+        />
+      </div>
+      <img
+        id="confirm-cursor"
+        class="actor human"
+        src="assets/human-cursor.svg"
+        alt=""
+        data-layout-ignore
+      />
+      <div id="confirm-ring" class="ring" data-layout-ignore></div>
+    </div>
+    <div
+      id="mail-sent-result"
+      class="clip"
+      data-start="8.0"
+      data-duration="0.966667"
+      data-track-index="5"
+      data-track-kind="graphics"
+      data-beat="sent"
+    ></div>
+  </div>
+  <script>
+    {
+      const tl = gsap.timeline({ paused: true });
+      launchMove(
+        tl,
+        "#compose-cursor",
+        [997.5, 131.25],
+        [145.03125, 181.125],
+        0.26,
+        0.28,
+      );
+      launchClick(
+        tl,
+        "#compose-cursor",
+        "#compose-ring",
+        [145.03125, 181.125],
+        0.6,
+      );
+      launchMove(tl, "#draft-cursor", [1500, 570], [960, 615], 3.21, 0.24);
+      launchClick(tl, "#draft-cursor", "#draft-ring", [960, 615], 3.55);
+      launchMove(tl, "#confirm-cursor", [1430, 690], [990, 744], 6.13, 0.25);
+      launchClick(tl, "#confirm-cursor", "#confirm-ring", [990, 744], 6.56);
+      launchMove(
+        tl,
+        "#send-cursor",
+        [577.5, 590.625],
+        [446.98828125, 847.875],
+        6.94,
+        0.28,
+      );
+      launchClick(
+        tl,
+        "#send-cursor",
+        "#send-ring",
+        [446.98828125, 847.875],
+        7.3,
+      );
+      tl.to(
+        "#mail-stage",
+        { scale: 1.1, x: -60, y: -150, duration: 0.28, ease: "power2.inOut" },
+        3.9,
+      );
+      tl.fromTo(
+        "#mail-title",
+        { x: -36, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.24, ease: "power3.out" },
+        0,
+      );
+      window.__timelines["mail"] = tl;
+    }
+  </script>
+</template>

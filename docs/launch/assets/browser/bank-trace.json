@@ -1,0 +1,19 @@
+{
+  "case": "bank",
+  "goal": "download my October bank statement",
+  "prompts": [],
+  "outcome": {
+    "ok": true,
+    "message": "Done in 3 steps \u00b7 7.6 s \u00b7 Jev 107 ms per decision"
+  },
+  "idle": {
+    "file": "bank-idle.png",
+    "width": 1400,
+    "height": 304
+  },
+  "done": {
+    "file": "bank-done.png",
+    "width": 1400,
+    "height": 672
+  }
+}

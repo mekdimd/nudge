@@ -1,0 +1,124 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[{"id":"tagline","type":"string","label":"Closing line","default":"Fewer precise clicks."},{"id":"repository","type":"string","label":"Repository","default":"github.com/mekdimd/nudge"}]'
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1920,height=1080" />
+    <title>Nudge launch film</title>
+    <link rel="stylesheet" href="assets/film.css" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <script src="assets/motion.js"></script>
+    <style>
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="30"
+      data-width="1920"
+      data-height="1080"
+      data-fps="60"
+    >
+      <div
+        id="hook"
+        class="clip"
+        data-composition-id="hook"
+        data-composition-src="compositions/hook.html"
+        data-start="0.0"
+        data-duration="3.3666666666666667"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="reveal"
+        class="clip"
+        data-composition-id="reveal"
+        data-composition-src="compositions/reveal.html"
+        data-start="3.3666666666666667"
+        data-duration="1.1166666666666667"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="bank"
+        class="clip"
+        data-composition-id="bank"
+        data-composition-src="compositions/bank.html"
+        data-start="4.483333333333333"
+        data-duration="6.733333333333333"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="search"
+        class="clip"
+        data-composition-id="search"
+        data-composition-src="compositions/search.html"
+        data-start="11.216666666666667"
+        data-duration="6.733333333333333"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="mail"
+        class="clip"
+        data-composition-id="mail"
+        data-composition-src="compositions/mail.html"
+        data-start="17.95"
+        data-duration="8.966666666666667"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="outro"
+        class="clip"
+        data-composition-id="outro"
+        data-composition-src="compositions/outro.html"
+        data-start="26.916666666666668"
+        data-duration="3.0833333333333335"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <audio
+        id="music"
+        class="clip"
+        src="assets/cloud-dancer.mp3"
+        data-start="0"
+        data-duration="30"
+        data-track-index="2"
+        data-volume="1"
+      ></audio>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines.main = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

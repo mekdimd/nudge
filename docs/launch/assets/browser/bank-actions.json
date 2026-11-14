@@ -1,0 +1,52 @@
+{
+  "case": "bank",
+  "recordingOffset": 1.629,
+  "actions": [
+    {
+      "id": 2,
+      "operation": "click",
+      "control_id": "capture-4",
+      "label": "Statements",
+      "center": [
+        107.5,
+        258
+      ],
+      "at": 6.125
+    },
+    {
+      "id": 6,
+      "operation": "click",
+      "control_id": "capture-10",
+      "label": "View October statement",
+      "center": [
+        1145.296875,
+        398.890625
+      ],
+      "at": 8.719
+    },
+    {
+      "id": 10,
+      "operation": "click",
+      "control_id": "capture-9",
+      "label": "Download PDF",
+      "center": [
+        1046.3984375,
+        536.890625
+      ],
+      "at": 11.077
+    }
+  ],
+  "title": "October statement downloaded | Northline",
+  "sent": null,
+  "downloads": [
+    {
+      "name": "October-2026-statement.pdf",
+      "bytes": 831,
+      "pdf": true
+    }
+  ],
+  "outcome": {
+    "ok": true,
+    "message": "Done in 3 steps · 7.6 s · Jev 107 ms per decision"
+  }
+}

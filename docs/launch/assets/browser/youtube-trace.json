@@ -1,0 +1,34 @@
+{
+  "case": "youtube",
+  "goal": "find a video on how to change a tire",
+  "prompts": [
+    {
+      "kind": "draft",
+      "at": 2.614,
+      "panel": {
+        "file": "youtube-draft.png",
+        "width": 1328,
+        "height": 374
+      },
+      "bar": {
+        "file": "youtube-draft-bar.png",
+        "width": 1400,
+        "height": 876
+      }
+    }
+  ],
+  "outcome": {
+    "ok": true,
+    "message": "Done in 2 steps \u00b7 6.9 s \u00b7 Jev 93 ms per decision"
+  },
+  "idle": {
+    "file": "youtube-idle.png",
+    "width": 1400,
+    "height": 304
+  },
+  "done": {
+    "file": "youtube-done.png",
+    "width": 1400,
+    "height": 672
+  }
+}

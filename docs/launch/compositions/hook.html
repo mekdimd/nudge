@@ -1,0 +1,81 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+  </style>
+  <div
+    id="root"
+    class="scene"
+    data-composition-id="hook"
+    data-width="1920"
+    data-height="1080"
+    data-duration="3.3666666666666667"
+  >
+    <h1 id="hook-title" class="headline">Small targets add up.</h1>
+    <div class="screen">
+      <div id="hook-stage" class="screen-stage" data-layout-allow-overflow>
+        <img
+          class="screen-media"
+          src="assets/browser/bank-page-idle.png"
+          alt=""
+        /><img
+          id="hook-cursor"
+          class="actor human"
+          src="assets/human-cursor.svg"
+          alt=""
+          data-layout-ignore
+        />
+        <div id="miss-0" class="ring miss" data-layout-ignore></div>
+        <div id="miss-1" class="ring miss" data-layout-ignore></div>
+        <div id="miss-2" class="ring miss" data-layout-ignore></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    {
+      const tl = gsap.timeline({ paused: true });
+      tl.set("#hook-cursor", { x: 750, y: 210, opacity: 1 });
+      launchMove(
+        tl,
+        "#hook-cursor",
+        [748.125, 210.0],
+        [270.375, 338.625],
+        0.4,
+        0.24,
+      );
+      launchClick(tl, "#hook-cursor", "#miss-0", [270.375, 338.625], 0.65);
+      launchMove(
+        tl,
+        "#hook-cursor",
+        [270.375, 338.625],
+        [1601.25, 446.25],
+        1.1800000000000002,
+        0.24,
+      );
+      launchClick(
+        tl,
+        "#hook-cursor",
+        "#miss-1",
+        [1601.25, 446.25],
+        1.4300000000000002,
+      );
+      launchMove(
+        tl,
+        "#hook-cursor",
+        [1601.25, 446.25],
+        [1010.625, 280.875],
+        1.96,
+        0.24,
+      );
+      launchClick(tl, "#hook-cursor", "#miss-2", [1010.625, 280.875], 2.21);
+      tl.to(
+        "#hook-stage",
+        { scale: 1.045, x: -15, y: -15, duration: 0.32, ease: "power2.inOut" },
+        2.72,
+      );
+      window.__timelines["hook"] = tl;
+    }
+  </script>
+</template>

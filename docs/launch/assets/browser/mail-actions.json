@@ -1,0 +1,75 @@
+{
+  "case": "mail",
+  "recordingOffset": 1.627,
+  "actions": [
+    {
+      "id": 2,
+      "operation": "click",
+      "control_id": "capture-1",
+      "label": "Compose",
+      "center": [
+        110.5,
+        138
+      ],
+      "at": 5.302
+    },
+    {
+      "id": 6,
+      "operation": "type",
+      "control_id": "capture-6",
+      "text": "prof.lee@sfu.ca",
+      "label": "To recipients",
+      "center": [
+        743.5,
+        272
+      ],
+      "at": 15.169
+    },
+    {
+      "id": 7,
+      "operation": "type",
+      "control_id": "capture-7",
+      "text": "Missing today's lecture",
+      "label": "Subject",
+      "center": [
+        743.5,
+        337
+      ],
+      "at": 15.2
+    },
+    {
+      "id": 8,
+      "operation": "type",
+      "control_id": "capture-8",
+      "text": "Dear Professor Lee, I am feeling sick today and will unfortunately miss the lecture. Best regards.",
+      "label": "Message Body",
+      "center": [
+        701,
+        487.5
+      ],
+      "at": 15.23
+    },
+    {
+      "id": 12,
+      "operation": "click",
+      "control_id": "capture-9",
+      "label": "Send",
+      "center": [
+        340.5625,
+        646
+      ],
+      "at": 17.829
+    }
+  ],
+  "title": "Message sent to prof.lee@sfu.ca | Mail",
+  "sent": {
+    "to": "prof.lee@sfu.ca",
+    "subject": "Missing today's lecture",
+    "body": "Dear Professor Lee, I am feeling sick today and will unfortunately miss the lecture. Best regards."
+  },
+  "downloads": [],
+  "outcome": {
+    "ok": true,
+    "message": "Done in 3 steps · 15.1 s · Jev 119 ms per decision"
+  }
+}

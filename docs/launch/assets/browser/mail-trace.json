@@ -1,0 +1,54 @@
+{
+  "case": "mail",
+  "goal": "email prof.lee@sfu.ca that I'm sick and will miss today's lecture",
+  "prompts": [
+    {
+      "kind": "draft",
+      "at": 12.72,
+      "panel": {
+        "file": "mail-draft.png",
+        "width": 1328,
+        "height": 794
+      },
+      "bar": {
+        "file": "mail-draft-bar.png",
+        "width": 1400,
+        "height": 1392
+      },
+      "edited": {
+        "file": "mail-draft-edited.png",
+        "width": 1328,
+        "height": 794
+      }
+    },
+    {
+      "kind": "confirm",
+      "at": 16.313,
+      "panel": {
+        "file": "mail-confirm.png",
+        "width": 1328,
+        "height": 236
+      },
+      "bar": {
+        "file": "mail-confirm-bar.png",
+        "width": 1400,
+        "height": 1026
+      }
+    }
+  ],
+  "outcome": {
+    "ok": true,
+    "message": "Done in 3 steps \u00b7 15.1 s \u00b7 Jev 119 ms per decision"
+  },
+  "idle": {
+    "file": "mail-idle.png",
+    "width": 1400,
+    "height": 304
+  },
+  "confirmed_before_action": true,
+  "done": {
+    "file": "mail-done.png",
+    "width": 1400,
+    "height": 764
+  }
+}

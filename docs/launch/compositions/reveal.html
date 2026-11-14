@@ -1,0 +1,56 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+    .wordmark {
+      left: 300px;
+      top: 325px;
+      font-size: 250px;
+    }
+  </style>
+  <div
+    id="root"
+    class="scene"
+    data-composition-id="reveal"
+    data-width="1920"
+    data-height="1080"
+    data-duration="1.1166666666666667"
+  >
+    <h1 id="reveal-word" class="wordmark">Nudge</h1>
+    <img
+      id="reveal-cursor"
+      class="actor"
+      src="assets/pointer.png"
+      alt=""
+      data-layout-ignore
+    />
+  </div>
+  <script>
+    {
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(
+        "#reveal-word",
+        { y: 65, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.22, ease: "power3.out" },
+        0,
+      );
+      tl.fromTo(
+        "#reveal-cursor",
+        { x: 1590, y: 670, scale: 1.8, rotation: 18 },
+        {
+          x: 1240,
+          y: 335,
+          scale: 2.3,
+          rotation: 0,
+          opacity: 1,
+          duration: 0.34,
+          ease: "power3.out",
+        },
+        0.06,
+      );
+      window.__timelines["reveal"] = tl;
+    }
+  </script>
+</template>
