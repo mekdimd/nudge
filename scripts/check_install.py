@@ -6,13 +6,13 @@ import os
 import subprocess
 import sys
 import tempfile
+from contextlib import chdir
 from pathlib import Path
 from xml.etree import ElementTree
 
 
 def main() -> None:
-    with tempfile.TemporaryDirectory(prefix='nudge-install-') as directory:
-        os.chdir(directory)
+    with tempfile.TemporaryDirectory(prefix='nudge-install-') as directory, chdir(directory):
         os.environ['QT_QPA_PLATFORM'] = 'offscreen'
         os.environ.pop('TYPESAFE_API_KEY', None)
         os.environ.pop('WAKE_WORD', None)
