@@ -16,14 +16,19 @@ concurrency:
 
 jobs:
   test:
-    name: Test (${{ matrix.os }}, Python ${{ matrix.python }})
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, windows-latest]
-        python: ['3.12', '3.13']
+        include:
+          - name: macOS
+            os: macos-15
+            python: '3.12'
+          - name: Windows
+            os: windows-latest
+            python: '3.13'
     defaults:
       run:
         shell: bash
@@ -73,15 +78,3 @@ jobs:
           path: dist/
           if-no-files-found: error
           retention-days: 7
-
-  gate:
-    name: CI passed
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: test
-    if: ${{ always() }}
-    steps:
-      - name: Require all matrix jobs to pass
-        env:
-          RESULT: ${{ needs.test.result }}
-        run: test "$RESULT" = success

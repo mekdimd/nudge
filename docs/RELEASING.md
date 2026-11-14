@@ -1,13 +1,14 @@
 # Checks and releases
 
-CI runs on pull requests and pushes to `main`. It tests macOS on Apple Silicon and Windows x64 with
-Python 3.12 and 3.13, using `uv.lock` and headless Qt. Each job builds a wheel
+CI runs on pull requests and pushes to `main`. It tests macOS on Apple Silicon
+with Python 3.12 and Windows x64 with Python 3.13, using `uv.lock` and headless Qt.
+Each job builds a wheel
 and source distribution, installs both into fresh environments, and checks
 the CLI, SVG icons, `.env` loading, and offline rehearsal fixtures.
 
-The `CI passed` check requires every matrix job to succeed. A maintainer can
-make it a required check in the repository's branch protection settings after
-the first run. The workflow itself does not enforce merge protection.
+A maintainer can make `macOS` and `Windows` required checks in the repository's
+branch protection settings after the first run. The workflow itself does not
+enforce merge protection.
 
 ## Make a release
 
