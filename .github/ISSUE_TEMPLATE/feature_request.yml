@@ -1,0 +1,22 @@
+name: Feature request
+description: Describe a desktop task that Nudge should help with.
+title: "[Feature] "
+body:
+  - type: textarea
+    id: task
+    attributes:
+      label: The task
+      description: What are you trying to do, and in which app and OS?
+    validations:
+      required: true
+  - type: textarea
+    id: difficulty
+    attributes:
+      label: What makes it difficult today?
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Suggested behavior
+      description: Include any step where Nudge should ask for your decision.

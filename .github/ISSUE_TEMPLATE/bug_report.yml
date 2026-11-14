@@ -1,0 +1,46 @@
+name: Bug report
+description: Report a task or control that did not work as expected.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: "Remove keys, private messages, email addresses and other personal data from logs and screenshots."
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS version, Python version and Nudge commit.
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: Target app
+      description: App name and version, or the offline fixture name.
+    validations:
+      required: true
+  - type: input
+    id: goal
+    attributes:
+      label: Goal
+      description: The goal you gave Nudge, with personal data removed.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the step where Nudge stopped or chose the wrong control.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual result
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or screenshots
+      description: Optional evidence with keys and personal data removed.
