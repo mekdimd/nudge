@@ -10,12 +10,12 @@ Footage, fonts, audio and runtime are local. Playback needs no remote assets.
 | GitHub footage and Peek capture | Public VS Code issue list at https://github.com/microsoft/vscode/issues, signed out. The actual Peek overlay outlines the controls, and Jev opens Labels. GitHub, Microsoft and contributor marks and content retain their owners' rights. Their appearance demonstrates control selection and does not imply endorsement. |
 | Blue pointer | Nudge's actual artwork exported from nudge/ui/overlay.py. Its Lucide silhouette retains the ISC notice in assets/pointer-LICENSE.txt and THIRD_PARTY_NOTICES.md. |
 | Ordinary cursor and bank icons | [Lucide](https://lucide.dev), with pinned lucide-static 0.468.0 artwork. The ordinary cursor changes fill and stroke colors. Notice in demo/assets/icons/LICENSE. |
-| README artwork and GIF | Composed from the recordings and console output above, with the same underlying rights. The terminal screenshot renders captured console lines; the GIF starts with the command that launched the browser capture. |
+| README artwork and GIF | Composed from the recordings and console output above, with the same underlying rights. The terminal screenshot renders captured console lines; the GIF begins with the bank request and has no terminal intro. |
 | Outfit font | [Google Fonts source](https://github.com/google/fonts/tree/main/ofl/outfit), SIL Open Font License 1.1. Notice in assets/fonts/OFL.txt. |
 | Inter font | [Google Fonts source](https://github.com/google/fonts/tree/main/ofl/inter), SIL Open Font License 1.1. Notice in demo/assets/Inter-OFL.txt. |
 | GSAP 3.15.0 | [Official distribution](https://www.npmjs.com/package/gsap), assets/vendor/gsap.min.js. Its [Standard License](https://gsap.com/standard-license/) applies separately. |
-| Inspired music excerpt | Kevin MacLeod, [official catalog](https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1600022), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). ISRC USUAN1600022, 120 bpm. |
-| Nudge tones | start.wav, tick.wav, attention.wav and success.wav exported with nudge.ui.sounds.synth(TONES). Nudge's MIT license applies. |
+| Inspired music source and excerpt | Kevin MacLeod, [official catalog](https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1600022), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). ISRC USUAN1600022, 120 bpm. |
+| Nudge tones | start.wav, tick.wav, attention.wav, success.wav and listen.wav exported with nudge.ui.sounds.synth(TONES). Nudge's MIT license applies. |
 | Soft click | The bundled HyperFrames media-use SFX asset, assets/sounds/click-soft.mp3. Source: [Pixabay](https://pixabay.com/sound-effects/), under the [Pixabay Content License](https://pixabay.com/service/license-summary/). Its bundled credits name Pixabay but do not give an individual author or item URL. |
 | Keyboard typing | "Keyboard Typing Sounds" by crz1990, [Freesound source](https://freesound.org/people/crz1990/sounds/135872/), [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Retrieved through HyperFrames media-use and shortened into timed accents. |
 
@@ -23,7 +23,7 @@ Footage, fonts, audio and runtime are local. Playback needs no remote assets.
 
 "Inspired" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0 License. https://creativecommons.org/licenses/by/4.0/
 
-The excerpt starts at second 16 of the [official MP3](https://incompetech.com/music/royalty-free/mp3-royaltyfree/Inspired.mp3). It lasts 52.9 seconds, with fades and loudness normalization. The delivery MP4 carries the credit in metadata. Include the attribution above when sharing the film outside this repository.
+The excerpt starts at second 16 of the [official MP3](https://incompetech.com/music/royalty-free/mp3-royaltyfree/Inspired.mp3). It lasts 83.9 seconds, with fades and loudness normalization. The delivery MP4 carries the credit in metadata. Include the attribution above when sharing the film outside this repository.
 
 ## Keyboard attribution
 
@@ -39,4 +39,6 @@ The recordings use real Jev and Gemini calls through a browser-only adapter. The
 
 The blue cursor flights and click pulses reconstruct recorded target coordinates. A faint blue trail follows each Nudge flight. The Jev caption and thicker border emphasize its recorded Labels target. Waiting is trimmed and mail typing stretches by 1.32×. The email capture delays returning real Jev and writer results so their loading indicators remain visible. This recording-only hold does not change product code or the reported provider latency. The film is not a benchmark. Browser sources have 25 fps, Qt sources have 20 fps, and the final cursor and camera animation have 60 fps.
 
-The HyperFrames dart-cursor and cursor-glyph-trail components informed the flights, click rebound and SVG trail. The final scenes use Nudge's artwork and shared GSAP helpers.
+The HyperFrames dart-cursor, cursor-glyph-trail and yt-feather-highlight components informed the flights, click rebound, SVG trail and Peek spotlight. The final scenes use Nudge's artwork and shared GSAP helpers.
+
+The wake shot loads the repository's models/hey_nudge.onnx and replays voice callbacks into Nudge's actual UI. It does not exercise a microphone, wake detection or transcription. The custom model supports the illustrated phrase; the app's default configuration can use another wake word.

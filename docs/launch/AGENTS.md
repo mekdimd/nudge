@@ -1,6 +1,6 @@
 # Launch film instructions
 
-Read the HyperFrames skill before editing this project. The user authorized iteration through delivery, browser footage, real model clients, a cut under one minute, live Nudge activity, Peek and action sounds.
+Read the HyperFrames skill before editing this project. The user authorized iteration through delivery, browser footage, real model clients, a cut without a duration limit, live Nudge activity, Peek and action sounds.
 
 - Use the HyperFrames version pinned in package.json.
 - Keep one paused, seekable GSAP timeline per scene in window.__timelines.

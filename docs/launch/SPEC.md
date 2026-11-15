@@ -1,41 +1,50 @@
 # Nudge launch film
 
-Show the missed-click problem before revealing Nudge. Demonstrate a statement download and YouTube search beside Nudge's live feed. Give Jev and Peek their own shot. The email uses one window at a time so viewers can follow drafting, editing, typing and approval.
+Explain computer control for people with limited dexterity. Show the missed-click problem before introducing Nudge, then demonstrate spoken requests, a statement download, YouTube search, Peek and email editing. Guide attention between Nudge thinking and the browser acting. Each frame has one dominant window.
 
 ## Picture and sound
 
-1920 × 1080, 60 fps, 52.9 seconds, 3,174 frames. Scene cuts fall at frames 240, 372, 768, 1,230, 1,566 and 2,922. The canvas uses #eef2f5 and #222b36. Outfit headings and the email subtitle are 64 px, opening copy is 94 px and the closing address is 64 px. Nudge retains its actual blue pointer and closing mark.
+1920 × 1080, 60 fps, 83.9 seconds, 5,034 frames. The canvas uses #eef2f5 and #222b36. Outfit guidance captions are 60 px and centered at y=104. Opening copy is 94 px. The closing tagline is 78 px with an explicit line break after "for." The address is 58 px. Keep Nudge's actual pointer artwork.
 
-Cursor flights take 0.24 to 0.30 seconds. Clicks compress the cursor for 0.07 seconds and rebound over 0.16 seconds. Nudge's flights leave a 3 px blue trail at 40% opacity, which fades over 0.24 seconds. Human cursors have no trail. Red rings and crosses persist across the opening misses. The problem sentence fades in after the clicks. Browser camera moves zoom 10% toward the target, then return.
+Nudge shots are 1372 px wide. Browser shots are 1376 × 765.4 px, centered at y=200. Browser recordings lose only their grey recorder footer. They keep the source aspect ratio. Nudge's video masks follow its encoded frame boundaries, leaving the surrounding canvas transparent as the bar resizes. Static bar images retain their alpha channel.
 
-Music uses a 120 bpm excerpt of "Inspired" by Kevin MacLeod. Soft clicks, keyboard sounds and Nudge's start, tick, attention and success tones accompany visible actions. Keyboard audio covers the YouTube query and email typing. The final mix targets -17 LUFS and -2.3 dB true peak before AAC encoding. No voiceover. See [asset credits](ASSETS.md).
+Cursor flights take 0.24 to 0.30 seconds. Clicks compress the cursor for 0.07 seconds and rebound over 0.16 seconds. Blue flights leave a 3 px trail at 40% opacity, fading over 0.24 seconds. Human cursors have no trail. The hook's final pointer flight lasts 0.86 seconds as it grows into the reveal mark. Browser camera moves zoom 10% toward the target, then return. GitHub navigation and Mail's Send click keep the complete browser header visible.
 
-## Shots
+Music uses a 120 bpm excerpt of "Inspired" by Kevin MacLeod. Soft clicks, typing and Nudge's actual tones accompany visible actions. The mix targets -17 LUFS and -2.3 dB true peak before AAC encoding. No voiceover. See [asset credits](ASSETS.md).
 
-| Frames | Picture | Copy |
+## Shots and focal points
+
+| Frames | Picture | Focal point |
 | --- | --- | --- |
-| 0 to 239 | Three misses on the bank overview, then the centered problem sentence | Hard to click? |
-| 240 to 371 | Blue pointer and wordmark, with about 1.8 seconds of stillness after landing | Meet Nudge |
-| 372 to 767 | Statements, October detail and PDF download beside Nudge's feed | Download a statement. |
-| 768 to 1229 | Excel query typing, suggestion click and tutorial results beside Nudge | Find an Excel tutorial. |
-| 1230 to 1565 | Actual Peek outlines over VS Code's GitHub issue list, Labels decision and click | Meet Jev, Nudge's action model. |
-| 1566 to 2921 | Compose, Jev and writer processing, draft edit, Type it approval, browser typing, Send approval and result | Draft. Edit. Send. / Nudge types it for you. |
-| 2922 to 3173 | Pointer, wordmark and repository address through the music fade | Assisted computer control. |
+| 0 to 323 | Website misses, centered question, blue assistance click and continuous pointer transition | Cursor, then the question, then the blue cursor |
+| 324 to 503 | Meet Nudge and the pointer mark | Wordmark and pointer as one lockup |
+| 504 to 851 | Hey Nudge and the actual listening UI | Listening bar and its transcript |
+| 852 to 1643 | Bank request, Nudge processing, three browser actions and completed feed | One window per phase |
+| 1644 to 2501 | Excel tutorial request, Nudge processing, query typing, search and completion | Nudge, then the search field, then results |
+| 2502 to 3365 | Peek activation, control outlines, Jev processing, its decision and Labels navigation | Peek button, control outlines, loading feed, then chosen target |
+| 3366 to 4757 | Email request, processing, draft edit, typing, approval, Send and result | One window per phase, with a stage subtitle |
+| 4758 to 5033 | Pointer, wordmark, two-line tagline and repository | Closing lockup |
 
-The email windows slide and crossfade over 0.2 seconds. Jev and the writer process for 3.9 seconds before the draft appears. Its source header and complete review panel form one readable Nudge window. The browser is 1424 × 890 px; the draft is 1320 × 880 px. The draft stays for 5.2 seconds. Subject selection holds for about 0.65 seconds, seven replacement letters appear over about 0.6 seconds, and the edited draft holds before approval. Browser typing stretches by 1.32×. "Nudge types it for you" replaces the heading while the fields fill, and the complete message holds for about two seconds. The Send decision holds for 2.4 seconds and its result for more than three seconds. Each approval and browser click appears once. The final 1.2 seconds of the draft and 0.6 seconds of the Send panel hold their pre-approval frames so the visible clicks land on complete controls.
+The reveal holds for three seconds. Bank and YouTube begin with 1.8 seconds of the request and two seconds of actual processing. Their browser shots reserve about 0.95 seconds before the click or typing starts. The final feed holds for 1.6 seconds.
+
+Peek activation takes 2.4 seconds, including a close-up of the complete button and its enabled state. Its control outlines have 3.4 seconds. Jev's loading indicator has 3.4 seconds with the TypeSafe AI subtitle. Its decision has 1.6 seconds before the browser action and result. A spotlight isolates Labels; the outlines fade before navigation.
+
+Email phases occupy 0–2.6, 2.4–6.3, 6.1–11.3, 11.1–17.3, 17.1–19.5 and 19.3–23.2 seconds within the scene. Each outgoing window fades before the incoming one appears. Stage captions never overlap. Draft review lasts 5.2 seconds, with a 2.7-second subject detail view before returning to the complete draft. The subject selection holds for about 0.65 seconds, seven replacement letters appear over about 0.6 seconds, and the edited draft holds before Type it. Browser typing stretches by 1.32× and the completed message holds before Send approval. The final 1.2 seconds of the draft and 0.6 seconds of the Send panel freeze before their source windows close.
 
 ## Recorded behavior
 
-The actual Nudge loop, Jev client and Gemini writer operate Chrome through a recording adapter. Bank and mail use working local pages with fictitious data. The bank downloads a sample PDF; mail stores a result without sending email. YouTube uses a public search page. Jev's shot uses the public VS Code issue list, signed out, and permits only a Labels navigation click.
+Real Jev and Gemini clients operate Chrome through the recording adapter. The bank downloads a sample PDF. Mail stores a local result without sending email. YouTube searches a public page. The Jev capture uses the signed-out VS Code issue list and permits only public Labels navigation.
 
-Qt frames and browser actions have timestamped records. Browser video timing can drift from wall-clock events, so decoded page transitions locate the cuts and field starts. The values are in assets/browser/edit-points-v5.json. A caption and thicker border emphasize the recorded Labels target in the Jev shot. Cursor flights reconstruct target positions. Actual Qt Peek captures supply the control outlines. The email recording holds real Jev results until 1.2 seconds and writer results until 2.4 seconds to keep loading visible. Provider latency records exclude those holds. Waiting is trimmed and some typing stretches for readability, so the film is not a performance measurement.
+The bank and YouTube captures hold real Jev results for at least 1.2 seconds. The Jev shot holds results for 1.5 seconds. The email holds Jev results for 1.2 seconds and writer results for 2.4 seconds. These recording holds leave product code and provider latency records unchanged. Waiting is trimmed and typing is retimed. The film is not a performance measurement.
 
-Browser sources have 25 fps and Qt sources have 20 fps. Camera, cursor and delivery render at 60 fps. Repeating source frames does not add detail to recorded interface changes. The captures do not exercise native macOS or Windows adapters.
+The wake capture loads models/hey_nudge.onnx and replays the app's voice callbacks into its actual listening UI. It does not validate wake detection, microphone input or transcription. The film's phrase matches that custom model; the default configured wake model can differ.
+
+The builder records scene timing in shot-slots.json and media selections in assets/browser/edit-points-v6.json. Decoded page changes and field starts must agree with visible actions. Browser sources have 25 fps, Qt sources have 20 fps, and camera and cursor movement render at 60 fps. These captures do not exercise native macOS or Windows adapters.
 
 ## Design constraints
 
-No invented Nudge controls, offline corner labels, ornamental status captions, slow opening cursor, drifting headlines, gradient washes, glass cards or feature-card grids. Avoid two active email windows, duplicate clicks and crops through draft or approval controls. Preserve the approved opening and closing pointer.
+No simultaneous small split screens, empty dark blocks beneath Nudge, clipped draft controls, duplicate clicks, overlapping captions, offline corner labels, ornamental status text, slow opening cursor, gradient washes, glass cards or feature-card grids. Keep the modern bank and approved pointer artwork.
 
 ## Delivery
 
-Editable HyperFrames source, local recordings and license records, a 1080p H.264 MP4 with AAC audio, cursor banner, one complete bank GIF, terminal image and labelled interface image.
+Editable HyperFrames source, local media and rights records, a 1080p H.264 MP4 with AAC audio, a cursor banner, one complete bank GIF without a terminal intro, a terminal photo and a labelled interface image. The README Photos disclosure contains only the terminal image. The interface callout says "Debug mode."
