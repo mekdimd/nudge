@@ -64,8 +64,8 @@ def canvas(width, height, background=GROUND):
 def banner():
     value, p = canvas(1800, 960)
     text(p, "Nudge", 100, 185, 140, weight=QFont.Weight.DemiBold)
-    text(p, "Desktop tasks.", 105, 305, 66)
-    text(p, "Fewer precise clicks.", 105, 390, 60)
+    text(p, "Assisted", 105, 305, 66)
+    text(p, "computer control.", 105, 390, 60)
     image(p, load("browser/bank-page-idle.png"), 800, 55, 920)
     target = QPointF(800 + 107.5 * 920 / 1280, 55 + 258 * 920 / 1280)
     for offset, alpha, width in [(0, 160, 7), (12, 65, 4), (24, 30, 3)]:

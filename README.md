@@ -90,7 +90,7 @@ Try goals that name the task and its destination:
 
 ~~~text
 download my October bank statement
-find a video on YouTube about how to change a tire
+find a tutorial on YouTube about Excel pivot tables
 email prof.lee@sfu.ca that I'm sick and will miss today's lecture
 ~~~
 

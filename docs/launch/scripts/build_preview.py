@@ -48,7 +48,7 @@ def main():
         raise SystemExit("Render the launch MP4 first.")
     run(
         "-ss",
-        "9.6",
+        "12.3",
         "-i",
         video,
         "-frames:v",
@@ -62,8 +62,7 @@ def main():
         terminal_intro(temp / "intro.png")
         filters = (
             "[0:v]fps=15,trim=duration=1.4,setpts=PTS-STARTPTS[intro];"
-            "[1:v]fps=15,trim=start=5.4:end=10.0,setpts=PTS-STARTPTS,"
-            "tpad=stop_mode=clone:stop_duration=2.0[run];"
+            "[1:v]fps=15,trim=start=6.2:end=12.8,setpts=PTS-STARTPTS[run];"
             "[intro][run]concat=n=2:v=1:a=0,scale=960:-1:flags=lanczos,split[a][b];"
             "[a]palettegen=max_colors=128:stats_mode=diff[p];"
             "[b][p]paletteuse=dither=bayer:bayer_scale=3:diff_mode=rectangle[out]"
