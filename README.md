@@ -21,11 +21,13 @@
 
 ## What is Nudge?
 
-Nudge is a desktop tool for people who find precise mouse clicks difficult. Type or say a goal. Nudge finds the next control, moves its large cursor, and acts one step at a time. Its bar shows what it is doing and asks when it needs your decision.
+Nudge is an accessibility assistant that lets you control your computer by voice or text. It is built for people with tremor, repetitive strain injuries, low vision or limited dexterity who want to use their existing apps without navigating every control by hand.
+
+Describe what you want to do. Nudge reads the app's controls, chooses the next action and moves its large cursor to carry it out. It can draft and enter text, ask you to choose between uncertain options, and request approval before sensitive actions. Optional local vision finds controls that an app does not expose through accessibility APIs.
 
 For example, ask Nudge to download your October bank statement. It opens Statements, selects the document and downloads the PDF. When you ask it to write an email, you can edit the draft and approve Send before it acts.
 
-Nudge is a macOS and Windows prototype built at StormHacks 2026. App support depends on readable controls; the launch film uses a sample bank and mail page.
+Nudge is a macOS and Windows prototype built at StormHacks 2026. Read the [Devpost write-up](https://devpost.com/software/nudge-nf7okh) for the project's background. App support depends on readable controls; the launch film uses a sample bank and mail page.
 
 ## See it run
 
@@ -58,7 +60,7 @@ The offline demo needs no keys or desktop permissions. It uses a scripted screen
 <details>
 <summary>Use Nudge with real apps</summary>
 
-Copy [.env.example](.env.example) to .env and add your keys. Git ignores .env.
+Copy [.env.example](.env.example) to .env and add your keys.
 
 | Key | Purpose |
 | --- | --- |
@@ -77,14 +79,13 @@ Real tasks send your goal and control details to Jev. [Setup and privacy](docs/S
 
 ## Use Nudge
 
-Focus the app, summon the bar, and describe your task. Review drafts and confirmations. Press Esc or Stop to cancel.
+1. Open the app you want to use and bring its window to the front.
+2. Start Nudge with `uv run nudge`, then return to your app. Summon the bar with <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>Space</kbd> on macOS, or <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd> on Windows.
+3. Type your goal and press Go. With voice configured, click the orb or say your wake word, then speak your request.
+4. Review drafts and edit them before approving. If Nudge asks which control you mean, choose an option to continue.
+5. Press <kbd>Esc</kbd> or Stop to cancel a task.
 
-| Platform | Summon the bar |
-| --- | --- |
-| macOS | ⌘⇧Space |
-| Windows | Ctrl+Shift+Space |
-
-![The actual Nudge bar labelled with its target app, step feed, goal field, debug mode control and Go or Stop button](docs/assets/nudge-interface.png)
+![The actual Nudge bar with boxed labels for the current app, step feed, goal field, debug mode, voice input and Start or Stop control](docs/assets/nudge-interface.png)
 
 Try goals that name the task and its destination:
 
@@ -93,6 +94,36 @@ download my October bank statement
 play a tutorial on YouTube about Excel pivot tables
 email prof.lee@sfu.ca that I'm sick and will miss today's lecture
 ~~~
+
+<details>
+<summary>Command line, voice and vision</summary>
+
+The CLI launches the bar. Enter your goal there, or speak it when voice is configured.
+
+~~~bash
+uv run nudge --help          # Show all options.
+uv run nudge --debug         # Open with Peek debug mode enabled.
+uv run nudge --background    # Run in the background.
+uv run nudge --stop          # Quit a background or persistent instance.
+uv run nudge --offline gmail # Try the scripted demo without keys.
+~~~
+
+Use `--persistent` to keep Nudge in the terminal while the close button hides the bar. The hotkey brings it back. Press Ctrl+C to quit a foreground instance.
+
+For voice input and spoken approval prompts, set `ELEVENLABS_API_KEY` in .env. To use "Hey Nudge" as the wake word, set `WAKE_WORD=models/hey_nudge.onnx`; the default is "Hey Jarvis." The orb starts or stops listening. The mic button mutes the microphone, and its menu selects the microphone and controls spoken replies.
+
+To enable the local vision fallback:
+
+~~~bash
+uv sync --frozen --extra vision
+uv run --extra vision nudge
+~~~
+
+Nudge uses vision when the app exposes too few accessibility controls. Model weights download on first launch, and screenshots stay on your computer. The resulting control labels go to Jev. Start with `uv run nudge --no-vision` to disable it.
+
+[Setup and privacy](docs/SETUP.md) covers configuration, model downloads and provider data use.
+
+</details>
 
 <details>
 <summary>Controls, confirmation and limits</summary>

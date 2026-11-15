@@ -44,12 +44,14 @@ With voice configured, click the orb or say the wake word to speak. Click the or
 Some apps expose few accessibility controls. Install the optional local vision dependencies:
 
 ~~~bash
-uv sync --extra vision
-uv run nudge
+uv sync --frozen --extra vision
+uv run --extra vision nudge
 uv run nudge --no-vision
 ~~~
 
 This adds PyTorch, Ultralytics and Transformers. OmniParser weights download from Hugging Face on first launch. Vision reads the target window locally; its resulting labels go to Jev. Icon names can be wrong, so expect more requests for your help.
+
+For vision on macOS, also grant the launching terminal or editor screen recording access in System Settings → Privacy & Security.
 
 ## Background mode and debugging
 
