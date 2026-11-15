@@ -115,13 +115,61 @@ body {
   position: absolute;
   left: 192px;
   right: 192px;
-  top: 104px;
+  top: 78px;
   text-align: center;
-  font-size: 60px;
+  font-size: 72px;
   line-height: 1.1;
   font-weight: 500;
-  letter-spacing: -1.5px;
+  letter-spacing: -1.8px;
   color: var(--ink);
+}
+.guidance.hero {
+  left: 120px;
+  right: 120px;
+  top: 300px;
+  font-size: 84px;
+  letter-spacing: -2.2px;
+}
+.done-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 34px;
+  opacity: 0;
+  z-index: 8;
+}
+.done-badge {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: #1f9d5c;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 14px 36px #1f9d5c55;
+}
+.done-badge svg {
+  width: 64px;
+  height: 64px;
+  overflow: visible;
+}
+.done-badge path {
+  fill: none;
+  stroke: white;
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 60;
+}
+.done-title p {
+  font-size: 100px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -3px;
+  color: #17663f;
 }
 .focus-spotlight {
   position: absolute;
@@ -201,8 +249,8 @@ body {
 }
 #outro-cursor,
 #reveal-cursor {
-  width: 112px;
-  height: 112px;
-  left: -14px;
-  top: -14px;
+  width: 160px;
+  height: 160px;
+  left: -20px;
+  top: -20px;
 }

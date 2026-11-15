@@ -1,7 +1,7 @@
 {
   "case": "jev",
-  "epochStarted": 1794729402.437,
-  "recordingOffset": 3.506,
+  "epochStarted": 1794774796.216,
+  "recordingOffset": 3.63,
   "actions": [
     {
       "id": 3,
@@ -12,8 +12,8 @@
         127.5,
         497
       ],
-      "at": 5.95,
-      "endedAt": 6.517
+      "at": 6.054,
+      "endedAt": 6.611
     }
   ],
   "title": "Labels · microsoft/vscode · GitHub",
@@ -21,6 +21,6 @@
   "downloads": [],
   "outcome": {
     "ok": true,
-    "message": "Done in 1 step · 5.8 s · Jev 127 ms per decision"
+    "message": "Done in 1 step · 5.0 s · Jev 236 ms per decision"
   }
 }

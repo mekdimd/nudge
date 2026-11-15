@@ -1,11 +1,17 @@
 Nudge · [32mJev[0m  [32mGemini[0m  [90mvoice off[0m  [90mwake word off[0m  [90mvision off[0m
-[1m▶ find a tutorial on YouTube about Excel pivot tables for beginners[0m · Google Chrome
-  [35mJev      [0m Picked “Type into the empty fields”  [90m87% · 152 ms[0m
+[1m▶ play a tutorial on Excel pivot tables for beginners[0m · Google Chrome
+  [35mJev      [0m Picked “Type into the empty fields”  [90m89% · 142 ms[0m
   [34mGemini   [0m Wrote the text  [90m1.1 s[0m
   [37mNudge    [0m Check the text before I type it  [33mwaiting for you[0m
   [32mGoogle Chrome[0m Typed into “Search”
-  [35mJev      [0m Picked “excel pivot tables for beginners”  [90m64% · 240 ms[0m
+  [35mJev      [0m Picked “excel pivot tables for beginners”  [90m69% · 196 ms[0m
   [32mGoogle Chrome[0m Pressed “excel pivot tables for beginners”
-  [35mJev      [0m Says the task is done  [90m84% · 106 ms[0m
-[32m✓[0m Done in 2 steps · 13.7 s · Jev 166 ms per decision
+  [35mJev      [0m Picked “Pivot Table Excel | Step-by-Step Tutorial 8 minutes, 36 seconds”  [90m47% · 115 ms[0m
+  [32mGoogle Chrome[0m Pressed “Pivot Table Excel | Step-by-Step Tutorial 8 minutes, 36 seconds”
+  [35mJev      [0m Picked “Pause (k)”  [90m60% · 134 ms[0m
+  [32mGoogle Chrome[0m Pressed “Pause (k)”
+  [35mJev      [0m Picked “Play keyboard shortcut k”  [90m99% · 89 ms[0m
+  [32mGoogle Chrome[0m Pressed “Play keyboard shortcut k”
+  [35mJev      [0m Says the task is done  [90m71% · 137 ms[0m
+[32m✓[0m Done in 5 steps · 25.6 s · Jev 135 ms per decision
 {"finished": "youtube", "ok": true}
