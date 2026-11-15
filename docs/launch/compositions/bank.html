@@ -11,7 +11,7 @@
     data-composition-id="bank"
     data-width="1920"
     data-height="1080"
-    data-duration="6.0"
+    data-duration="4.6"
   >
     <h1 class="headline">Download a statement.</h1>
     <div class="screen">
@@ -23,7 +23,7 @@
           muted
           playsinline
           data-start="0"
-          data-duration="1.95"
+          data-duration="1.2"
           data-track-index="1"
           data-beat="bank-0-screen"
           data-hf-media-start-basis="local"
@@ -35,8 +35,8 @@
           src="assets/browser/bank-1-screen.mp4"
           muted
           playsinline
-          data-start="1.95"
-          data-duration="1.7"
+          data-start="1.2"
+          data-duration="1.2"
           data-track-index="1"
           data-beat="bank-1-screen"
           data-hf-media-start-basis="local"
@@ -48,8 +48,8 @@
           src="assets/browser/bank-2-screen.mp4"
           muted
           playsinline
-          data-start="3.65"
-          data-duration="2.35"
+          data-start="2.4"
+          data-duration="2.2"
           data-track-index="1"
           data-beat="bank-2-screen"
           data-hf-media-start-basis="local"
@@ -68,7 +68,7 @@
       class="nudge-screen"
       style="top: 366.88186813186815px; height: 293.7362637362637px"
     >
-      <div id="bank-nudge-stage" class="nudge-stage">
+      <div id="bank-nudge-stage" class="nudge-stage" data-layout-allow-overflow>
         <video
           id="bank-0-nudge"
           class="clip nudge-media"
@@ -76,7 +76,7 @@
           muted
           playsinline
           data-start="0"
-          data-duration="1.95"
+          data-duration="1.2"
           data-track-index="1"
           data-beat="bank-0-nudge"
           data-hf-media-start-basis="local"
@@ -87,8 +87,8 @@
           src="assets/browser/bank-1-nudge.mp4"
           muted
           playsinline
-          data-start="1.95"
-          data-duration="1.7"
+          data-start="1.2"
+          data-duration="1.2"
           data-track-index="1"
           data-beat="bank-1-nudge"
           data-hf-media-start-basis="local"
@@ -99,8 +99,8 @@
           src="assets/browser/bank-2-nudge.mp4"
           muted
           playsinline
-          data-start="3.65"
-          data-duration="2.35"
+          data-start="2.4"
+          data-duration="2.2"
           data-track-index="1"
           data-beat="bank-2-nudge"
           data-hf-media-start-basis="local"
@@ -115,7 +115,7 @@
         <div
           id="bank-done-hold"
           class="clip"
-          data-start="5.45"
+          data-start="4.05"
           data-duration=".55"
           data-track-index="3"
           data-beat="bank-finished"
@@ -137,51 +137,43 @@
         "#bank-cursor",
         [682.0, 206.25],
         [92.383, 221.719],
-        1.16,
-        0.3,
-      );
-      launchClick(tl, "#bank-cursor", "#bank-ring-0", [92.383, 221.719], 1.5);
-      launchCamera(tl, "#bank-stage", [92.383, 221.719], 1.16, 1100, 687.5);
-      launchMove(
-        tl,
-        "#bank-cursor",
-        [92.383, 221.719],
-        [984.24, 342.797],
-        2.8600000000000003,
-        0.3,
-      );
-      launchClick(tl, "#bank-cursor", "#bank-ring-1", [984.24, 342.797], 3.2);
-      launchCamera(
-        tl,
-        "#bank-stage",
-        [984.24, 342.797],
-        2.8600000000000003,
-        1100,
-        687.5,
-      );
-      launchMove(
-        tl,
-        "#bank-cursor",
-        [984.24, 342.797],
-        [899.249, 461.39],
-        4.460000000000001,
+        0.51,
         0.3,
       );
       launchClick(
         tl,
         "#bank-cursor",
-        "#bank-ring-2",
-        [899.249, 461.39],
-        4.800000000000001,
+        "#bank-ring-0",
+        [92.383, 221.719],
+        0.8500000000000001,
       );
-      launchCamera(
+      launchCamera(tl, "#bank-stage", [92.383, 221.719], 0.51, 1100, 687.5);
+      launchMove(
         tl,
-        "#bank-stage",
-        [899.249, 461.39],
-        4.460000000000001,
-        1100,
-        687.5,
+        "#bank-cursor",
+        [92.383, 221.719],
+        [984.24, 342.797],
+        1.61,
+        0.3,
       );
+      launchClick(
+        tl,
+        "#bank-cursor",
+        "#bank-ring-1",
+        [984.24, 342.797],
+        1.9500000000000002,
+      );
+      launchCamera(tl, "#bank-stage", [984.24, 342.797], 1.61, 1100, 687.5);
+      launchMove(
+        tl,
+        "#bank-cursor",
+        [984.24, 342.797],
+        [899.249, 461.39],
+        2.91,
+        0.3,
+      );
+      launchClick(tl, "#bank-cursor", "#bank-ring-2", [899.249, 461.39], 3.25);
+      launchCamera(tl, "#bank-stage", [899.249, 461.39], 2.91, 1100, 687.5);
       tl.set(".headline", { opacity: 1 });
       window.__timelines["bank"] = tl;
     }

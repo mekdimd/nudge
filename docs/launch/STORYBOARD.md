@@ -1,11 +1,13 @@
 # Storyboard
 
-1. A cursor misses three controls on the banking website. Red rings and crosses mark the misses. "Hard to click?" fades in at the center after the clicks. Nudge has not appeared.
-2. Nudge's blue pointer arrives beside its wordmark.
-3. The bank stays on the left while Nudge runs on the right. The pointer selects Statements, the October document and Download PDF. The website reports the download and Nudge completes its feed.
-4. Nudge's Peek view outlines YouTube's controls. The right pane shows the actual query draft and approval. The pointer enters Search, chooses the matching suggestion and Nudge scrolls to tire-changing results.
-5. Compose opens in the mail page. The right pane holds the actual draft while its subject changes. The person chooses Type it, then the browser fields fill with the edited message.
-6. The Send confirmation holds beside the filled email. The person chooses Yes, send once. The blue pointer clicks the browser's Send control, then both panes show completion.
-7. The approved pointer logo, Nudge wordmark and GitHub address hold through the fade.
+1. A cursor misses three controls on the bank website. Red rings and crosses mark the misses. "Hard to click?" fades in at the center after the clicks.
+2. Nudge's blue pointer arrives beside its wordmark. The reveal holds for a full second after the animation lands.
+3. The bank stays on the left while Nudge runs on the right. The pointer selects Statements, the October document and Download PDF. The website reports the download.
+4. Nudge types a tire-changing query into YouTube's search field, chooses the matching suggestion and scrolls to the results. The actual Nudge feed remains beside the browser.
+5. "Meet Jev, Nudge's action model." A real VS Code issue list fills the browser. Actual Peek outlines reveal its controls, Jev chooses Labels, and the pointer opens the Labels page. Nudge's feed shows the decision.
+6. Compose opens in the mail client. Focus slides to Nudge while the writer generates the draft. A black cursor selects "Absent" in its subject and replaces it with "Missing," one character at a time. The edited draft holds, then the person chooses Type it once.
+7. Focus slides to the mail client. The blue cursor moves through the recipient, subject and body as each field fills. The complete email holds before focus returns to Nudge.
+8. Nudge's Send confirmation holds alone. The person chooses Yes, send once. Focus slides to the mail client, where the blue pointer clicks Send. The local result holds for more than two seconds.
+9. The pointer logo, Nudge wordmark and GitHub address hold through the fade.
 
-The browser camera zooms 10% toward cursor targets. Click pulses and sound cues identify actions. The black cursor represents the opening misses and sample approvals; the blue cursor reconstructs Nudge's chosen targets. Waiting is trimmed. Bank and mail are local samples, and no email is sent. The film remains understandable when muted.
+The browser camera zooms 10% toward cursor targets. Click pulses, typing sounds and Nudge tones identify visible actions. The black cursor represents misses and sample approvals; the blue cursor reconstructs recorded targets. Waiting is trimmed and typing is retimed for readability. Bank and mail are local samples, and no email is sent. The film remains understandable when muted.

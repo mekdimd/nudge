@@ -1,6 +1,6 @@
 # Nudge launch film
 
-[Watch the 31-second video](../assets/nudge-launch.mp4). The editable HyperFrames project renders at 1920 × 1080 and 60 fps. It shows browser actions alongside the actual Nudge feed, Peek, draft editing and Send approval.
+[Watch the 35-second video](../assets/nudge-launch.mp4). The editable HyperFrames project renders at 1920 × 1080 and 60 fps. It shows bank and YouTube actions beside Nudge, gives Jev and Peek their own shot, then follows email drafting, editing, typing and Send approval one window at a time.
 
 Bank and mail use fictitious local data. Mail stores a local result without sending email. Real model clients and the task loop run through a browser capture adapter, which does not test native desktop backends. Read [capture limits and media credits](ASSETS.md).
 
@@ -21,7 +21,7 @@ For visual review:
 
 ~~~bash
 npx --yes hyperframes@0.9.47 snapshot --review
-npx --yes hyperframes@0.9.47 snapshot --range 23.5,26.5 --frames 8
+npx --yes hyperframes@0.9.47 snapshot --range 20,23 --frames 8
 ~~~
 
 ## Record the workflows
@@ -40,14 +40,15 @@ Run these in another terminal:
 ~~~bash
 node docs/launch/scripts/capture_host.mjs bank 'http://127.0.0.1:8765/?app=bank&theme=light' 'download my October bank statement'
 node docs/launch/scripts/capture_host.mjs youtube 'https://www.youtube.com/' 'find a video on how to change a tire'
-node docs/launch/scripts/capture_host.mjs mail 'http://127.0.0.1:8765/?app=mail' "email prof.lee@sfu.ca that I'm sick and will miss today's lecture"
+node docs/launch/scripts/capture_host.mjs jev 'https://github.com/microsoft/vscode/issues' 'open Labels in the left sidebar'
+node docs/launch/scripts/capture_host.mjs mail 'http://127.0.0.1:8765/?app=mail' "email prof.lee@sfu.ca that I'm sick and will miss today's lecture. Use the subject Absent from lecture today"
 ~~~
 
 An optional final argument selects an .env file outside this checkout. The host starts isolated Chrome and the actual Qt app offscreen. A file RPC connection carries browser controls and actions. The capture script edits the email subject and approves the sample panels. The host checks the downloaded PDF, YouTube results and approved local mail result.
 
-The recordings include browser video at 25 fps, timestamped Qt frames encoded at 20 fps, console output, screenshots and action traces. YouTube's Peek button is active in its capture; Nudge performs the result scroll. The blue cursor reconstructs target positions at 60 fps, and the black cursor marks misses and approvals.
+The recordings include browser video at 25 fps, timestamped Qt frames encoded at 20 fps, console output, screenshots and action traces. Peek is active in the Jev capture over VS Code's public GitHub issue list. Nudge performs the YouTube result scroll. The blue cursor reconstructs target positions at 60 fps, and the black cursor marks misses and approvals.
 
-Capture and network timing vary. After recapturing, decode the page transitions and update the segment selections and video offsets in scripts/build_film.py. Do not reuse old trim points without checking them. The builder writes the chosen values to assets/browser/edit-points-v3.json.
+Capture and network timing vary. After recapturing, decode the page transitions and update the segment selections and video offsets in scripts/build_film.py. Do not reuse old trim points without checking them. The builder writes the chosen values to assets/browser/edit-points-v4.json.
 
 Rebuild the film source and artwork from the repository root:
 
@@ -66,13 +67,13 @@ The GIF starts with the capture command and actual startup output, shows every b
 
 ## Music and effects
 
-"Inspired" Kevin MacLeod (incompetech.com). Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The film uses a 31.2-second excerpt, Nudge's actual tones and a soft click effect. Include the [music attribution](ASSETS.md#music-attribution) when sharing the video. The click effect has separate Pixabay rights.
+"Inspired" Kevin MacLeod (incompetech.com). Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The film uses a 35.4-second excerpt, Nudge's actual tones, a soft click effect and keyboard typing. Include the [music attribution](ASSETS.md#music-attribution) and [keyboard attribution](ASSETS.md#keyboard-attribution) when sharing the video. The click effect has separate Pixabay rights.
 
 ## Project files
 
 | File | Purpose |
 | --- | --- |
-| index.html | Six scene slots, music and action sounds |
+| index.html | Seven scene slots, music and action sounds |
 | compositions/ | Editable HTML scenes |
 | assets/ | Local recordings, fonts and runtime |
 | demo/ | Working sample bank and mail pages |

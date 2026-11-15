@@ -8,7 +8,10 @@ import tempfile
 VIDEO = Path(__file__).resolve().parents[2] / "assets" / "nudge-launch.mp4"
 CREDIT = (
     '"Inspired" Kevin MacLeod (incompetech.com). Licensed under '
-    "Creative Commons: By Attribution 4.0. https://creativecommons.org/licenses/by/4.0/"
+    "Creative Commons: By Attribution 4.0. https://creativecommons.org/licenses/by/4.0/. "
+    '"Keyboard Typing Sounds" by crz1990, CC BY 3.0. '
+    "https://freesound.org/people/crz1990/sounds/135872/. "
+    "https://creativecommons.org/licenses/by/3.0/"
 )
 
 
@@ -20,7 +23,7 @@ def main():
             "-i",
             str(VIDEO),
             "-af",
-            "loudnorm=I=-17:TP=-1.5:LRA=11:print_format=json",
+            "loudnorm=I=-17:TP=-2.3:LRA=11:print_format=json",
             "-f",
             "null",
             "-",
@@ -30,8 +33,9 @@ def main():
         check=True,
     ).stderr
     levels, _ = json.JSONDecoder().raw_decode(measured[measured.rindex("{") :])
+    # Leave headroom for AAC peaks after encoding.
     filters = (
-        "loudnorm=I=-17:TP=-1.5:LRA=11:linear=true:"
+        "loudnorm=I=-17:TP=-2.3:LRA=11:linear=true:"
         f"measured_I={levels['input_i']}:measured_TP={levels['input_tp']}:"
         f"measured_LRA={levels['input_lra']}:measured_thresh={levels['input_thresh']}:"
         f"offset={levels['target_offset']}"

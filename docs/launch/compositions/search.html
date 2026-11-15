@@ -11,7 +11,7 @@
     data-composition-id="youtube"
     data-width="1920"
     data-height="1080"
-    data-duration="6.0"
+    data-duration="4.2"
   >
     <h1 class="headline">Find a how-to.</h1>
     <div class="screen">
@@ -23,7 +23,7 @@
           muted
           playsinline
           data-start="0"
-          data-duration="2.85"
+          data-duration="1.85"
           data-track-index="1"
           data-beat="youtube-0-screen"
           data-hf-media-start-basis="local"
@@ -35,8 +35,8 @@
           src="assets/browser/youtube-1-screen.mp4"
           muted
           playsinline
-          data-start="2.85"
-          data-duration="2.05"
+          data-start="1.85"
+          data-duration="1.45"
           data-track-index="1"
           data-beat="youtube-1-screen"
           data-hf-media-start-basis="local"
@@ -48,8 +48,8 @@
           src="assets/browser/youtube-2-screen.mp4"
           muted
           playsinline
-          data-start="4.9"
-          data-duration="1.1"
+          data-start="3.3"
+          data-duration="0.9"
           data-track-index="1"
           data-beat="youtube-2-screen"
           data-hf-media-start-basis="local"
@@ -61,26 +61,17 @@
           alt=""
           data-layout-ignore
         />
-        <div
-          id="peek-frame"
-          class="clip"
-          data-start=".2"
-          data-duration="1.35"
-          data-track-index="3"
-        >
-          <img
-            class="screen-media"
-            src="assets/browser/youtube-peek.png"
-            alt="Nudge Peek outlines the browser controls"
-          />
-        </div>
       </div>
     </div>
     <div
       class="nudge-screen"
       style="top: 323.80054945054945px; height: 379.8989010989011px"
     >
-      <div id="youtube-nudge-stage" class="nudge-stage">
+      <div
+        id="youtube-nudge-stage"
+        class="nudge-stage"
+        data-layout-allow-overflow
+      >
         <video
           id="youtube-0-nudge"
           class="clip nudge-media"
@@ -88,20 +79,19 @@
           muted
           playsinline
           data-start="0"
-          data-duration="2.85"
+          data-duration="1.85"
           data-track-index="1"
           data-beat="youtube-0-nudge"
           data-hf-media-start-basis="local"
-        ></video>
-        <div id="youtube-approval-ring-0" class="ring" data-layout-ignore></div>
-        <video
+        ></video
+        ><video
           id="youtube-1-nudge"
           class="clip nudge-media"
           src="assets/browser/youtube-1-nudge.mp4"
           muted
           playsinline
-          data-start="2.85"
-          data-duration="2.05"
+          data-start="1.85"
+          data-duration="1.45"
           data-track-index="1"
           data-beat="youtube-1-nudge"
           data-hf-media-start-basis="local"
@@ -112,8 +102,8 @@
           src="assets/browser/youtube-2-nudge.mp4"
           muted
           playsinline
-          data-start="4.9"
-          data-duration="1.1"
+          data-start="3.3"
+          data-duration="0.9"
           data-track-index="1"
           data-beat="youtube-2-nudge"
           data-hf-media-start-basis="local"
@@ -128,7 +118,7 @@
         <div
           id="youtube-done-hold"
           class="clip"
-          data-start="5.45"
+          data-start="3.6500000000000004"
           data-duration=".55"
           data-track-index="3"
           data-beat="youtube-finished"
@@ -150,7 +140,7 @@
         "#youtube-cursor",
         [682.0, 206.25],
         [512.617, 24.062],
-        2.06,
+        0.04,
         0.3,
       );
       launchClick(
@@ -158,35 +148,15 @@
         "#youtube-cursor",
         "#youtube-ring-0",
         [512.617, 24.062],
-        2.4,
+        0.34999999999999964,
       );
-      launchCamera(tl, "#youtube-stage", [512.617, 24.062], 2.06, 1100, 687.5);
-      launchMove(
-        tl,
-        "#youtube-human",
-        [520, 170.51100000000002],
-        [296.151, 260.511],
-        1.1233209056854239,
-        0.28,
-      );
-      launchClick(
-        tl,
-        "#youtube-human",
-        "#youtube-approval-ring-0",
-        [296.151, 260.511],
-        1.443320905685424,
-      );
-      tl.to(
-        "#youtube-human",
-        { opacity: 0, duration: 0.15 },
-        1.743320905685424,
-      );
+      launchCamera(tl, "#youtube-stage", [512.617, 24.062], 0.04, 1100, 687.5);
       launchMove(
         tl,
         "#youtube-cursor",
         [512.617, 24.062],
         [361.723, 70.039],
-        3.66,
+        1.91,
         0.3,
       );
       launchClick(
@@ -194,16 +164,9 @@
         "#youtube-cursor",
         "#youtube-ring-1",
         [361.723, 70.039],
-        4.0,
+        2.25,
       );
-      launchCamera(tl, "#youtube-stage", [361.723, 70.039], 3.66, 1100, 687.5);
-      tl.fromTo(
-        "#peek-frame img",
-        { opacity: 0 },
-        { opacity: 1, duration: 0.16 },
-        0.2,
-      );
-      tl.to("#peek-frame img", { opacity: 0, duration: 0.18 }, 1.35);
+      launchCamera(tl, "#youtube-stage", [361.723, 70.039], 1.91, 1100, 687.5);
       tl.set(".headline", { opacity: 1 });
       window.__timelines["youtube"] = tl;
     }

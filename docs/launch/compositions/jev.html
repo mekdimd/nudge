@@ -1,0 +1,185 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+    .decision-caption {
+      position: absolute;
+      left: 1230px;
+      top: 620px;
+      font-size: 64px;
+      line-height: 1.08;
+      font-weight: 550;
+      letter-spacing: -1.6px;
+      color: var(--ink);
+      width: 594px;
+    }
+    .selected-control {
+      position: absolute;
+      left: 27.5px;
+      top: 413.36px;
+      width: 164.14px;
+      height: 27.5px;
+      border: 5px solid #3576ec;
+      border-radius: 5px;
+      background: #4f8ef71a;
+    }
+  </style>
+  <div
+    id="root"
+    class="scene"
+    data-composition-id="jev"
+    data-width="1920"
+    data-height="1080"
+    data-duration="3.8"
+  >
+    <h1 class="headline">Meet Jev, Nudge&apos;s action model.</h1>
+    <div class="screen">
+      <div id="jev-stage" class="screen-stage" data-layout-allow-overflow>
+        <img
+          class="screen-media"
+          src="assets/browser/jev-page-idle.png"
+          alt="VS Code issue list on GitHub"
+        />
+        <div
+          id="jev-peek"
+          class="clip"
+          data-start="0.25"
+          data-duration="1.9"
+          data-track-index="3"
+          data-beat="jev-peek"
+        >
+          <img
+            class="screen-media"
+            src="assets/browser/jev-peek.png"
+            alt="Actual Peek outlines over available controls"
+          />
+        </div>
+        <div
+          id="jev-choice"
+          class="clip"
+          data-start="1.4"
+          data-duration="1.26"
+          data-track-index="3"
+          data-beat="jev-choice"
+        >
+          <img
+            class="screen-media"
+            src="assets/browser/jev-choice.png"
+            alt="Actual Peek outlines over available controls"
+          />
+        </div>
+        <div
+          id="jev-selected-control"
+          class="clip"
+          data-start="1.4"
+          data-duration="1.26"
+          data-track-index="4"
+        >
+          <div class="selected-control" data-layout-ignore></div>
+        </div>
+        <video
+          id="jev-result"
+          class="clip screen-media"
+          src="assets/browser/jev-result.mp4"
+          muted
+          playsinline
+          data-start="2.66"
+          data-duration="1.14"
+          data-track-index="1"
+          data-beat="jev-result"
+          data-hf-media-start-basis="local"
+        ></video
+        ><img
+          id="jev-cursor"
+          class="actor"
+          src="assets/pointer.png"
+          alt=""
+          data-layout-ignore
+        />
+        <div id="jev-ring" class="ring" data-layout-ignore></div>
+      </div>
+    </div>
+    <div class="nudge-screen" style="top: 390px; height: 198.4px">
+      <div class="nudge-stage">
+        <video
+          id="jev-feed"
+          class="clip nudge-media"
+          src="assets/browser/jev-feed.mp4"
+          muted
+          playsinline
+          data-start="0"
+          data-duration="3.8"
+          data-track-index="1"
+          data-beat="jev-feed"
+          data-hf-media-start-basis="local"
+        ></video>
+      </div>
+    </div>
+    <div
+      id="jev-decision"
+      class="clip"
+      data-start="1.4"
+      data-duration="2.4"
+      data-track-index="5"
+      data-beat="jev-decision"
+    >
+      <p class="decision-caption">Jev chooses Labels.</p>
+    </div>
+  </div>
+  <script>
+    {
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(
+        "#jev-peek img",
+        { clipPath: "inset(0 100% 0 0)" },
+        { clipPath: "inset(0 0% 0 0)", duration: 0.75, ease: "power2.inOut" },
+        0.25,
+      );
+      tl.fromTo(
+        "#jev-choice img",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.18 },
+        1.4,
+      );
+      launchMove(
+        tl,
+        "#jev-cursor",
+        [780, 300],
+        [109.5703125, 427.109375],
+        2.17,
+        0.3,
+      );
+      launchCamera(
+        tl,
+        "#jev-stage",
+        [109.5703125, 427.109375],
+        2.17,
+        1100,
+        687.5,
+      );
+      launchClick(
+        tl,
+        "#jev-cursor",
+        "#jev-ring",
+        [109.5703125, 427.109375],
+        2.54,
+      );
+      tl.to("#jev-cursor", { opacity: 0, duration: 0.12 }, 3.05);
+      tl.fromTo(
+        "#jev-decision p",
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" },
+        1.4,
+      );
+      tl.fromTo(
+        "#jev-selected-control div",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.18 },
+        1.4,
+      );
+      window.__timelines["jev"] = tl;
+    }
+  </script>
+</template>

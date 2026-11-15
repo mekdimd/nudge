@@ -1,0 +1,109 @@
+{
+  "bank": {
+    "segments": [
+      [
+        2.4979999999999998,
+        1.2
+      ],
+      [
+        5.24,
+        1.2
+      ],
+      [
+        7.43,
+        2.2
+      ]
+    ],
+    "video_offsets": [
+      1.56,
+      1.56,
+      1.56
+    ],
+    "duration": 4.6,
+    "side_top": 366.88186813186815,
+    "side_height": 293.7362637362637
+  },
+  "youtube": {
+    "segments": [
+      [
+        5.002000000000001,
+        1.85
+      ],
+      [
+        8.135,
+        1.45
+      ],
+      [
+        10.716000000000001,
+        0.9
+      ]
+    ],
+    "video_offsets": [
+      2.09,
+      1.95,
+      2.09
+    ],
+    "duration": 4.2,
+    "side_top": 323.80054945054945,
+    "side_height": 379.8989010989011
+  },
+  "jev": {
+    "duration": 3.8,
+    "source": "https://github.com/microsoft/vscode/issues",
+    "peek_controls": 63
+  },
+  "mail": {
+    "duration": 14.3,
+    "phases": [
+      [
+        "compose",
+        0,
+        1.2,
+        "browser"
+      ],
+      [
+        "writing",
+        1.0,
+        0.8,
+        "writing"
+      ],
+      [
+        "review",
+        1.6,
+        4.0,
+        "draft"
+      ],
+      [
+        "fill",
+        5.4,
+        4.8,
+        "browser"
+      ],
+      [
+        "approval",
+        10.0,
+        1.55,
+        "confirm"
+      ],
+      [
+        "send",
+        11.35,
+        2.95,
+        "browser"
+      ]
+    ],
+    "draft_source": 4.971,
+    "draft_stretch": 1,
+    "fill_source": [
+      7.6,
+      4.8,
+      1.32
+    ],
+    "field_starts": [
+      7.92,
+      8.24,
+      8.96
+    ],
+    "send_source": 12.78
+  }
+}
