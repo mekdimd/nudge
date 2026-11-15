@@ -25,7 +25,7 @@ Footage, fonts, audio and runtime are local. Playback needs no remote assets.
 
 "Inspired" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0 License. https://creativecommons.org/licenses/by/4.0/
 
-The excerpt uses the [official MP3](https://incompetech.com/music/royalty-free/mp3-royaltyfree/Inspired.mp3). The editor-supplied music lasts 108.3 seconds, with fades and delivery loudness normalization. The delivery MP4 carries the credit in metadata. Include the attribution above when sharing the film outside this repository.
+The excerpt uses the [official MP3](https://incompetech.com/music/royalty-free/mp3-royaltyfree/Inspired.mp3). The editor-supplied music lasts 108.7 seconds, with fades and delivery loudness normalization. The delivery MP4 carries the credit in metadata. Include the attribution above when sharing the film outside this repository.
 
 ## Keyboard attribution
 

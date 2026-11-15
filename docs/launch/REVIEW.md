@@ -1,6 +1,6 @@
 # Launch film review
 
-The 108.3-second editor cut follows one window at a time. Three website misses lead to a successful blue-cursor click, then the pointer carries into "Meet Nudge." The three-second reveal adds the two-line tagline after the title settles. The closing card and README banner also use "Computer control for" above "limited dexterity."
+The 108.7-second editor cut follows one window at a time. Three website misses lead to a successful blue-cursor click, then the pointer carries into "Meet Nudge." The three-second reveal adds the two-line tagline after the title settles. The closing card and README banner also use "Computer control for" above "limited dexterity."
 
 The wake shot introduces "Hey Nudge" through the actual listening UI. Bank and YouTube begin with the request and Nudge processing, then give the browser the stage for continuous actions. The bank ends with a green completion badge. YouTube identifies Gemini during query drafting, then searches for and plays an Excel pivot table tutorial. Nudge windows are larger than the earlier split view, and their masks follow the recorded bar as it resizes.
 
@@ -10,6 +10,8 @@ Email shows Compose, Nudge processing, the spoken draft prompt, a subject-field 
 
 ## Verification
 
+The latest export includes the longer wake shot, highlighted phrase and animated voice bars. HyperFrames, visual review, delivery decode and audio measurements below cover this export. Application tests, the package build and recording checks describe the earlier review and were not repeated for this media update.
+
 | Check | Result |
 | --- | --- |
 | Test suite | 165 tests passed with headless Qt, fake adapters and stubbed providers. |
@@ -18,10 +20,10 @@ Email shows Compose, Nudge processing, the spoken draft prompt, a subject-field 
 | Recordings | Existing traces and supplied recordings cover the sample PDF download, tutorial playback, public GitHub Labels navigation and edited local mail workflow. Live provider calls were not repeated during this sync. |
 | Wake model | The existing capture loads the repository's Hey Nudge ONNX model and replays voice callbacks into the actual UI. Model loading was checked for the earlier cut, not repeated during this sync. |
 | HyperFrames check | Zero errors across 17 layout samples. Runtime, layout, contrast, craft and audio checks have zero warnings. Automatic motion sampling is disabled. Five timeline-density authoring warnings remain. |
-| Visual review | All storyboard, phone and transition sheets inspected by the author and a fresh agent. Its only P1 finding was the speech caption, corrected and checked in a new snapshot. Forty-eight decoded export frames were also inspected. No sampled frame has a broken mount or competing focal window. |
-| Delivery decode | The complete MP4 decodes without FFmpeg errors. H.264 video is 1920 × 1080, 60 fps, 6,498 frames and 108.3 seconds. The container lasts 108.4 seconds due to the AAC tail. Stereo audio uses 48 kHz sampling. The file is 27.66 MiB and carries music and keyboard credits in metadata. |
-| Audio | -16.9 LUFS integrated and -2.1 dB true peak after AAC encoding. Music, keyboard accents, clicks, Nudge tones and the two prerecorded approval prompts remain in the timeline. The signal analysis reports no warnings. Audio was measured, not heard. |
-| README media | One 14.25-second GIF, 171 frames at 960 × 540, 2.19 MiB. It begins with the bank request, shows every action and holds the completed feed and badge. It has no terminal intro. The banner, poster, terminal photo and labelled interface were regenerated and inspected. The banner and terminal match their existing inputs. The interface has boxed labels for Current app, Debug mode, Step feed, Goal, Toggle voice input and Start / Stop. Photos contains only the terminal image. |
+| Visual review | Storyboard, phone and transition sheets inspected for the updated cut. Extra snapshots at 9.5 and 10.5 seconds show the highlighted wake phrase after its entrance. A decoded delivery frame confirms that phrase appears in the MP4. Existing phone readability limits remain. |
+| Delivery decode | The complete MP4 decodes without FFmpeg errors. H.264 video is 1920 × 1080, 60 fps, 6,522 frames and 108.7 seconds. The container lasts 108.8 seconds due to the AAC tail. Stereo audio uses 48 kHz sampling. The file is 27.84 MiB and carries music and keyboard credits in metadata. |
+| Audio | -17.0 LUFS integrated and -2.0 dB true peak after AAC encoding. Music, keyboard accents, clicks, Nudge tones and the two prerecorded approval prompts remain in the timeline. The signal analysis reports no warnings. Audio was measured, not heard. |
+| README media | Regenerated the poster and one 14.25-second bank GIF, 171 frames at 960 × 540, 2.20 MiB. It begins with the bank request, shows every action and holds the completed feed and badge. It has no terminal intro. Other README artwork belongs to the earlier review. |
 | Documentation | Local links and anchors checked across 20 Markdown files. One GIF and six collapsible sections. Fourteen capture JSON and console logs contain no key patterns. Whitespace checks pass. |
 
 ## Recording and editing
@@ -30,7 +32,7 @@ The saved index.html, compositions, CSS, motion helpers and supplied media defin
 
 scripts/sync_timeline.py derives shot-slots.json and audio-cues.json from the current HTML. The preview builder uses that bank interval, skips its first 0.3 seconds and holds its final frame. It chooses the completed feed for the poster. scripts/build_film.py and assets/browser/edit-points-v6.json reconstruct the earlier cut and must not replace these editor changes during routine exports.
 
-Recording-only holds keep the actual processing indicators visible. These holds leave product code and provider latency records unchanged. Waiting and typing are edited. Cursor flights leave a faint blue trail. The 108.3-second music excerpt covers the cut. User-added speech clips read the draft and Send approval text, but their synthesis provider and voice license are not recorded. This export does not verify live text-to-speech.
+Recording-only holds keep the actual processing indicators visible. These holds leave product code and provider latency records unchanged. Waiting and typing are edited. Cursor flights leave a faint blue trail. The 108.7-second music excerpt covers the cut. User-added speech clips read the draft and Send approval text, but their synthesis provider and voice license are not recorded. This export does not verify live text-to-speech.
 
 ## Retained warnings and limits
 

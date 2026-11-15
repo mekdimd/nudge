@@ -4,13 +4,13 @@ Explain computer control for people with limited dexterity. Show the missed-clic
 
 ## Picture and sound
 
-1920 × 1080, 60 fps, 108.3 seconds, 6,498 frames. The canvas uses #eef2f5 and #222b36. Outfit guidance captions are 72 px, or 84 px for Nudge phases. Opening copy is 94 px. The closing tagline is 84 px with an explicit line break after "for." The address is 64 px. Keep Nudge's actual pointer artwork.
+1920 × 1080, 60 fps, 108.7 seconds, 6,522 frames. The canvas uses #eef2f5 and #222b36. Outfit guidance captions are 72 px, or 84 px for Nudge phases. Opening copy is 94 px. The closing tagline is 84 px with an explicit line break after "for." The address is 64 px. Keep Nudge's actual pointer artwork.
 
 Nudge shots are 1372 px wide. Browser shots are 1376 × 765.4 px, centered at y=200. Browser recordings lose only their grey recorder footer. They keep the source aspect ratio. Nudge's video masks follow its encoded frame boundaries, leaving the surrounding canvas transparent as the bar resizes. Static bar images retain their alpha channel.
 
 The editor uses 0.55 to 0.60-second bank and YouTube cursor flights. Clicks compress the cursor for 0.07 seconds and rebound over 0.16 seconds. Blue flights leave a faint trail that fades after arrival. Human cursors have no trail. The hook's final pointer flight lasts 0.86 seconds as it grows into the reveal mark. Browser camera moves follow the target and then return. Peek close-ups reach 1.8×.
 
-Music uses a 120 bpm excerpt of "Inspired" by Kevin MacLeod. Soft clicks, typing and Nudge's actual tones accompany visible actions. Prerecorded draft and Send prompts occupy 77.65–81.30 and 94.65–98.60 seconds. The mix targets -17 LUFS and -2.3 dB true peak before AAC encoding. See [asset credits](ASSETS.md).
+Music uses a 120 bpm excerpt of "Inspired" by Kevin MacLeod. Soft clicks, typing and Nudge's actual tones accompany visible actions. Prerecorded draft and Send prompts occupy 78.05–81.70 and 95.05–99.00 seconds. The mix targets -17 LUFS and -2.3 dB true peak before AAC encoding. See [asset credits](ASSETS.md).
 
 ## Shots and focal points
 
@@ -18,12 +18,12 @@ Music uses a 120 bpm excerpt of "Inspired" by Kevin MacLeod. Soft clicks, typing
 | --- | --- | --- |
 | 0 to 323 | Website misses, centered question, blue assistance click and continuous pointer transition | Cursor, then the question, then the blue cursor |
 | 324 to 503 | Meet Nudge and the pointer mark | Wordmark and pointer as one lockup |
-| 504 to 851 | Hey Nudge and the actual listening UI | Listening bar and its transcript |
-| 852 to 1721 | Bank request, Nudge processing, three browser actions and completed feed | One window per phase |
-| 1722 to 2849 | Excel tutorial request, Gemini drafting, query typing, search and playback | Nudge, search field, selected tutorial, then playback |
-| 2850 to 4217 | Peek activation, dark-mode control outlines, Jev processing, its decision and Labels navigation | Peek button, control outlines, loading feed, then chosen target |
-| 4218 to 6221 | Email request, processing, spoken draft prompt, draft edit, typing, spoken Send approval and result | One window per phase, with a stage subtitle |
-| 6222 to 6497 | Pointer, wordmark, two-line tagline and repository | Closing lockup |
+| 504 to 875 | Hey Nudge and the actual listening UI | Listening bar and its transcript |
+| 876 to 1745 | Bank request, Nudge processing, three browser actions and completed feed | One window per phase |
+| 1746 to 2873 | Excel tutorial request, Gemini drafting, query typing, search and playback | Nudge, search field, selected tutorial, then playback |
+| 2874 to 4241 | Peek activation, dark-mode control outlines, Jev processing, its decision and Labels navigation | Peek button, control outlines, loading feed, then chosen target |
+| 4242 to 6245 | Email request, processing, spoken draft prompt, draft edit, typing, spoken Send approval and result | One window per phase, with a stage subtitle |
+| 6246 to 6521 | Pointer, wordmark, two-line tagline and repository | Closing lockup |
 
 The reveal lasts three seconds and adds the two-line tagline after the title settles. Bank starts with 2.4 seconds of the request, two seconds of processing and 8.7 seconds of continuous browser action. A green completion badge accompanies the final 1.4-second feed. YouTube starts with a 2.4-second request and 2.8 seconds of Gemini drafting. Its continuous 13.6-second browser clip includes search, tutorial selection and playback. The playback badge holds for 2.5 seconds.
 
