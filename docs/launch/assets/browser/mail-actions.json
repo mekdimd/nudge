@@ -1,7 +1,7 @@
 {
   "case": "mail",
-  "epochStarted": 1794702592.125,
-  "recordingOffset": 1.78,
+  "epochStarted": 1794705197.856,
+  "recordingOffset": 1.636,
   "actions": [
     {
       "id": 2,
@@ -12,8 +12,8 @@
         110.5,
         138
       ],
-      "at": 4.029,
-      "endedAt": 4.565
+      "at": 3.953,
+      "endedAt": 4.504
     },
     {
       "id": 6,
@@ -25,8 +25,8 @@
         743.5,
         272
       ],
-      "at": 11.94,
-      "endedAt": 12.237
+      "at": 14.606,
+      "endedAt": 14.897
     },
     {
       "id": 7,
@@ -38,8 +38,8 @@
         743.5,
         337
       ],
-      "at": 12.261,
-      "endedAt": 12.767
+      "at": 14.922,
+      "endedAt": 15.443
     },
     {
       "id": 8,
@@ -51,8 +51,8 @@
         701,
         487.5
       ],
-      "at": 12.822,
-      "endedAt": 13.956
+      "at": 15.474,
+      "endedAt": 16.645
     },
     {
       "id": 12,
@@ -63,8 +63,8 @@
         340.5625,
         646
       ],
-      "at": 16.567,
-      "endedAt": 17.082
+      "at": 21.288,
+      "endedAt": 21.808
     }
   ],
   "title": "Message sent to prof.lee@sfu.ca | Mail",
@@ -76,6 +76,6 @@
   "downloads": [],
   "outcome": {
     "ok": true,
-    "message": "Done in 3 steps · 16.3 s · Jev 201 ms per decision"
+    "message": "Done in 3 steps · 22.1 s · Jev 129 ms per decision"
   }
 }

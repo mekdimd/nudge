@@ -176,6 +176,22 @@ def main_capture():
 
     main.NudgeLoop = RecordingLoop
     adapter = BrowserCaptureAdapter(args.rpc)
+    processing_hold = float(os.environ.get("NUDGE_CAPTURE_PROCESSING_HOLD", "0"))
+
+    class RecordingJev(JevClient):
+        def decide(self, *values, **options):
+            began = time.monotonic()
+            result = super().decide(*values, **options)
+            time.sleep(max(0, processing_hold - (time.monotonic() - began)))
+            return result
+
+    class RecordingWriter(Writer):
+        def fill(self, *values, **options):
+            began = time.monotonic()
+            result = super().fill(*values, **options)
+            time.sleep(max(0, processing_hold * 2 - (time.monotonic() - began)))
+            return result
+
     trace = {
         "case": args.case,
         "goal": args.goal,
@@ -183,6 +199,7 @@ def main_capture():
         "events": [],
         "ui_frames": [],
         "outcome": None,
+        "processing_hold_seconds": processing_hold,
     }
     started = time.monotonic()
     trace["epoch_started"] = time.time()
@@ -194,8 +211,8 @@ def main_capture():
         audio.set_sounds_muted(True)
         app = main.Nudge(
             adapter,
-            JevClient(os.environ["TYPESAFE_API_KEY"]),
-            Writer(os.environ["GEMINI_API_KEY"]),
+            RecordingJev(os.environ["TYPESAFE_API_KEY"]),
+            RecordingWriter(os.environ["GEMINI_API_KEY"]),
             audio=audio,
         )
         app.overlay.setGeometry(0, 0, 1280, 800)

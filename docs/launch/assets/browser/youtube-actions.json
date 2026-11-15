@@ -1,46 +1,39 @@
 {
   "case": "youtube",
-  "epochStarted": 1794702593.192,
-  "recordingOffset": 2.846,
+  "epochStarted": 1794705119.928,
+  "recordingOffset": 2.688,
   "actions": [
     {
       "id": 2,
       "operation": "type",
       "control_id": "capture-3",
-      "text": "how to change a tire",
+      "text": "Excel pivot tables for beginners",
       "label": "Search",
       "center": [
         596.5,
         28
       ],
-      "at": 5.352,
-      "endedAt": 6.716
+      "at": 7.719,
+      "endedAt": 9.917
     },
     {
       "id": 6,
       "operation": "click",
       "control_id": "capture-6",
-      "label": "how to change a tire",
+      "label": "excel pivot tables for beginners",
       "center": [
-        420.9140625,
+        460.046875,
         81.5
       ],
-      "at": 8.535,
-      "endedAt": 9.054
-    },
-    {
-      "id": 10,
-      "operation": "scroll",
-      "delta": 550,
-      "at": 10.836,
-      "endedAt": 10.86
+      "at": 11.698,
+      "endedAt": 12.226
     }
   ],
-  "title": "how to change a tire - YouTube",
+  "title": "excel pivot tables for beginners - YouTube",
   "sent": null,
   "downloads": [],
   "outcome": {
     "ok": true,
-    "message": "Done in 3 steps · 11.1 s · Jev 185 ms per decision"
+    "message": "Done in 2 steps · 8.8 s · Jev 134 ms per decision"
   }
 }
