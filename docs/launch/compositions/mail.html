@@ -75,9 +75,19 @@
     data-composition-id="mail"
     data-width="1920"
     data-height="1080"
-    data-duration="14.3"
+    data-duration="22.6"
   >
-    <h1 class="headline">Draft. Edit. Send.</h1>
+    <h1 id="mail-headline" class="headline">Draft. Edit. Send.</h1>
+    <div
+      id="mail-input-caption"
+      class="clip"
+      data-start="10.5"
+      data-duration="6.0"
+      data-track-index="5"
+      data-beat="mail-input"
+    >
+      <p class="headline" data-hold>Nudge types it for you.</p>
+    </div>
     <div
       id="mail-compose-window"
       style="position: absolute; inset: 0; z-index: 2"
@@ -91,11 +101,16 @@
             muted
             playsinline
             data-start="0"
-            data-duration="1.2"
+            data-duration="2.0"
             data-track-index="1"
             data-beat="mail-compose-video"
             data-hf-media-start-basis="local"
           ></video
+          ><svg class="cursor-trail" aria-hidden="true" data-layout-ignore>
+            <path id="mail-compose-cursor-trail-0" />
+            <path id="mail-compose-cursor-trail-1" />
+            <path id="mail-compose-cursor-trail-2" />
+            <path id="mail-compose-cursor-trail-3" /></svg
           ><img
             id="mail-compose-cursor"
             class="clip actor"
@@ -103,7 +118,7 @@
             alt=""
             data-layout-ignore
             data-start="0"
-            data-duration="1.2"
+            data-duration="2.0"
           />
           <div id="mail-compose-ring" class="ring" data-layout-ignore></div>
         </div>
@@ -121,8 +136,8 @@
             src="assets/browser/mail-writing.mp4"
             muted
             playsinline
-            data-start="1.0"
-            data-duration="0.8"
+            data-start="1.8"
+            data-duration="3.9"
             data-track-index="1"
             data-beat="mail-writing-video"
             data-hf-media-start-basis="local"
@@ -133,8 +148,8 @@
             src="assets/human-cursor.svg"
             alt=""
             data-layout-ignore
-            data-start="1.0"
-            data-duration="0.8"
+            data-start="1.8"
+            data-duration="3.9"
           />
         </div>
       </div>
@@ -151,8 +166,8 @@
             src="assets/browser/mail-review-header.mp4"
             muted
             playsinline
-            data-start="1.6"
-            data-duration="4.0"
+            data-start="5.5"
+            data-duration="5.2"
             data-track-index="1"
             data-beat="mail-review-header"
             data-hf-media-start-basis="local"
@@ -163,8 +178,8 @@
             src="assets/browser/mail-review-panel.mp4"
             muted
             playsinline
-            data-start="1.6"
-            data-duration="4.0"
+            data-start="5.5"
+            data-duration="5.2"
             data-track-index="1"
             data-beat="mail-review-panel"
             data-hf-media-start-basis="local"
@@ -175,8 +190,8 @@
             src="assets/human-cursor.svg"
             alt=""
             data-layout-ignore
-            data-start="1.6"
-            data-duration="4.0"
+            data-start="5.5"
+            data-duration="5.2"
           />
           <div id="mail-review-ring" class="ring" data-layout-ignore></div>
         </div>
@@ -191,20 +206,25 @@
             src="assets/browser/mail-fill.mp4"
             muted
             playsinline
-            data-start="5.4"
-            data-duration="4.8"
+            data-start="10.5"
+            data-duration="6.2"
             data-track-index="1"
             data-beat="mail-fill-video"
             data-hf-media-start-basis="local"
           ></video
+          ><svg class="cursor-trail" aria-hidden="true" data-layout-ignore>
+            <path id="mail-fill-cursor-trail-0" />
+            <path id="mail-fill-cursor-trail-1" />
+            <path id="mail-fill-cursor-trail-2" />
+            <path id="mail-fill-cursor-trail-3" /></svg
           ><img
             id="mail-fill-cursor"
             class="clip actor"
             src="assets/pointer.png"
             alt=""
             data-layout-ignore
-            data-start="5.4"
-            data-duration="4.8"
+            data-start="10.5"
+            data-duration="6.2"
           />
         </div>
       </div>
@@ -221,8 +241,8 @@
             src="assets/browser/mail-approval-header.mp4"
             muted
             playsinline
-            data-start="10.0"
-            data-duration="1.55"
+            data-start="16.5"
+            data-duration="2.4"
             data-track-index="1"
             data-beat="mail-approval-header"
             data-hf-media-start-basis="local"
@@ -233,8 +253,8 @@
             src="assets/browser/mail-approval-panel.mp4"
             muted
             playsinline
-            data-start="10.0"
-            data-duration="1.55"
+            data-start="16.5"
+            data-duration="2.4"
             data-track-index="1"
             data-beat="mail-approval-panel"
             data-hf-media-start-basis="local"
@@ -245,8 +265,8 @@
             src="assets/human-cursor.svg"
             alt=""
             data-layout-ignore
-            data-start="10.0"
-            data-duration="1.55"
+            data-start="16.5"
+            data-duration="2.4"
           />
           <div id="mail-approval-ring" class="ring" data-layout-ignore></div>
         </div>
@@ -261,8 +281,8 @@
             src="assets/browser/mail-send.mp4"
             muted
             playsinline
-            data-start="11.35"
-            data-duration="2.05"
+            data-start="18.7"
+            data-duration="2.8"
             data-track-index="1"
             data-beat="mail-send-video"
             data-hf-media-start-basis="local"
@@ -270,8 +290,8 @@
           <div
             id="mail-result-hold"
             class="clip"
-            data-start="13.4"
-            data-duration="0.9"
+            data-start="21.5"
+            data-duration="1.1"
             data-track-index="2"
             data-hold
           >
@@ -281,14 +301,19 @@
               alt="Edited email sent to Professor Lee"
             />
           </div>
-          <img
+          <svg class="cursor-trail" aria-hidden="true" data-layout-ignore>
+            <path id="mail-send-cursor-trail-0" />
+            <path id="mail-send-cursor-trail-1" />
+            <path id="mail-send-cursor-trail-2" />
+            <path id="mail-send-cursor-trail-3" /></svg
+          ><img
             id="mail-send-cursor"
             class="clip actor"
             src="assets/pointer.png"
             alt=""
             data-layout-ignore
-            data-start="11.35"
-            data-duration="2.95"
+            data-start="18.7"
+            data-duration="3.9"
           />
           <div id="mail-send-ring" class="ring" data-layout-ignore></div>
         </div>
@@ -302,57 +327,57 @@
       tl.to(
         "#mail-compose-window .focus-window",
         { x: 180, opacity: 0, duration: 0.2, ease: "power2.in" },
-        1.0,
+        1.8,
       );
       tl.fromTo(
         "#mail-writing-window .focus-window",
         { x: 180, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.2, ease: "power2.out" },
-        1.0,
+        1.8,
       );
       tl.to(
         "#mail-writing-window .focus-window",
         { x: -180, opacity: 0, duration: 0.2, ease: "power2.in" },
-        1.6,
+        5.5,
       );
       tl.fromTo(
         "#mail-review-window .focus-window",
         { x: 180, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.2, ease: "power2.out" },
-        1.6,
+        5.5,
       );
       tl.to(
         "#mail-review-window .focus-window",
         { x: -180, opacity: 0, duration: 0.2, ease: "power2.in" },
-        5.3999999999999995,
+        10.5,
       );
       tl.fromTo(
         "#mail-fill-window .focus-window",
         { x: -180, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.2, ease: "power2.out" },
-        5.4,
+        10.5,
       );
       tl.to(
         "#mail-fill-window .focus-window",
         { x: 180, opacity: 0, duration: 0.2, ease: "power2.in" },
-        10.0,
+        16.5,
       );
       tl.fromTo(
         "#mail-approval-window .focus-window",
         { x: 180, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.2, ease: "power2.out" },
-        10.0,
+        16.5,
       );
       tl.to(
         "#mail-approval-window .focus-window",
         { x: -180, opacity: 0, duration: 0.2, ease: "power2.in" },
-        11.350000000000001,
+        18.7,
       );
       tl.fromTo(
         "#mail-send-window .focus-window",
         { x: -180, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.2, ease: "power2.out" },
-        11.35,
+        18.7,
       );
       launchMove(
         tl,
@@ -370,25 +395,33 @@
         0.36,
       );
       tl.to("#mail-compose-cursor", { opacity: 0, duration: 0.1 }, 0.8);
+      tl.set("#mail-headline", { opacity: 0 }, 10.5);
+      tl.set("#mail-headline", { opacity: 1 }, 16.5);
+      tl.fromTo(
+        "#mail-input-caption p",
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" },
+        10.5,
+      );
       launchMove(
         tl,
         "#mail-review-cursor",
         [740, 245],
         [57.651, 435.904],
-        2.1239999999999997,
+        6.464,
         0.28,
       );
       tl.to(
         "#mail-review-cursor",
         { x: 149.096, y: 435.904, duration: 0.2, ease: "power1.inOut" },
-        2.2739999999999996,
+        6.614,
       );
       launchMove(
         tl,
         "#mail-review-cursor",
         [149.096, 435.904],
         [658.012, 807.651],
-        5.011999999999999,
+        9.98,
         0.28,
       );
       launchClick(
@@ -396,26 +429,26 @@
         "#mail-review-cursor",
         "#mail-review-ring",
         [658.012, 807.651],
-        5.331999999999999,
+        10.3,
       );
       tl.to(
         "#mail-review-cursor",
         { opacity: 0, duration: 0.07 },
-        5.401999999999999,
+        10.370000000000001,
       );
       launchMove(
         tl,
         "#mail-fill-cursor",
         [850, 210],
         [827.144, 302.6],
-        5.572400000000001,
+        10.698800000000002,
         0.25,
       );
       launchCamera(
         tl,
         "#mail-fill-stage",
         [827.144, 302.6],
-        5.572400000000001,
+        10.698800000000002,
         1424,
         890,
       );
@@ -424,14 +457,14 @@
         "#mail-fill-cursor",
         [827.144, 302.6],
         [827.144, 374.913],
-        5.9948000000000015,
+        11.279599999999999,
         0.25,
       );
       launchCamera(
         tl,
         "#mail-fill-stage",
         [827.144, 374.913],
-        5.9948000000000015,
+        11.279599999999999,
         1424,
         890,
       );
@@ -440,24 +473,24 @@
         "#mail-fill-cursor",
         [827.144, 374.913],
         [779.863, 542.344],
-        6.945200000000002,
+        12.071600000000002,
         0.25,
       );
       launchCamera(
         tl,
         "#mail-fill-stage",
         [779.863, 542.344],
-        6.945200000000002,
+        12.071600000000002,
         1424,
         890,
       );
-      tl.to("#mail-fill-cursor", { opacity: 0, duration: 0.1 }, 9.3);
+      tl.to("#mail-fill-cursor", { opacity: 0, duration: 0.1 }, 15.8);
       launchMove(
         tl,
         "#mail-approval-cursor",
         [1030, 190],
         [339.94, 253.012],
-        10.92,
+        18.23,
         0.28,
       );
       launchClick(
@@ -465,22 +498,22 @@
         "#mail-approval-cursor",
         "#mail-approval-ring",
         [339.94, 253.012],
-        11.24,
+        18.55,
       );
-      tl.to("#mail-approval-cursor", { opacity: 0, duration: 0.07 }, 11.31);
+      tl.to("#mail-approval-cursor", { opacity: 0, duration: 0.07 }, 18.62);
       launchMove(
         tl,
         "#mail-send-cursor",
         [780, 535],
         [378.87578125, 718.6750000000001],
-        11.58,
+        18.93,
         0.3,
       );
       launchCamera(
         tl,
         "#mail-send-stage",
         [378.87578125, 718.6750000000001],
-        11.58,
+        18.93,
         1424,
         890,
       );
@@ -489,9 +522,9 @@
         "#mail-send-cursor",
         "#mail-send-ring",
         [378.87578125, 718.6750000000001],
-        11.89,
+        19.24,
       );
-      tl.to("#mail-send-cursor", { opacity: 0, duration: 0.1 }, 12.3);
+      tl.to("#mail-send-cursor", { opacity: 0, duration: 0.1 }, 19.65);
       window.__timelines["mail"] = tl;
     }
   </script>

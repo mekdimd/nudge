@@ -6,8 +6,16 @@
     }
     .wordmark {
       left: 300px;
-      top: 325px;
+      top: 365px;
       font-size: 250px;
+    }
+    .reveal-intro {
+      position: absolute;
+      left: 314px;
+      top: 286px;
+      font-size: 76px;
+      font-weight: 450;
+      color: var(--ink);
     }
   </style>
   <div
@@ -16,9 +24,12 @@
     data-composition-id="reveal"
     data-width="1920"
     data-height="1080"
-    data-duration="1.4"
+    data-duration="2.2"
   >
-    <h1 id="reveal-word" class="wordmark">Nudge</h1>
+    <div id="reveal-title" data-hold>
+      <p class="reveal-intro">Meet</p>
+      <h1 id="reveal-word" class="wordmark">Nudge</h1>
+    </div>
     <img
       id="reveal-cursor"
       class="actor"
@@ -31,7 +42,7 @@
     {
       const tl = gsap.timeline({ paused: true });
       tl.fromTo(
-        "#reveal-word",
+        "#reveal-title",
         { y: 65, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.22, ease: "power3.out" },
         0,
@@ -41,7 +52,7 @@
         { x: 1590, y: 670, scale: 1.8, rotation: 18 },
         {
           x: 1240,
-          y: 335,
+          y: 365,
           scale: 2.3,
           rotation: 0,
           opacity: 1,

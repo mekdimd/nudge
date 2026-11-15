@@ -11,7 +11,7 @@
     data-composition-id="bank"
     data-width="1920"
     data-height="1080"
-    data-duration="4.6"
+    data-duration="6.6"
   >
     <h1 class="headline">Download a statement.</h1>
     <div class="screen">
@@ -23,7 +23,7 @@
           muted
           playsinline
           data-start="0"
-          data-duration="1.2"
+          data-duration="1.8"
           data-track-index="1"
           data-beat="bank-0-screen"
           data-hf-media-start-basis="local"
@@ -35,8 +35,8 @@
           src="assets/browser/bank-1-screen.mp4"
           muted
           playsinline
-          data-start="1.2"
-          data-duration="1.2"
+          data-start="1.8"
+          data-duration="1.8"
           data-track-index="1"
           data-beat="bank-1-screen"
           data-hf-media-start-basis="local"
@@ -48,14 +48,19 @@
           src="assets/browser/bank-2-screen.mp4"
           muted
           playsinline
-          data-start="2.4"
-          data-duration="2.2"
+          data-start="3.6"
+          data-duration="3.0"
           data-track-index="1"
           data-beat="bank-2-screen"
           data-hf-media-start-basis="local"
         ></video>
         <div id="bank-ring-2" class="ring" data-layout-ignore></div>
-        <img
+        <svg class="cursor-trail" aria-hidden="true" data-layout-ignore>
+          <path id="bank-cursor-trail-0" />
+          <path id="bank-cursor-trail-1" />
+          <path id="bank-cursor-trail-2" />
+          <path id="bank-cursor-trail-3" /></svg
+        ><img
           id="bank-cursor"
           class="actor"
           src="assets/pointer.png"
@@ -76,7 +81,7 @@
           muted
           playsinline
           data-start="0"
-          data-duration="1.2"
+          data-duration="1.8"
           data-track-index="1"
           data-beat="bank-0-nudge"
           data-hf-media-start-basis="local"
@@ -87,8 +92,8 @@
           src="assets/browser/bank-1-nudge.mp4"
           muted
           playsinline
-          data-start="1.2"
-          data-duration="1.2"
+          data-start="1.8"
+          data-duration="1.8"
           data-track-index="1"
           data-beat="bank-1-nudge"
           data-hf-media-start-basis="local"
@@ -99,8 +104,8 @@
           src="assets/browser/bank-2-nudge.mp4"
           muted
           playsinline
-          data-start="2.4"
-          data-duration="2.2"
+          data-start="3.6"
+          data-duration="3.0"
           data-track-index="1"
           data-beat="bank-2-nudge"
           data-hf-media-start-basis="local"
@@ -115,7 +120,7 @@
         <div
           id="bank-done-hold"
           class="clip"
-          data-start="4.05"
+          data-start="6.05"
           data-duration=".55"
           data-track-index="3"
           data-beat="bank-finished"
@@ -153,27 +158,34 @@
         "#bank-cursor",
         [92.383, 221.719],
         [984.24, 342.797],
-        1.61,
+        2.21,
         0.3,
       );
-      launchClick(
-        tl,
-        "#bank-cursor",
-        "#bank-ring-1",
-        [984.24, 342.797],
-        1.9500000000000002,
-      );
-      launchCamera(tl, "#bank-stage", [984.24, 342.797], 1.61, 1100, 687.5);
+      launchClick(tl, "#bank-cursor", "#bank-ring-1", [984.24, 342.797], 2.55);
+      launchCamera(tl, "#bank-stage", [984.24, 342.797], 2.21, 1100, 687.5);
       launchMove(
         tl,
         "#bank-cursor",
         [984.24, 342.797],
         [899.249, 461.39],
-        2.91,
+        4.109999999999999,
         0.3,
       );
-      launchClick(tl, "#bank-cursor", "#bank-ring-2", [899.249, 461.39], 3.25);
-      launchCamera(tl, "#bank-stage", [899.249, 461.39], 2.91, 1100, 687.5);
+      launchClick(
+        tl,
+        "#bank-cursor",
+        "#bank-ring-2",
+        [899.249, 461.39],
+        4.449999999999999,
+      );
+      launchCamera(
+        tl,
+        "#bank-stage",
+        [899.249, 461.39],
+        4.109999999999999,
+        1100,
+        687.5,
+      );
       tl.set(".headline", { opacity: 1 });
       window.__timelines["bank"] = tl;
     }

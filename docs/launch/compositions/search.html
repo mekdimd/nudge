@@ -11,9 +11,9 @@
     data-composition-id="youtube"
     data-width="1920"
     data-height="1080"
-    data-duration="4.2"
+    data-duration="7.7"
   >
-    <h1 class="headline">Find a how-to.</h1>
+    <h1 class="headline">Find an Excel tutorial.</h1>
     <div class="screen">
       <div id="youtube-stage" class="screen-stage" data-layout-allow-overflow>
         <video
@@ -23,7 +23,7 @@
           muted
           playsinline
           data-start="0"
-          data-duration="1.85"
+          data-duration="3.55"
           data-track-index="1"
           data-beat="youtube-0-screen"
           data-hf-media-start-basis="local"
@@ -35,25 +35,18 @@
           src="assets/browser/youtube-1-screen.mp4"
           muted
           playsinline
-          data-start="1.85"
-          data-duration="1.45"
+          data-start="3.55"
+          data-duration="4.15"
           data-track-index="1"
           data-beat="youtube-1-screen"
           data-hf-media-start-basis="local"
         ></video>
         <div id="youtube-ring-1" class="ring" data-layout-ignore></div>
-        <video
-          id="youtube-2-screen"
-          class="clip screen-media"
-          src="assets/browser/youtube-2-screen.mp4"
-          muted
-          playsinline
-          data-start="3.3"
-          data-duration="0.9"
-          data-track-index="1"
-          data-beat="youtube-2-screen"
-          data-hf-media-start-basis="local"
-        ></video
+        <svg class="cursor-trail" aria-hidden="true" data-layout-ignore>
+          <path id="youtube-cursor-trail-0" />
+          <path id="youtube-cursor-trail-1" />
+          <path id="youtube-cursor-trail-2" />
+          <path id="youtube-cursor-trail-3" /></svg
         ><img
           id="youtube-cursor"
           class="actor"
@@ -79,7 +72,7 @@
           muted
           playsinline
           data-start="0"
-          data-duration="1.85"
+          data-duration="3.55"
           data-track-index="1"
           data-beat="youtube-0-nudge"
           data-hf-media-start-basis="local"
@@ -90,22 +83,10 @@
           src="assets/browser/youtube-1-nudge.mp4"
           muted
           playsinline
-          data-start="1.85"
-          data-duration="1.45"
+          data-start="3.55"
+          data-duration="4.15"
           data-track-index="1"
           data-beat="youtube-1-nudge"
-          data-hf-media-start-basis="local"
-        ></video
-        ><video
-          id="youtube-2-nudge"
-          class="clip nudge-media"
-          src="assets/browser/youtube-2-nudge.mp4"
-          muted
-          playsinline
-          data-start="3.3"
-          data-duration="0.9"
-          data-track-index="1"
-          data-beat="youtube-2-nudge"
           data-hf-media-start-basis="local"
         ></video
         ><img
@@ -118,7 +99,7 @@
         <div
           id="youtube-done-hold"
           class="clip"
-          data-start="3.6500000000000004"
+          data-start="7.15"
           data-duration=".55"
           data-track-index="3"
           data-beat="youtube-finished"
@@ -140,7 +121,7 @@
         "#youtube-cursor",
         [682.0, 206.25],
         [512.617, 24.062],
-        0.04,
+        0.2099999999999998,
         0.3,
       );
       launchClick(
@@ -148,25 +129,32 @@
         "#youtube-cursor",
         "#youtube-ring-0",
         [512.617, 24.062],
-        0.34999999999999964,
+        0.5499999999999998,
       );
-      launchCamera(tl, "#youtube-stage", [512.617, 24.062], 0.04, 1100, 687.5);
+      launchCamera(
+        tl,
+        "#youtube-stage",
+        [512.617, 24.062],
+        0.2099999999999998,
+        1100,
+        687.5,
+      );
       launchMove(
         tl,
         "#youtube-cursor",
         [512.617, 24.062],
-        [361.723, 70.039],
-        1.91,
+        [395.353, 70.039],
+        3.91,
         0.3,
       );
       launchClick(
         tl,
         "#youtube-cursor",
         "#youtube-ring-1",
-        [361.723, 70.039],
-        2.25,
+        [395.353, 70.039],
+        4.25,
       );
-      launchCamera(tl, "#youtube-stage", [361.723, 70.039], 1.91, 1100, 687.5);
+      launchCamera(tl, "#youtube-stage", [395.353, 70.039], 3.91, 1100, 687.5);
       tl.set(".headline", { opacity: 1 });
       window.__timelines["youtube"] = tl;
     }

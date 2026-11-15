@@ -59,7 +59,19 @@ def actor(id, human=False, start=None, duration=None):
     timing = (
         f' data-start="{start}" data-duration="{duration}"' if start is not None else ""
     )
-    return f'<img id="{id}" class="{"clip " if timing else ""}actor{" human" if human else ""}" src="assets/{"human-cursor.svg" if human else "pointer.png"}" alt="" data-layout-ignore{timing}>'
+    trail = (
+        ""
+        if human
+        else (
+            '<svg class="cursor-trail" aria-hidden="true" data-layout-ignore>'
+            + "".join(f'<path id="{id}-trail-{i}"/>' for i in range(4))
+            + "</svg>"
+        )
+    )
+    return (
+        trail
+        + f'<img id="{id}" class="{"clip " if timing else ""}actor{" human" if human else ""}" src="assets/{"human-cursor.svg" if human else "pointer.png"}" alt="" data-layout-ignore{timing}>'
+    )
 
 
 def ring(id, miss=False):
@@ -149,6 +161,13 @@ def build_task(case, title, segments, absolute_start, video_offsets=None):
                 screen += ring(f"{case}-ring-{j}")
                 if a["operation"] == "click":
                     cue("click-soft.mp3", absolute_start + local, 0.65)
+                elif a["operation"] == "type":
+                    cue(
+                        "typing.mp3",
+                        absolute_start + local,
+                        0.30,
+                        a["endedAt"] - a["at"],
+                    )
                 cue("tick.wav", absolute_start + local + 0.32, 0.38)
                 previous = point
         for event in trace["events"]:
@@ -239,38 +258,38 @@ def build_mail(absolute_start):
     first = trace["ui_frames"][0]
     events = {e["kind"]: e for e in trace["events"] if e["kind"].startswith("edit-")}
     approvals = {e["prompt"]: e for e in trace["events"] if e["kind"] == "approve"}
-    draft_source = draft["at"] - first + 0.59
+    draft_source = draft["at"] - first + 0.10
     draft_stretch = 1
-    panel_clip("mail-review", draft, draft_source, 4.0, draft_stretch, hold=0.4)
+    panel_clip("mail-review", draft, draft_source, 5.2, draft_stretch, hold=1.2)
     encode(
         A / "mail-nudge.mp4",
         A / "mail-writing.mp4",
-        3.45,
-        0.8,
-        "crop=910:350:0:0,fps=60",
+        4.20,
+        3.9,
+        "crop=910:350:0:0,trim=duration=3.7,tpad=stop_mode=clone:stop_duration=0.2,fps=60",
     )
-    confirm_source = approvals["confirm"]["at"] - first - 1.24
-    panel_clip("mail-approval", confirm, confirm_source, 1.55, hold=0.4)
-    browser_clip("mail-compose", 2.68, 1.2)
+    confirm_source = confirm["at"] - first + 0.05
+    panel_clip("mail-approval", confirm, confirm_source, 2.4, hold=0.6)
+    browser_clip("mail-compose", 5.12, 2.0)
     # Page changes, rather than the browser recorder's wall-clock offset, locate typing.
-    browser_clip("mail-fill", 7.60, 4.8, 1.32)
-    browser_clip("mail-send", 12.78, 2.05)
-    body = '<h1 class="headline">Draft. Edit. Send.</h1>'
+    browser_clip("mail-fill", 15.78, 6.2, 1.32)
+    browser_clip("mail-send", 22.50, 2.8)
+    body = '<h1 id="mail-headline" class="headline">Draft. Edit. Send.</h1><div id="mail-input-caption" class="clip" data-start="10.5" data-duration="6.0" data-track-index="5" data-beat="mail-input"><p class="headline" data-hold>Nudge types it for you.</p></div>'
     script = ""
     phases = [
-        ("compose", 0, 1.2, "browser"),
-        ("writing", 1.0, 0.8, "writing"),
-        ("review", 1.6, 4.0, "draft"),
-        ("fill", 5.4, 4.8, "browser"),
-        ("approval", 10.0, 1.55, "confirm"),
-        ("send", 11.35, 2.95, "browser"),
+        ("compose", 0, 2.0, "browser"),
+        ("writing", 1.8, 3.9, "writing"),
+        ("review", 5.5, 5.2, "draft"),
+        ("fill", 10.5, 6.2, "browser"),
+        ("approval", 16.5, 2.4, "confirm"),
+        ("send", 18.7, 3.9, "browser"),
     ]
     for name, start, duration, kind in phases:
         ident = f"mail-{name}"
         cls = "focus-browser" if kind == "browser" else f"focus-nudge {kind}"
         content = ""
         if kind == "browser":
-            media_duration = 2.05 if name == "send" else duration
+            media_duration = 2.8 if name == "send" else duration
             content += timed_video(
                 ident + "-video", ident + ".mp4", start, media_duration, "focus-media"
             )
@@ -307,9 +326,10 @@ def build_mail(absolute_start):
     script += f'launchMove(tl,"#mail-compose-cursor",[600,250],{compose_point},.04,.28);launchClick(tl,"#mail-compose-cursor","#mail-compose-ring",{compose_point},.36);tl.to("#mail-compose-cursor",{{opacity:0,duration:.1}},.8);'
     cue("start.wav", absolute_start + 0.05, 0.38)
     cue("click-soft.mp3", absolute_start + 0.36, 0.65)
+    script += 'tl.set("#mail-headline",{opacity:0},10.5);tl.set("#mail-headline",{opacity:1},16.5);tl.fromTo("#mail-input-caption p",{opacity:0,y:12},{opacity:1,y:0,duration:.2,ease:"power2.out"},10.5);'
 
     def draft_time(at):
-        return 1.6 + (at - first - draft_source) * draft_stretch
+        return 5.5 + (at - first - draft_source) * draft_stretch
 
     def panel_point(prompt, point):
         x, y, w, _ = prompt["panel_rect"]
@@ -326,19 +346,19 @@ def build_mail(absolute_start):
     typed_end = draft_time(events["edit-subject"]["at"])
     cue("typing.mp3", absolute_start + typed_at, 0.42, typed_end - typed_at)
     approval = panel_point(draft, approvals["draft"]["center"])
-    approve_at = draft_time(approvals["draft"]["at"])
+    approve_at = 10.30
     script += f'launchMove(tl,"#mail-review-cursor",{right},{approval},{approve_at - 0.32},.28);launchClick(tl,"#mail-review-cursor","#mail-review-ring",{approval},{approve_at});tl.to("#mail-review-cursor",{{opacity:0,duration:.07}},{approve_at + 0.07});'
     cue("click-soft.mp3", absolute_start + approve_at, 0.65)
     # These field starts were checked in decoded browser frames at 25 fps.
     previous = [850, 210]
     for j, (source_at, source_end, point) in enumerate(
         [
-            (7.92, 8.20, [743.5, 272]),
-            (8.24, 8.88, [743.5, 337]),
-            (8.96, 10.40, [701, 487.5]),
+            (16.12, 16.52, [743.5, 272]),
+            (16.56, 17.12, [743.5, 337]),
+            (17.16, 18.52, [701, 487.5]),
         ]
     ):
-        at = 5.4 + (source_at - 7.6) * 1.32
+        at = 10.5 + (source_at - 15.78) * 1.32
         target = [round(v * scale, 3) for v in point]
         script += (
             f'launchMove(tl,"#mail-fill-cursor",{previous},{target},{at - 0.25},.25);'
@@ -346,67 +366,72 @@ def build_mail(absolute_start):
         script += f'launchCamera(tl,"#mail-fill-stage",{target},{at - 0.25},1424,890);'
         cue("typing.mp3", absolute_start + at, 0.30, (source_end - source_at) * 1.32)
         previous = target
-    script += 'tl.to("#mail-fill-cursor",{opacity:0,duration:.1},9.3);'
+    script += 'tl.to("#mail-fill-cursor",{opacity:0,duration:.1},15.8);'
     send_approval = panel_point(confirm, approvals["confirm"]["center"])
-    yes_at = 10.0 + approvals["confirm"]["at"] - first - confirm_source
     # Keep the source panel before it closes; the visible approval marks its actual action.
-    yes_at = min(yes_at, 11.24)
+    yes_at = 18.55
     script += f'launchMove(tl,"#mail-approval-cursor",[1030,190],{send_approval},{yes_at - 0.32},.28);launchClick(tl,"#mail-approval-cursor","#mail-approval-ring",{send_approval},{yes_at});tl.to("#mail-approval-cursor",{{opacity:0,duration:.07}},{yes_at + 0.07});'
-    cue("attention.wav", absolute_start + 10.2, 0.3)
+    cue("attention.wav", absolute_start + 16.7, 0.3)
     cue("click-soft.mp3", absolute_start + yes_at, 0.65)
     send_point = [340.5625 * scale, 646 * scale]
-    script += f'launchMove(tl,"#mail-send-cursor",[780,535],{send_point},11.58,.3);launchCamera(tl,"#mail-send-stage",{send_point},11.58,1424,890);launchClick(tl,"#mail-send-cursor","#mail-send-ring",{send_point},11.89);tl.to("#mail-send-cursor",{{opacity:0,duration:.1}},12.3);'
-    cue("click-soft.mp3", absolute_start + 11.89, 0.65)
-    cue("success.wav", absolute_start + 12.12, 0.42)
+    script += f'launchMove(tl,"#mail-send-cursor",[780,535],{send_point},18.93,.3);launchCamera(tl,"#mail-send-stage",{send_point},18.93,1424,890);launchClick(tl,"#mail-send-cursor","#mail-send-ring",{send_point},19.24);tl.to("#mail-send-cursor",{{opacity:0,duration:.1}},19.65);'
+    cue("click-soft.mp3", absolute_start + 19.24, 0.65)
+    cue("success.wav", absolute_start + 19.47, 0.42)
     styles = ".focus-window{position:absolute;overflow:hidden;border-radius:14px;border:1px solid #d4dce4}.focus-browser{left:248px;top:160px;width:1424px;height:890px;background:#f5f5fb}.focus-nudge{left:300px;top:154px;width:1320px;background:#10151d;border:1px solid #333943}.focus-nudge.draft{height:880px}.focus-nudge.confirm{top:385px;height:326px}.focus-nudge.writing{top:290px;height:508px}.focus-stage{position:absolute;inset:0;transform-origin:0 0}.focus-media{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}.focus-header{position:absolute;inset:auto;left:0;top:0;width:1320px;height:90px;object-fit:fill}.focus-panel{position:absolute;inset:auto;left:0;top:90px;width:1320px;height:790px;object-fit:fill}.confirm .focus-panel{height:236px}"
-    scene("mail", 14.3, body, script, styles)
+    scene("mail", 22.6, body, script, styles)
     return {
-        "duration": 14.3,
+        "duration": 22.6,
         "phases": phases,
         "draft_source": draft_source,
         "draft_stretch": draft_stretch,
-        "fill_source": [7.6, 4.8, 1.32],
-        "field_starts": [7.92, 8.24, 8.96],
-        "send_source": 12.78,
+        "fill_source": [15.78, 6.2, 1.32],
+        "field_starts": [16.12, 16.56, 17.16],
+        "send_source": 22.50,
+        "processing_source": [4.2, 3.7],
+        "processing_hold_seconds": trace["processing_hold_seconds"],
     }
 
 
 def build_jev(absolute_start):
     trace = json.loads((A / "jev-trace.json").read_text())
     encode(
-        A / "jev-nudge.mp4", A / "jev-feed.mp4", 0.65, 3.8, "crop=910:304:0:0,fps=60"
+        A / "jev-nudge.mp4",
+        A / "jev-feed.mp4",
+        0.65,
+        5.6,
+        "crop=910:304:0:0,trim=duration=3.8,tpad=stop_mode=clone:stop_duration=1.8,fps=60",
     )
     encode(
         A / "jev.webm",
         A / "jev-result.mp4",
         6.08,
-        1.14,
+        1.84,
         "crop=1280:712:0:0,pad=1280:800:0:0:color=white,fps=60",
     )
     body = '<h1 class="headline">Meet Jev, Nudge&apos;s action model.</h1><div class="screen"><div id="jev-stage" class="screen-stage" data-layout-allow-overflow><img class="screen-media" src="assets/browser/jev-page-idle.png" alt="VS Code issue list on GitHub">'
-    for name, at, duration in [("peek", 0.25, 1.9), ("choice", 1.4, 1.26)]:
+    for name, at, duration in [("peek", 0.4, 2.9), ("choice", 2.0, 1.76)]:
         body += f'<div id="jev-{name}" class="clip" data-start="{at}" data-duration="{duration}" data-track-index="3" data-beat="jev-{name}"><img class="screen-media" src="assets/browser/jev-{name}.png" alt="Actual Peek outlines over available controls"></div>'
-    body += '<div id="jev-selected-control" class="clip" data-start="1.4" data-duration="1.26" data-track-index="4"><div class="selected-control" data-layout-ignore></div></div>'
-    body += timed_video("jev-result", "jev-result.mp4", 2.66, 1.14, "screen-media")
+    body += '<div id="jev-selected-control" class="clip" data-start="2.0" data-duration="1.76" data-track-index="4"><div class="selected-control" data-layout-ignore></div></div>'
+    body += timed_video("jev-result", "jev-result.mp4", 3.76, 1.84, "screen-media")
     body += actor("jev-cursor") + ring("jev-ring") + "</div></div>"
     body += (
         '<div class="nudge-screen" style="top:390px;height:198.4px"><div class="nudge-stage">'
-        + timed_video("jev-feed", "jev-feed.mp4", 0, 3.8, "nudge-media")
+        + timed_video("jev-feed", "jev-feed.mp4", 0, 5.6, "nudge-media")
         + "</div></div>"
     )
-    body += '<div id="jev-decision" class="clip" data-start="1.4" data-duration="2.4" data-track-index="5" data-beat="jev-decision"><p class="decision-caption">Jev chooses Labels.</p></div>'
+    body += '<div id="jev-decision" class="clip" data-start="2.0" data-duration="3.6" data-track-index="5" data-beat="jev-decision"><p class="decision-caption" data-hold>Jev chooses Labels.</p></div>'
     point = [127.5 * SCALE, 497 * SCALE]
-    script = 'tl.fromTo("#jev-peek img",{clipPath:"inset(0 100% 0 0)"},{clipPath:"inset(0 0% 0 0)",duration:.75,ease:"power2.inOut"},.25);tl.fromTo("#jev-choice img",{opacity:0},{opacity:1,duration:.18},1.4);'
-    script += f'launchMove(tl,"#jev-cursor",[780,300],{point},2.17,.30);launchCamera(tl,"#jev-stage",{point},2.17,1100,687.5);launchClick(tl,"#jev-cursor","#jev-ring",{point},2.54);tl.to("#jev-cursor",{{opacity:0,duration:.12}},3.05);'
+    script = 'tl.fromTo("#jev-peek img",{clipPath:"inset(0 100% 0 0)"},{clipPath:"inset(0 0% 0 0)",duration:.75,ease:"power2.inOut"},.4);tl.fromTo("#jev-choice img",{opacity:0},{opacity:1,duration:.18},2.0);'
+    script += f'launchMove(tl,"#jev-cursor",[780,300],{point},3.27,.30);launchCamera(tl,"#jev-stage",{point},3.27,1100,687.5);launchClick(tl,"#jev-cursor","#jev-ring",{point},3.64);tl.to("#jev-cursor",{{opacity:0,duration:.12}},4.15);'
     cue("start.wav", absolute_start + 0.10, 0.38)
-    cue("tick.wav", absolute_start + 1.4, 0.36)
-    cue("click-soft.mp3", absolute_start + 2.54, 0.65)
-    cue("success.wav", absolute_start + 3.22, 0.4)
-    script += 'tl.fromTo("#jev-decision p",{opacity:0,y:12},{opacity:1,y:0,duration:.18,ease:"power2.out"},1.4);tl.fromTo("#jev-selected-control div",{opacity:0},{opacity:1,duration:.18},1.4);'
+    cue("tick.wav", absolute_start + 2.0, 0.36)
+    cue("click-soft.mp3", absolute_start + 3.64, 0.65)
+    cue("success.wav", absolute_start + 4.32, 0.4)
+    script += 'tl.fromTo("#jev-decision p",{opacity:0,y:12},{opacity:1,y:0,duration:.18,ease:"power2.out"},2.0);tl.fromTo("#jev-selected-control div",{opacity:0},{opacity:1,duration:.18},2.0);'
     styles = ".decision-caption{position:absolute;left:1230px;top:620px;font-size:64px;line-height:1.08;font-weight:550;letter-spacing:-1.6px;color:var(--ink);width:594px}.selected-control{position:absolute;left:27.5px;top:413.36px;width:164.14px;height:27.5px;border:5px solid #3576ec;border-radius:5px;background:#4f8ef71a}"
-    scene("jev", 3.8, body, script, styles)
+    scene("jev", 5.6, body, script, styles)
     return {
-        "duration": 3.8,
+        "duration": 5.6,
         "source": "https://github.com/microsoft/vscode/issues",
         "peek_controls": next(
             e["count"] for e in trace["events"] if e["kind"] == "peek"
@@ -419,32 +444,30 @@ def main():
     youtube = json.loads((A / "youtube-actions.json").read_text())
     clicks = bank["actions"]
     bank_segments = [
-        (clicks[0]["at"] - 0.85, 1.2),
-        (clicks[1]["at"] - 0.75, 1.2),
-        (clicks[2]["at"] - 0.85, 2.2),
+        (clicks[0]["at"] - 0.85, 1.8),
+        (clicks[1]["at"] - 0.75, 1.8),
+        (clicks[2]["at"] - 0.85, 3.0),
     ]
     yt_type = next(a for a in youtube["actions"] if a["operation"] == "type")
     yt_click = next(a for a in youtube["actions"] if a["operation"] == "click")
-    scroll = next(a for a in youtube["actions"] if a["operation"] == "scroll")
     yt_segments = [
-        (yt_type["at"] - 0.35, 1.85),
-        (yt_click["at"] - 0.40, 1.45),
-        (scroll["at"] - 0.12, 0.9),
+        (yt_type["at"] - 0.55, 3.55),
+        (yt_click["at"] - 0.70, 4.15),
     ]
     cut = {}
     cut["bank"] = build_task(
-        "bank", "Download a statement.", bank_segments, 5.4, video_offsets=[1.56] * 3
+        "bank", "Download a statement.", bank_segments, 6.2, video_offsets=[1.56] * 3
     )
     cut["youtube"] = build_task(
         "youtube",
-        "Find a how-to.",
+        "Find an Excel tutorial.",
         yt_segments,
-        10.0,
-        video_offsets=[2.09, 1.95, 2.09],
+        12.8,
+        video_offsets=[2.54, 2.7],
     )
-    cut["jev"] = build_jev(14.2)
-    cut["mail"] = build_mail(18.0)
-    (A / "edit-points-v4.json").write_text(json.dumps(cut, indent=2) + "\n")
+    cut["jev"] = build_jev(20.5)
+    cut["mail"] = build_mail(26.1)
+    (A / "edit-points-v5.json").write_text(json.dumps(cut, indent=2) + "\n")
 
     misses = [(206, 258), (1220, 340), (770, 214)]
     h = (
@@ -471,18 +494,18 @@ def main():
 
     reveal = re.sub(
         r'data-duration="[0-9.]+"',
-        'data-duration="1.4"',
+        'data-duration="2.2"',
         (P / "compositions/reveal.html").read_text(),
     )
     (P / "compositions/reveal.html").write_text(reveal)
     slots = [
         ("hook", 0, 4),
-        ("reveal", 4, 1.4),
-        ("bank", 5.4, 4.6),
-        ("youtube", 10.0, 4.2),
-        ("jev", 14.2, 3.8),
-        ("mail", 18.0, 14.3),
-        ("outro", 32.3, 3.1),
+        ("reveal", 4, 2.2),
+        ("bank", 6.2, 6.6),
+        ("youtube", 12.8, 7.7),
+        ("jev", 20.5, 5.6),
+        ("mail", 26.1, 22.6),
+        ("outro", 48.7, 4.2),
     ]
     hosts = "".join(
         f'<div id="{name}" class="clip" data-composition-id="{name}" data-composition-src="compositions/{"search" if name == "youtube" else name}.html" data-start="{start}" data-duration="{duration}" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>'
@@ -493,7 +516,7 @@ def main():
         (P / "compositions/youtube.html").read_text()
     )
     (P / "compositions/youtube.html").unlink()
-    audio = '<audio id="music" class="clip" src="assets/inspired.mp3" data-start="0" data-duration="35.4" data-track-index="2" data-volume="1"></audio>'
+    audio = '<audio id="music" class="clip" src="assets/inspired.mp3" data-start="0" data-duration="52.9" data-track-index="2" data-volume="1"></audio>'
     for i, (name, at, volume, duration) in enumerate(SOUND_CUES):
         if duration is None and name.endswith(".mp3"):
             duration = 0.4
@@ -502,7 +525,7 @@ def main():
                 duration = sound.getnframes() / sound.getframerate()
         audio += f'<audio id="cue-{i}" class="clip" src="assets/sounds/{name}" data-start="{round(at, 4)}" data-duration="{duration}" data-track-index="{3 + i % 6}" data-volume="{volume}"></audio>'
     (P / "index.html").write_text(
-        """<!doctype html><html lang="en" data-composition-variables='[{"id":"tagline","type":"string","label":"Closing line","default":"Fewer precise clicks."},{"id":"repository","type":"string","label":"Repository","default":"github.com/mekdimd/nudge"}]'><head><meta charset="utf-8"><meta name="viewport" content="width=1920,height=1080"><title>Nudge launch film</title><link rel="stylesheet" href="assets/film.css"><script src="assets/vendor/gsap.min.js"></script><script src="assets/motion.js"></script><style>html,body{width:1920px;height:1080px;overflow:hidden}#root{position:relative;width:1920px;height:1080px}</style></head><body><div id="root" data-composition-id="main" data-start="0" data-duration="35.4" data-width="1920" data-height="1080" data-fps="60">"""
+        """<!doctype html><html lang="en" data-composition-variables='[{"id":"tagline","type":"string","label":"Closing line","default":"Assisted computer control."},{"id":"repository","type":"string","label":"Repository","default":"github.com/mekdimd/nudge"}]'><head><meta charset="utf-8"><meta name="viewport" content="width=1920,height=1080"><title>Nudge launch film</title><link rel="stylesheet" href="assets/film.css"><script src="assets/vendor/gsap.min.js"></script><script src="assets/motion.js"></script><style>html,body{width:1920px;height:1080px;overflow:hidden}#root{position:relative;width:1920px;height:1080px}</style></head><body><div id="root" data-composition-id="main" data-start="0" data-duration="52.9" data-width="1920" data-height="1080" data-fps="60">"""
         + hosts
         + audio
         + """</div><script>window.__timelines=window.__timelines||{};window.__timelines.main=gsap.timeline({paused:true});</script></body></html>"""

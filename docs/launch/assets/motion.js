@@ -31,6 +31,44 @@ function launchMove(tl, selector, from, to, at, duration) {
     },
     at + duration * 0.42,
   );
+  // Adapt the registry's SVG trail to the same path and easing as the pointer.
+  const counts = (tl.launchTrailCounts ||= {});
+  const index = counts[selector] || 0;
+  const trail = selector + "-trail-" + index;
+  if (document.querySelector(trail)) {
+    counts[selector] = index + 1;
+    const first = Math.hypot(mid[0] - from[0], mid[1] - from[1]);
+    const total = first + Math.hypot(to[0] - mid[0], to[1] - mid[1]);
+    tl.set(
+      trail,
+      {
+        attr: { d: `M${from.join(" ")} L${mid.join(" ")} L${to.join(" ")}` },
+        strokeDasharray: total,
+        strokeDashoffset: total,
+        opacity: 0.4,
+      },
+      at,
+    );
+    tl.to(
+      trail,
+      {
+        strokeDashoffset: total - first,
+        duration: duration * 0.42,
+        ease: "power2.in",
+      },
+      at,
+    );
+    tl.to(
+      trail,
+      { strokeDashoffset: 0, duration: duration * 0.58, ease: "power3.out" },
+      at + duration * 0.42,
+    );
+    tl.to(
+      trail,
+      { opacity: 0, duration: 0.24, ease: "power2.out" },
+      at + duration,
+    );
+  }
 }
 function launchClick(tl, selector, ring, point, at) {
   tl.set(ring, { x: point[0], y: point[1], scale: 0.38, opacity: 1 }, at);
