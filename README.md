@@ -31,7 +31,7 @@ Nudge is a macOS and Windows prototype built at StormHacks 2026. App support dep
 
 [![Nudge completes a bank statement request, showing its decisions and blue cursor on each browser control](docs/assets/nudge-demo.gif)](docs/assets/nudge-launch.mp4)
 
-[Watch the launch video](docs/assets/nudge-launch.mp4) for the statement download, YouTube search, Jev control selection and email review. The GIF shows the complete bank flow with waiting shortened. The recordings use real model clients through a browser capture adapter and fictitious bank and mail data. See [capture details and music credits](docs/launch/ASSETS.md).
+[Watch the launch video](docs/assets/nudge-launch.mp4) for the statement download, Excel tutorial playback on YouTube, Jev control selection and email review. The GIF shows the complete bank flow with waiting shortened. The recordings use real model clients through a browser capture adapter and fictitious bank and mail data. See [capture details and music credits](docs/launch/ASSETS.md).
 
 <details>
 <summary>Photos</summary>
@@ -90,7 +90,7 @@ Try goals that name the task and its destination:
 
 ~~~text
 download my October bank statement
-find a tutorial on YouTube about Excel pivot tables
+play a tutorial on YouTube about Excel pivot tables
 email prof.lee@sfu.ca that I'm sick and will miss today's lecture
 ~~~
 

@@ -1,12 +1,12 @@
 # Launch film review
 
-The 83.9-second film follows one window at a time. Three website misses lead to a successful blue-cursor click, then the pointer carries into "Meet Nudge." The reveal holds for three seconds. The closing card and README banner use two lines: "Computer control for" and "limited dexterity."
+The 108.3-second editor cut follows one window at a time. Three website misses lead to a successful blue-cursor click, then the pointer carries into "Meet Nudge." The three-second reveal adds the two-line tagline after the title settles. The closing card and README banner also use "Computer control for" above "limited dexterity."
 
-The wake shot introduces "Hey Nudge" through the actual listening UI. Bank and YouTube begin with the request and Nudge processing, then give the browser the stage for its actions. The YouTube task searches for an Excel pivot table tutorial. Nudge windows are larger than the earlier split view, and their masks follow the recorded bar as it resizes.
+The wake shot introduces "Hey Nudge" through the actual listening UI. Bank and YouTube begin with the request and Nudge processing, then give the browser the stage for continuous actions. The bank ends with a green completion badge. YouTube identifies Gemini during query drafting, then searches for and plays an Excel pivot table tutorial. Nudge windows are larger than the earlier split view, and their masks follow the recorded bar as it resizes.
 
-Peek has a close-up of its button and enabled state before the browser's control outlines appear. Jev's loading indicator accompanies "Jev is TypeSafe AI's action model." A spotlight isolates Labels, then the outlines fade before the click and navigation. GitHub's header remains visible.
+Peek has a close-up of its button and enabled state before the dark-mode browser's control outlines appear. Guided zooms show the controls. Jev's loading indicator accompanies "Jev is TypeSafe AI's action model" and a blue row highlight. A spotlight isolates Labels, then the outlines fade before the click and navigation.
 
-Email shows Compose, Nudge processing, the complete draft, a subject-field close-up and the edited draft before Type it. The person selects "Absent" and types "Missing." Focus moves to the browser while Nudge fills the fields, returns to Nudge for Send approval, then shows the browser's Send click and result. The Send shot keeps the complete header.
+Email shows Compose, Nudge processing, the spoken draft prompt, a subject-field close-up and the edited draft before Type it. The person selects "Absent" and types "Missing." Focus moves to the browser while Nudge fills the fields, returns to Nudge for a spoken Send approval, then shows the browser's Send click and result. The sync corrected "Nudge reads each step aloud" to "Nudge reads approval prompts aloud" to match the app.
 
 ## Verification
 
@@ -14,29 +14,29 @@ Email shows Compose, Nudge processing, the complete draft, a subject-field close
 | --- | --- |
 | Test suite | 165 tests passed with headless Qt, fake adapters and stubbed providers. |
 | Package build | Wheel and source distribution built with uv build. |
-| Capture and build scripts | Ruff passes for the five changed Python scripts. Python compilation and the JavaScript capture host's syntax check pass. |
-| Recordings | Real Jev and Gemini clients completed the sample PDF download, Excel search, public GitHub Labels navigation and edited local mail workflow. The mail trace records selection, character typing, both approvals and the sent result. |
-| Wake model | The repository's Hey Nudge ONNX model loads in a CPU inference session. The capture replays voice callbacks into the actual UI. |
-| HyperFrames check | Zero errors across 17 layout samples. Runtime, layout, contrast, motion, craft and audio checks have zero warnings. Five timeline-density authoring warnings remain. |
-| Visual review | Storyboard, phone, transition and detail sheets inspected. A fresh agent flagged phone readability, stale outlines and crops. Close-ups, target isolation and complete headers resolved those findings. Its recheck found no remaining P0 or P1 issues in the revised samples. Forty-two exported frames were inspected. |
-| Delivery decode | The complete MP4 decodes without FFmpeg errors. H.264 video is 1920 × 1080, 60 fps, 5,034 frames and 83.9 seconds. The container lasts 84.0 seconds due to the AAC tail. Stereo audio uses 48 kHz sampling. The file is 16.2 MiB and carries music and keyboard credits in metadata. |
-| Audio | -17.0 LUFS integrated, -2.3 dB true peak and zero clipped samples. Music, keyboard accents, clicks and Nudge tones remain in the mix. Audio was measured, not heard. |
-| README media | One 12.91-second GIF, 155 frames at 960 × 540, 2.37 MiB. It begins with the bank request, shows every action and holds the complete result feed. It has no terminal intro. The banner, poster, terminal photo and labelled interface were inspected. Photos contains only the terminal image; the interface callout says Debug mode. |
-| Documentation | Local links and anchors checked across ten Markdown files. One GIF and five collapsible sections. Capture JSON and console logs contain no key patterns. Whitespace checks pass. |
+| Export scripts | Ruff and Python compilation pass for build_preview.py and sync_timeline.py. Executed exports read eight scene slots and 34 effects and speech cues from the editor HTML. Smoke checks reject scene gaps and missing audio. |
+| Recordings | Existing traces and supplied recordings cover the sample PDF download, tutorial playback, public GitHub Labels navigation and edited local mail workflow. Live provider calls were not repeated during this sync. |
+| Wake model | The existing capture loads the repository's Hey Nudge ONNX model and replays voice callbacks into the actual UI. Model loading was checked for the earlier cut, not repeated during this sync. |
+| HyperFrames check | Zero errors across 17 layout samples. Runtime, layout, contrast, craft and audio checks have zero warnings. Automatic motion sampling is disabled. Five timeline-density authoring warnings remain. |
+| Visual review | All storyboard, phone and transition sheets inspected by the author and a fresh agent. Its only P1 finding was the speech caption, corrected and checked in a new snapshot. Forty-eight decoded export frames were also inspected. No sampled frame has a broken mount or competing focal window. |
+| Delivery decode | The complete MP4 decodes without FFmpeg errors. H.264 video is 1920 × 1080, 60 fps, 6,498 frames and 108.3 seconds. The container lasts 108.4 seconds due to the AAC tail. Stereo audio uses 48 kHz sampling. The file is 27.66 MiB and carries music and keyboard credits in metadata. |
+| Audio | -16.9 LUFS integrated and -2.1 dB true peak after AAC encoding. Music, keyboard accents, clicks, Nudge tones and the two prerecorded approval prompts remain in the timeline. The signal analysis reports no warnings. Audio was measured, not heard. |
+| README media | One 14.25-second GIF, 171 frames at 960 × 540, 2.19 MiB. It begins with the bank request, shows every action and holds the completed feed and badge. It has no terminal intro. The banner, poster, terminal photo and labelled interface were regenerated and inspected. The three static screenshots match their existing inputs. Photos contains only the terminal image; the interface callout says Debug mode. |
+| Documentation | Local links and anchors checked across 20 Markdown files. One GIF and five collapsible sections. Fourteen capture JSON and console logs contain no key patterns. Whitespace checks pass. |
 
 ## Recording and editing
 
-Decoded page changes and field starts determine the browser intervals in assets/browser/edit-points-v6.json. Shot timing lives in shot-slots.json. The Jev page change follows the reconstructed click, and its outlines disappear before the result. The final 1.2 seconds of the draft and 0.6 seconds of the Send panel freeze before source dismissal, so each approval lands once on a complete control.
+The saved index.html, compositions, CSS, motion helpers and supplied media define this cut. They were already in the PR worktree. No transfer from another checkout was needed. The HyperFrames desktop app owns its editing history, which this sync leaves intact. File hashes before and after export guard against missing concurrent editor changes.
 
-Recording-only holds keep the actual processing indicators visible. The bank and YouTube captures hold real Jev results for at least 1.2 seconds, the Jev capture for 1.5 seconds, and the email writer for 2.4 seconds. These holds leave product code and provider latency records unchanged. Browser typing stretches by 1.32×. Cursor flights take 0.24 to 0.30 seconds, with a faint 3 px trail. Music extends through the cut and fades with the closing card.
+scripts/sync_timeline.py derives shot-slots.json and audio-cues.json from the current HTML. The preview builder uses that bank interval, skips its first 0.3 seconds and holds its final frame. It chooses the completed feed for the poster. scripts/build_film.py and assets/browser/edit-points-v6.json reconstruct the earlier cut and must not replace these editor changes during routine exports.
 
-The GIF skips the request window's entrance and replaces the final exit with a held result. Its first and last frames both contain the actual Nudge bar. The editable music source is tracked so rebuilding the film needs no ignored local download.
+Recording-only holds keep the actual processing indicators visible. These holds leave product code and provider latency records unchanged. Waiting and typing are edited. Cursor flights leave a faint blue trail. The 108.3-second music excerpt covers the cut. User-added speech clips read the draft and Send approval text, but their synthesis provider and voice license are not recorded. This export does not verify live text-to-speech.
 
 ## Retained warnings and limits
 
 The five HyperFrames warnings concern dense caption and overlay tracks. Keeping each task's sequential stages in one composition makes its timing easier to edit together. Runtime, layout and decoding pass.
 
-The full email body and literal activity-feed text remain small on a phone. The subject close-up, large stage captions and approval buttons carry the story. A portrait cut would give the remaining fields more space.
+The full email body and literal activity-feed text remain small on a phone. The subject close-up, large stage captions and approval buttons carry the story. Some browser and draft zooms crop panel edges to focus on the current target. Those are editor choices retained during this sync. The email is the weakest shot at phone width; a portrait cut would give the fields more space.
 
 Browser sources have 25 fps and Qt sources have 20 fps. Cursor and camera animation render at 60 fps. Waiting is edited, typing is retimed and target movement is reconstructed, so the film does not measure native task speed.
 
