@@ -2,8 +2,8 @@
 
 import json
 import os
-from pathlib import Path
 import re
+from pathlib import Path
 
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 from PySide6.QtCore import QPointF, QRectF, Qt
@@ -64,8 +64,8 @@ def canvas(width, height, background=GROUND):
 def banner():
     value, p = canvas(1800, 960)
     text(p, "Nudge", 100, 185, 140, weight=QFont.Weight.DemiBold)
-    text(p, "Assisted", 105, 305, 66)
-    text(p, "computer control.", 105, 390, 60)
+    text(p, "Computer control for", 105, 305, 60)
+    text(p, "limited dexterity", 105, 390, 60)
     image(p, load("browser/bank-page-idle.png"), 800, 55, 920)
     target = QPointF(800 + 107.5 * 920 / 1280, 55 + 258 * 920 / 1280)
     for offset, alpha, width in [(0, 160, 7), (12, 65, 4), (24, 30, 3)]:
@@ -111,8 +111,8 @@ def anatomy():
     callouts = [
         ("App", 570, 105, QPointF(x + 355 * scale, y + 45 * scale), QPointF(605, 124)),
         (
-            "Peek",
-            1390,
+            "Debug mode",
+            1260,
             160,
             QPointF(x + 1248 * scale, y + 36 * scale),
             QPointF(1370, 165),
@@ -167,7 +167,7 @@ def terminal():
         color = "#dce4ef"
         weight = QFont.Weight.Normal
         for part in re.split("(" + re.escape(chr(27) + "[") + "[0-9;]*m)", line):
-            if part.startswith("["):
+            if part.startswith("\x1b["):
                 code = part[2:-1]
                 if code == "0":
                     color = "#dce4ef"
@@ -186,7 +186,7 @@ def terminal():
 
 
 def main():
-    app = QApplication.instance() or QApplication([])
+    _app = QApplication.instance() or QApplication([])
     assert QFontDatabase.addApplicationFont(str(A / "fonts/Outfit.ttf")) != -1
     OUT.mkdir(exist_ok=True)
     banner()

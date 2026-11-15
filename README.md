@@ -29,16 +29,16 @@ Nudge is a macOS and Windows prototype built at StormHacks 2026. App support dep
 
 ## See it run
 
-[![A complete bank run launched from the terminal, with Nudge's live feed and blue cursor following each browser action](docs/assets/nudge-demo.gif)](docs/assets/nudge-launch.mp4)
+[![Nudge completes a bank statement request, showing its decisions and blue cursor on each browser control](docs/assets/nudge-demo.gif)](docs/assets/nudge-launch.mp4)
 
 [Watch the launch video](docs/assets/nudge-launch.mp4) for the statement download, YouTube search, Jev control selection and email review. The GIF shows the complete bank flow with waiting shortened. The recordings use real model clients through a browser capture adapter and fictitious bank and mail data. See [capture details and music credits](docs/launch/ASSETS.md).
 
 <details>
-<summary>Terminal output from the bank run</summary>
+<summary>Photos</summary>
 
 ![Nudge's captured CLI output in a dark terminal, showing the statement request, selected controls and successful completion](docs/assets/nudge-terminal.png)
 
-These are the console lines from the same recording, rendered as a terminal image.
+Terminal output from the bank recording.
 
 </details>
 
@@ -84,7 +84,7 @@ Focus the app, summon the bar, and describe your task. Review drafts and confirm
 | macOS | ⌘⇧Space |
 | Windows | Ctrl+Shift+Space |
 
-![The actual Nudge bar labelled with its target app, step feed, goal field, Peek control and Go or Stop button](docs/assets/nudge-interface.png)
+![The actual Nudge bar labelled with its target app, step feed, goal field, debug mode control and Go or Stop button](docs/assets/nudge-interface.png)
 
 Try goals that name the task and its destination:
 
