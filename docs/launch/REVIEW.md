@@ -1,42 +1,44 @@
 # Launch film review
 
-Reviewed on macOS with HyperFrames 0.9.47. The 31.2-second film shows missed website clicks before revealing Nudge, then keeps browser actions beside the actual Nudge feed. It demonstrates a bank statement download, a YouTube how-to search with Peek, and an email draft with subject editing and Send approval.
+The film keeps the approved website misses, pointer reveal and closing card. The reveal now holds for a full second after the pointer lands. Bank and YouTube demonstrations remain beside Nudge's actual activity feed. Jev and Peek have a dedicated shot over VS Code's real GitHub issue list.
 
-The bank follows the design-taste-frontend audit and typography guidance, with product-interface patterns from frontend-design. Northline uses cool-grey backgrounds, restrained green actions, compact Inter type and reconciled sample balances. Its statement page previews a document and downloads a working PDF. The bank identity and account data are fictitious.
+The email uses one active window at a time. Nudge generates a draft, the black cursor selects "Absent" and types "Missing," then approves the edited text. The browser shows each field filling and holds the completed message. Focus returns to Nudge for Send approval, then to the browser for its Send click and result. Whole review panels replace the previous cropped close-ups.
 
 ## Verification
 
 | Check | Result |
 | --- | --- |
-| Full test suite | 165 tests passed with headless Qt, fake adapters and stubbed providers. |
-| Capture adapter tests after the script edits | 2 passed. Python capture/build scripts compile and the JavaScript host passes node --check. |
-| uv build | Wheel and source distribution built. MIT metadata, LICENSE and THIRD_PARTY_NOTICES.md remain in the package. |
-| Browser recordings | The actual Nudge loop and model clients completed the sample tasks. The host verified a downloaded PDF, requested YouTube results and a local mail result after approval. Bank was recaptured through the corrected Qt encoder; mail and YouTube Qt recordings were rebuilt from their timestamped source frames. |
-| HyperFrames check, 17 layout samples | Zero errors. Runtime, layout, contrast, reading-time and audio checks have zero warnings. One authoring warning remains, explained below. |
-| Visual review | Storyboard, phone and transition sheets inspected. A fresh agent inspected all nine sheets and all three README images. Updated email close-ups and decoded delivery frames were checked after its finding. |
-| Delivery decode | The complete MP4 decoded without FFmpeg errors. H.264 video is 1920 × 1080, 60 fps, 1,872 frames and 31.2 seconds. Container duration is 31.21 seconds due to the AAC tail. Stereo audio has 48 kHz sampling. The file is about 7.3 MiB. Music credit is present in metadata. |
-| Audio inspection | -16.8 LUFS integrated, -1.7 dB true peak and zero clipped samples. Click onsets appear in the opening; music fades in at the reveal and continues through the final fade. Audio was measured, not heard. |
-| README | GitHub-rendered Markdown and artwork inspected. Local links and anchors checked across ten files. One complete 8-second GIF, 120 frames at 960 × 540, about 1.4 MiB. Five collapsible sections. No key patterns found in capture JSON or console logs. |
-
-Browser sources have 25 fps and Qt sources have 20 fps. Cursor and camera animation render at 60 fps. Source frame repetition does not add detail to recorded interface changes. Waiting between model decisions is trimmed.
+| Test suite | 165 tests passed with headless Qt, fake adapters and stubbed providers. |
+| Package build | Wheel and source distribution built with uv build. |
+| Capture and build scripts | Python scripts compile. The JavaScript capture host passes node --check. |
+| Actual recordings | Real Jev and Gemini clients completed the YouTube and mail tasks. The mail trace verifies a generated draft, subject selection, replacement typing, approval and local sent result. Jev chose Labels on the public GitHub issue list. The bank capture verifies a downloaded sample PDF. |
+| HyperFrames check | Zero errors across 21 layout samples. Runtime, layout, contrast, reading-time and audio checks have zero warnings. Two source-file size warnings remain, explained below. |
+| Visual review | Storyboard, phone and all six transition sheets inspected. A fresh agent found no P0 issues and one P1 in the Jev choice at phone width. The fix and final exported decision frames were inspected. Email selection, editing, typing, both approvals and the result were checked in the exported MP4. |
+| Delivery decode | The complete MP4 decodes without FFmpeg errors. H.264 video is 1920 × 1080, 60 fps, 2,124 frames and 35.4 seconds. The container lasts 35.586 seconds due to the AAC tail. Stereo audio uses 48 kHz sampling. The file is 8.8 MiB. Music and keyboard credits are in metadata. |
+| Audio | -17.0 LUFS integrated, -2.2 dB true peak and zero clipped samples. Keyboard onsets appear during subject editing and form typing. Clicks and Nudge tones remain in the mix. Audio was measured, not heard. |
+| README media | One complete 8-second GIF, 120 frames at 960 × 540, 1.3 MiB. CLI start, every bank action and the download result were inspected. The cursor banner, terminal screenshot and labelled interface remain in place. |
+| Documentation | Local links and anchors checked across ten Markdown files. One GIF and five collapsible sections. Capture JSON and console logs contain no key patterns. Whitespace checks pass. |
 
 ## Review fixes
 
-- The opening now shows three fast misses before its centered sentence fades in. Shortening it to "Hard to click?" removed a reading-time warning.
-- The browser and Nudge feed stay together. Qt video preserves real loading indicators, draft editing and approval controls.
-- Decoded browser transitions corrected the video offsets. The mail result now follows the visible approval and click; each approval appears once.
-- The email keeps one composition and holds the draft for 4.1 seconds. The reviewer flagged small subject and approval text. Smooth 2.5× subject/Type it and 2.25× Send close-ups now enlarge those actual controls within the right pane. Both subject states and both approval frames were inspected after this fix.
-- The blue cursor moves into the recipient field before the form fills, then to Send. Browser camera moves zoom 10% toward targets.
-- Peek appears during YouTube search. Nudge performs the recorded scroll to the tutorial results.
-- New licensed music, soft clicks and Nudge's actual tones replace the earlier silent actions. Unused derived clips and the old music were removed.
-- The banner has a prominent pointer and curved blue trail. A labelled interface image, actual console output and one complete CLI-to-result GIF support the shorter README.
+- The reveal grows from 0.8 to 1.4 seconds.
+- Email focus slides between the browser and complete Nudge panels over 0.2 seconds. Inactive cursors stay hidden.
+- Actual subject selection and character typing replace the abrupt edit. Keyboard audio has its leading silence trimmed and plays during visible typing.
+- Browser field starts and page changes come from decoded frames. This removes misleading click timing from the recorder's wall-clock drift.
+- The final 0.4 seconds of both Nudge panels holds their complete pre-approval frame. Each approval lands once before the pan.
+- Browser typing stretches by 1.32×. The complete form holds before Send approval; the sent result holds for more than two seconds.
+- Jev's shot reveals the actual Peek outlines over a dense public interface. A 64 px caption and stronger border identify its chosen Labels control at phone size.
+- Licensed music extends through the longer cut. Nudge tones, click effects and keyboard audio accompany their visible actions. Audio normalization leaves AAC headroom.
+- The README GIF and video poster use the revised bank interval. Obsolete split-screen email clips and the incidental YouTube Peek image are removed.
 
-## Retained warning and limits
+## Retained warnings and limits
 
-The root HTML has 346 lines because it declares the scene hosts and every timed sound cue. Keeping the audio tags visible makes timing and source changes editable. HyperFrames reports this as an authoring-size warning; runtime and delivery decoding pass. The right pane clips its enlarged source intentionally during email close-ups.
+HyperFrames warns that the root HTML and email composition exceed its suggested source-file length. The root declares editable sound cues. The email composition keeps its sequential windows and transitions together. These are authoring warnings; runtime and decoding pass.
 
-The email is still the densest shot at phone size. The subject and approval controls carry the decisions; the complete body is context and does not fit within the close-up. A portrait edit could give the message its own frame.
+The email is the densest shot at phone size. Its subject change and approval buttons carry the story; the full body is supporting context. A portrait edit could give the fields more space.
 
-Native macOS Accessibility permission was unavailable for this process, and no Windows session was tested. The browser capture adapter exercises the task loop and actual Qt app. Bank and mail use local sample pages, and the mail result sends no email. Blue cursor flights reconstruct recorded targets; black cursors represent misses and sample approvals.
+Browser sources have 25 fps and Qt sources have 20 fps. Cursor and camera animation render at 60 fps. Waiting is trimmed, typing is retimed and target movement is reconstructed, so the film does not measure native task speed.
 
-"Inspired" by Kevin MacLeod uses CC BY 4.0. The soft click has separate Pixabay rights, and Nudge's synthesized tones use MIT. See [asset credits](ASSETS.md). The film has no voiceover and remains understandable when muted.
+The browser adapter exercises the actual task loop and Qt app. Native macOS Accessibility permission was unavailable, and no Windows session was tested. Bank and mail use fictitious local data. No email is sent. GitHub and YouTube captures use signed-out public pages. The Jev host permits only the public Labels click.
+
+The bank retains its previous design-taste-frontend audit and modern grey and green design. See [asset credits](ASSETS.md) for the music, keyboard recording, click effect and source interfaces.

@@ -31,7 +31,7 @@ Nudge is a macOS and Windows prototype built at StormHacks 2026. App support dep
 
 [![A complete bank run launched from the terminal, with Nudge's live feed and blue cursor following each browser action](docs/assets/nudge-demo.gif)](docs/assets/nudge-launch.mp4)
 
-[Watch the launch video](docs/assets/nudge-launch.mp4) for the statement download, YouTube search and email review. The GIF shows the complete bank flow with waiting shortened. The recordings use real model clients through a browser capture adapter and fictitious bank and mail data. See [capture details and music credits](docs/launch/ASSETS.md).
+[Watch the launch video](docs/assets/nudge-launch.mp4) for the statement download, YouTube search, Jev control selection and email review. The GIF shows the complete bank flow with waiting shortened. The recordings use real model clients through a browser capture adapter and fictitious bank and mail data. See [capture details and music credits](docs/launch/ASSETS.md).
 
 <details>
 <summary>Terminal output from the bank run</summary>
