@@ -85,7 +85,9 @@ Nudge does not read password fields. Provider icons in the step feed explain the
 
 ## Support and limits
 
-Nudge works within one app at a time. It stops when another app takes focus. Controls that appear only on hover may be invisible, and testing so far uses English labels. Linux is not supported.
+Nudge reads one app at a time. It can open apps from the macOS Dock or Windows taskbar and continue in the new foreground app. During screen settling and for 10 seconds after a step, it follows foreground app changes. It cannot tell whether Nudge or you caused the switch. Outside this period, a focus change stops the task. Press Esc or Stop before switching apps yourself during a task.
+
+Controls that appear only on hover may be invisible, and testing so far uses English labels. Linux is not supported.
 
 Confirmation uses control labels. Unfamiliar labels can bypass a confirmation rule. Each run is capped at 12 steps; uncertain choices and unchanged screens require your decision.
 

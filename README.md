@@ -33,10 +33,18 @@ Nudge is a macOS and Windows prototype built at StormHacks 2026. Read the [Devpo
 
 [![Nudge completes a bank statement request, showing its decisions and blue cursor on each browser control](docs/assets/nudge-demo.gif)](docs/assets/nudge-launch.mp4)
 
-[Watch the launch video](docs/assets/nudge-launch.mp4) for the statement download, Excel tutorial playback on YouTube, Jev control selection and email review. The GIF shows the complete bank flow with waiting shortened. The recordings use real model clients through a browser capture adapter and fictitious bank and mail data. See [capture details and music credits](docs/launch/ASSETS.md).
+Nudge works across your desktop. Ask it to open Notes from the macOS Dock, launch an app from the Windows taskbar, fill in a form or draft an email for review. It can continue the task in the app it opens. [Watch the launch video](docs/assets/nudge-launch.mp4) or read the [recording details and credits](docs/launch/ASSETS.md).
 
 <details>
 <summary>Photos</summary>
+
+![Dock mockup with the actual Nudge bar, an open Notes request and a blue cursor path to the macOS Notes icon](docs/assets/nudge-dock.png)
+
+Mockup of opening Notes from the macOS Dock, using Nudge's actual bar and macOS app icons.
+
+![Nudge's Peek overlay marks selected text regions in orange on the sample bank statement screen](docs/assets/nudge-vision.png)
+
+Nudge's local OCR component reads a recorded bank screen. Peek outlines selected text detections in orange. This example shows text recognition; the full vision fallback also detects icons.
 
 ![Nudge's captured CLI output in a dark terminal, showing the statement request, selected controls and successful completion](docs/assets/nudge-terminal.png)
 
@@ -90,6 +98,7 @@ Real tasks send your goal and control details to Jev. [Setup and privacy](docs/S
 Try goals that name the task and its destination:
 
 ~~~text
+open Notes from the Dock
 download my October bank statement
 play a tutorial on YouTube about Excel pivot tables
 email prof.lee@sfu.ca that I'm sick and will miss today's lecture
@@ -131,7 +140,8 @@ Nudge uses vision when the app exposes too few accessibility controls. Model wei
 - Peek outlines the controls Nudge can see. Blue marks accessibility controls, green marks text fields and orange marks local vision results.
 - With voice configured, click the orb or say the wake word to speak. The mic button mutes the microphone.
 - Nudge pauses before acting. You can edit drafts, and controls labelled Send, Delete, Buy, Pay and other consequential words require confirmation.
-- If a choice is uncertain or an action changes nothing, Nudge asks for your help. It stops when another app takes focus and caps each run at 12 steps.
+- If a choice is uncertain or an action changes nothing, Nudge asks for your help. Each run is capped at 12 steps.
+- Nudge can follow another app after a step, including a manual focus change. Press Esc or Stop before switching apps during a task.
 
 Confirmation depends on control labels. It cannot identify every consequential action in an unfamiliar app. Windows has an implementation, but end-to-end Windows results are not yet reported. [Demo notes](docs/DEMO.md) and [setup limits](docs/SETUP.md#support-and-limits) describe the tested scope.
 
