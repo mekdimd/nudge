@@ -47,3 +47,15 @@ The browser adapter exercises the task loop and Qt app. Native macOS Accessibili
 The wake shot does not test microphone input, inference-triggered wake detection or transcription. It illustrates the custom Hey Nudge model; the app's default configured wake word can differ.
 
 The bank retains its design-taste-frontend audit and grey and green design. See [asset credits](ASSETS.md) for the music, keyboard recording, click effect and source interfaces.
+
+## README desktop examples
+
+The README explains opening apps from the macOS Dock or Windows taskbar. Nudge can follow foreground changes after a step, including manual app switches. The limits explain this timing rule and tell users to stop before switching apps themselves. The desktop switching and vision tests pass with fake adapters. The full suite also passes, and the package builds.
+
+The interface label boxes use #245eb7 with white text, a measured 6.25:1 contrast ratio. The existing bar content stays intact. The Dock mockup combines the actual offscreen bar with macOS app icons and a pointer path to Notes. Its visible Mockup label distinguishes it from a recording.
+
+The local vision image uses MacOCR on the recorded bank screen. Apple Vision returned 46 text regions. Nudge's actual Peek renderer draws 11 selected regions in orange. The complete source screen remains visible. This checks local text recognition, rather than the full icon detector or native desktop capture.
+
+The three changed graphics were inspected at full size and at 832 pixels wide. Ruff, Python compilation, saved-source image builds and README link checks pass. Photos now contains the Dock mockup, local OCR example and terminal image. The README retains one GIF and six disclosures. New media has no provider keys or personal desktop data.
+
+A fresh agent signed off on the README, setup instructions, graphics and builders after the focus-switching copy was corrected. Its saved-source rebuild matched all three PNGs byte for byte. Some OCR labels remain small and truncated in the overview; the large caption explains the orange boxes.

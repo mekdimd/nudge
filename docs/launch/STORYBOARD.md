@@ -1,5 +1,7 @@
 # Launch storyboard
 
+The README also explains desktop app launching through a labelled Dock mockup and local vision through an orange OCR overlay. These still images sit in Photos and do not add shots to the film.
+
 The film follows one focal point at a time. Each demo begins with the task above a large Nudge window. Processing stays on Nudge. Browser actions get the entire stage, with a blue cursor and a slight camera move toward its target. Captions occupy the same position throughout the demos.
 
 1. Three quick misses happen on the bank website. Red click marks show where the person missed. The website dims, then "Hard to click?" appears in the center. A blue cursor arrives, clicks Statements and carries into the reveal as the website fades away. Follow the cursor throughout this transition.

@@ -49,4 +49,4 @@ No simultaneous small split screens, empty dark blocks beneath Nudge, clipped dr
 
 ## Delivery
 
-Editable HyperFrames source, local media and rights records, a 1080p H.264 MP4 with AAC audio, a cursor banner, one complete bank GIF without a terminal intro, a terminal photo and a labelled interface image. The README Photos disclosure contains only the terminal image. The interface callout says "Debug mode."
+Editable HyperFrames source, local media and rights records, a 1080p H.264 MP4 with AAC audio, a cursor banner, one complete bank GIF without a terminal intro, a terminal photo and a labelled interface image. The README Photos disclosure contains the Dock mockup, local OCR example and terminal image. The interface callout says "Debug mode" and uses white text on dark blue boxes.

@@ -11,6 +11,8 @@ Footage, fonts, audio and runtime are local. Playback needs no remote assets.
 | Blue pointer | Nudge's actual artwork exported from nudge/ui/overlay.py. Its Lucide silhouette retains the ISC notice in assets/pointer-LICENSE.txt and THIRD_PARTY_NOTICES.md. |
 | Ordinary cursor and bank icons | [Lucide](https://lucide.dev), with pinned lucide-static 0.468.0 artwork. The ordinary cursor changes fill and stroke colors. Notice in demo/assets/icons/LICENSE. |
 | README artwork and GIF | Composed from the recordings and console output above, with the same underlying rights. The terminal screenshot renders captured console lines; the GIF begins with the bank request and has no terminal intro. |
+| Dock illustration | Nudge's actual bar rendered offscreen with an example goal. Finder, Safari, Mail, Notes and Calendar icons read from local macOS app bundles with NSWorkspace and resized. Apple retains its icon and trademark rights. The desktop and Dock arrangement are a mockup, with a reconstructed pointer path. No app was opened for this image. |
+| Local vision image | Nudge's MacOCR component uses Apple Vision locally on the recorded sample bank screen, assets/browser/bank-state-2.png. Saved detections are in assets/desktop/vision-ocr.json. Nudge's actual Peek renderer draws 11 selected text regions in orange. This illustrates OCR, not a full OmniParser or native desktop run. |
 | Outfit font | [Google Fonts source](https://github.com/google/fonts/tree/main/ofl/outfit), SIL Open Font License 1.1. Notice in assets/fonts/OFL.txt. |
 | Inter font | [Google Fonts source](https://github.com/google/fonts/tree/main/ofl/inter), SIL Open Font License 1.1. Notice in demo/assets/Inter-OFL.txt. |
 | GSAP 3.15.0 | [Official distribution](https://www.npmjs.com/package/gsap), assets/vendor/gsap.min.js. Its [Standard License](https://gsap.com/standard-license/) applies separately. |
@@ -20,6 +22,12 @@ Footage, fonts, audio and runtime are local. Playback needs no remote assets.
 | Spoken approval prompts | User-added voice-draft.mp3 and voice-send.mp3 with matching transcript JSON. They read Nudge's draft and Send approval text. The generation provider and voice license are not recorded in the supplied files. Nudge's MIT license covers the prompt text, not a third-party voice or synthesis service. |
 | Soft click | The bundled HyperFrames media-use SFX asset, assets/sounds/click-soft.mp3. Source: [Pixabay](https://pixabay.com/sound-effects/), under the [Pixabay Content License](https://pixabay.com/service/license-summary/). Its bundled credits name Pixabay but do not give an individual author or item URL. |
 | Keyboard typing | "Keyboard Typing Sounds" by crz1990, [Freesound source](https://freesound.org/people/crz1990/sounds/135872/), [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Retrieved through HyperFrames media-use and shortened into timed accents. |
+
+## README image sources
+
+scripts/build_desktop_artwork.py builds the Dock mockup and local vision image from saved inputs. Its --refresh-sources option reads local app icons, renders Nudge's bar offscreen and reruns MacOCR on the saved bank screen. It uses no model provider keys and does not operate the desktop. The full vision fallback's icon detector was not run for this image.
+
+The interface diagram uses white text on #245eb7 label boxes. The label contrast is 6.3:1. Connector lines use the same blue. The bar, banner and terminal retain their recorded content.
 
 ## Music attribution
 
