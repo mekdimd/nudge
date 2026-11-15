@@ -1,7 +1,7 @@
 {
   "case": "bank",
-  "epochStarted": 1794700615.319,
-  "recordingOffset": 1.715,
+  "epochStarted": 1794729338.412,
+  "recordingOffset": 2.007,
   "actions": [
     {
       "id": 2,
@@ -12,7 +12,8 @@
         107.5,
         258
       ],
-      "at": 3.348
+      "at": 7.273,
+      "endedAt": 7.813
     },
     {
       "id": 6,
@@ -23,7 +24,8 @@
         1145.296875,
         398.890625
       ],
-      "at": 5.99
+      "at": 10.971,
+      "endedAt": 11.495
     },
     {
       "id": 10,
@@ -34,7 +36,8 @@
         1046.3984375,
         536.890625
       ],
-      "at": 8.28
+      "at": 14.433,
+      "endedAt": 14.941
     }
   ],
   "title": "October statement downloaded | Northline",
@@ -48,6 +51,6 @@
   ],
   "outcome": {
     "ok": true,
-    "message": "Done in 3 steps · 7.6 s · Jev 129 ms per decision"
+    "message": "Done in 3 steps · 11.9 s · Jev 129 ms per decision"
   }
 }

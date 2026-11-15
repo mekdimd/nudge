@@ -7,14 +7,14 @@ owned browser tab. This adapter is for recording, not a shipped platform backend
 from __future__ import annotations
 
 import argparse
-from contextlib import nullcontext
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import time
+from contextlib import nullcontext
+from pathlib import Path
 
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 os.environ["QT_SCALE_FACTOR"] = "2"
@@ -22,9 +22,10 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 
 from dotenv import load_dotenv
-from PySide6.QtCore import QObject, QPoint, QSettings, QTimer, Signal, Qt
-from PySide6.QtGui import QColor, QImage, QPainter
+from PySide6.QtCore import QObject, QPoint, QSettings, Qt, QTimer, Signal
+from PySide6.QtGui import QImage, QPainter
 from PySide6.QtWidgets import QApplication, QLineEdit, QPushButton
+
 import nudge.__main__ as main
 from nudge.core.jev import JevClient
 from nudge.core.models import AppRef, Control, Rect, Snapshot
@@ -198,6 +199,7 @@ def main_capture():
         "prompts": [],
         "events": [],
         "ui_frames": [],
+        "ui_sizes": [],
         "outcome": None,
         "processing_hold_seconds": processing_hold,
     }
@@ -230,8 +232,8 @@ def main_capture():
 
         def record_frame():
             nonlocal frame_number
-            canvas = QImage(1400, 1540, QImage.Format.Format_RGB32)
-            canvas.fill(QColor("#20252c"))
+            canvas = QImage(1400, 1540, QImage.Format.Format_ARGB32_Premultiplied)
+            canvas.fill(Qt.GlobalColor.transparent)
             painter = QPainter(canvas)
             frame = app.bar.grab().toImage()
             frame.setDevicePixelRatio(1)
@@ -240,6 +242,7 @@ def main_capture():
             canvas = canvas.scaled(910, 1001)
             assert canvas.save(str(frames / f"{frame_number:05d}.png"))
             trace["ui_frames"].append(round(time.monotonic() - started, 3))
+            trace["ui_sizes"].append([frame.width(), frame.height()])
             frame_number += 1
 
         recording = QTimer()
@@ -408,9 +411,21 @@ def main_capture():
 
         app.bridge.sig_finished.connect(finished)
         QTimer.singleShot(300, lambda: trace.update(idle=save("idle")))
-        QTimer.singleShot(700, lambda: app.start(args.goal))
+        QTimer.singleShot(
+            1800 if args.case == "jev" else 700, lambda: app.start(args.goal)
+        )
         if args.case == "jev":
-            QTimer.singleShot(720, lambda: app.bar.peek.setChecked(True))
+            QTimer.singleShot(400, lambda: trace.update(peek_off=save("peek-off")))
+
+            def enable_peek():
+                point = app.bar.peek.mapTo(app.bar, app.bar.peek.rect().center())
+                event("peek-toggle", center=[point.x(), point.y()])
+                app.bar.peek.click()
+                QTimer.singleShot(
+                    180, lambda: trace.update(peek_enabled=save("peek-enabled"))
+                )
+
+            QTimer.singleShot(800, enable_peek)
         QTimer.singleShot(180000, app.stop)
         qapp.exec()
         recording.stop()
