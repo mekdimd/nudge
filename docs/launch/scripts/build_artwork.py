@@ -109,31 +109,34 @@ def anatomy():
         return QPointF(x + (a + w / 2) * scale, y + (b + h) * scale)
 
     callouts = [
-        ("App", 570, 105, QPointF(x + 355 * scale, y + 45 * scale), QPointF(605, 124)),
-        (
-            "Debug mode",
-            1260,
-            160,
-            QPointF(x + 1248 * scale, y + 36 * scale),
-            QPointF(1370, 165),
-        ),
-        (
-            "Step feed",
-            30,
-            360,
-            QPointF(x + 40 * scale, y + 210 * scale),
-            QPointF(182, 365),
-        ),
-        ("Goal", 630, 865, bottom("input"), QPointF(675, 825)),
-        ("Speak", 95, 860, bottom("orb"), QPointF(210, 822)),
-        ("Go / Stop", 1370, 830, bottom("go"), QPointF(1380, 790)),
+        ("Current app", 490, 56, QPointF(x + 355 * scale, y + 45 * scale), "bottom"),
+        ("Debug mode", 1230, 96, QPointF(x + 1248 * scale, y + 36 * scale), "bottom"),
+        ("Step feed", 12, 322, QPointF(x + 40 * scale, y + 210 * scale), "right"),
+        ("Goal", 660, 824, bottom("input"), "top"),
+        ("Toggle voice input", 60, 824, bottom("orb"), "top"),
+        ("Start / Stop", 1260, 802, bottom("go"), "top"),
     ]
-    for label, lx, ly, point, start in callouts:
-        text(p, label, lx, ly, 36, weight=QFont.Weight.DemiBold)
+    for label, lx, ly, point, edge in callouts:
+        p.setFont(font(36, weight=QFont.Weight.DemiBold))
+        box = QRectF(lx, ly, p.fontMetrics().horizontalAdvance(label) + 40, 72)
+        if edge == "right":
+            box.moveRight(x - 14)
+        assert box.left() >= 0 and box.right() <= value.width(), label
+        assert box.top() >= 0 and box.bottom() <= value.height(), label
+        start = {
+            "top": QPointF(box.center().x(), box.top()),
+            "bottom": QPointF(box.center().x(), box.bottom()),
+            "right": QPointF(box.right(), box.center().y()),
+        }[edge]
         p.setPen(QPen(QColor(BLUE), 2.5))
         p.drawLine(start, point)
         p.setBrush(QColor(BLUE))
         p.drawEllipse(QRectF(point.x() - 4, point.y() - 4, 8, 8))
+        p.setPen(QPen(QColor("#cbd9ee"), 1.5))
+        p.setBrush(QColor("#e3ecfa"))
+        p.drawRoundedRect(box, 16, 16)
+        p.setPen(QColor(INK))
+        p.drawText(box, Qt.AlignmentFlag.AlignCenter, label)
     p.end()
     assert value.save(str(OUT / "nudge-interface.png"))
 
