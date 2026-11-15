@@ -1,42 +1,40 @@
 # Nudge launch film
 
-Show how a goal replaces several precise clicks. The hook uses a website before the product reveal. Three tasks follow: download a bank statement, search for a tire-changing video, and draft an email with a separate Send approval.
-
-## Creative direction
-
-A continuous 42-second fixture story made the product bar dominate the film. The v2 cut uses a short task montage with recorded target pages. An architecture explainer would hide the actions, so it is outside this cut.
-
-The user authorized iteration through delivery and requested about 30 seconds, faster motion, music and fewer labels.
+Show the problem before revealing Nudge, then follow its work on three interfaces. The browser occupies the left pane; the actual Nudge feed, loading indicators and approvals remain on the right.
 
 ## Picture and sound
 
-1920 × 1080, 60 fps, 1,800 frames. Scene cuts fall at frames 202, 269, 673, 1,077 and 1,615. The canvas uses #eef2f5 and #222b36; Nudge retains its actual blue pointer. Outfit headlines are 74 px. The closing address is 64 px. Key copy holds after a 0.22 to 0.25 second entrance. Cursor flights take 0.24 to 0.34 seconds, with a 0.07 second press and 0.16 second rebound. Red rings mark failed clicks in the opening.
+1920 × 1080, 60 fps, 31.2 seconds, 1,872 frames. Cuts fall at frames 240, 288, 648, 1,008 and 1,686. The canvas uses #eef2f5 and #222b36. Outfit task headings are 64 px, opening copy is 94 px and the closing address is 64 px. Nudge retains its actual blue pointer and closing mark.
 
-The Cloud Dancer excerpt is 30 seconds, edited with opening and closing fades and normalized to about -18 LUFS. No voiceover. Music rights and attribution are in ASSETS.md.
+Cursor flights take 0.24 to 0.30 seconds. Clicks compress the cursor for 0.07 seconds and rebound over 0.16 seconds. Red rings and crosses persist across the three opening misses. The problem sentence fades in after the clicks. The browser camera zooms 10% toward each target and returns after the action.
 
-## Recorded behavior
-
-The real Nudge task loop, Jev client and Gemini writer operate an isolated Chrome browser through a recording adapter. Bank and mail pages contain fictitious data. The bank downloads a real sample PDF. Mail stores a local sent-message result without contacting an email service. YouTube is a public search page.
-
-Draft and confirmation panels come from the actual Qt application. The recording script approves sample prompts; the film shows those decisions with an ordinary black cursor. Blue cursor overlays reconstruct the chosen target positions from the action trace. They are editorial animation, not captured native cursor motion. Waiting between decisions is trimmed. The captures establish these browser-adapter results and do not establish native macOS or Windows support for the sample workflows.
-
-Browser recordings have 25 fps sources. The edited clips and delivery file use constant 60 fps; cursor and camera animation render at 60 fps. Source frame repetition does not add detail to browser state changes.
+Music uses a 120 bpm excerpt of "Inspired" by Kevin MacLeod. Clicks and Nudge's start, tick, attention and success tones accompany visible actions. The final mix targets -17 LUFS and a -1.5 dB true-peak ceiling. No voiceover. See [asset credits](ASSETS.md).
 
 ## Shots
 
-| Frames | Picture | Editorial copy |
+| Frames | Picture | Copy |
 | --- | --- | --- |
-| 0 to 201 | Three quick missed clicks on the Northline overview; no Nudge UI | Small targets add up. |
-| 202 to 268 | Actual blue pointer arrives beside the wordmark | Nudge |
-| 269 to 672 | Statements, October detail, PDF download and result | Download a statement. |
-| 673 to 1076 | Search field fills, suggestion is selected, real results appear | Find a how-to. |
-| 1077 to 1614 | Compose, draft edit, form fill, Send approval and local sent result | Draft an email. |
-| 1615 to 1799 | Wordmark and repository address held through the music fade | Fewer precise clicks. |
+| 0 to 239 | Three quick misses on the bank overview, then a centered problem sentence | Hard to click? |
+| 240 to 287 | The blue pointer arrives beside the wordmark | Nudge |
+| 288 to 647 | Statements, October detail and PDF download beside the live Nudge feed | Download a statement. |
+| 648 to 1007 | Peek outlines YouTube controls; Nudge types a tire-changing query, selects a suggestion and scrolls results | Find a how-to. |
+| 1008 to 1685 | Compose, held draft and subject edit, form fill, held Send approval and local result | Review an email. |
+| 1686 to 1871 | Pointer, wordmark and repository address hold through the music fade | Fewer precise clicks. |
 
-## Banned defaults
+The email keeps one composition across four trims. The draft holds for 4.1 seconds and the Send confirmation holds for about 2 seconds. Each approval appears once. The right pane zooms 2.5× into the subject and Type it, and 2.25× into Send confirmation, then returns to the complete feed.
 
-No invented Nudge controls, live-performance claims, offline corner labels, ornamental status text, Live Caption demonstration, slow hook cursor, drifting headlines, gradient washes, glass cards or feature-card grid. Target pages must occupy most of each task shot. Keep product controls and proportions intact when cropping or enlarging them.
+## Recorded behavior
+
+The real Nudge loop, Jev client and Gemini writer operate Chrome through a recording adapter. Bank and mail use working local pages with fictitious data. The bank downloads a sample PDF; mail stores a result without sending email. YouTube uses a public search page and Nudge performs the scroll.
+
+Qt frames and browser footage share timestamped action records. Decoded page transitions establish the browser trim offsets in assets/browser/edit-points-v3.json. The source browser capture has an empty grey strip below its page; edited clips replace that strip with the page background. Cursor flights reconstruct recorded target positions. Waiting between decisions is trimmed, so this is not a performance measurement.
+
+Browser sources have 25 fps and Qt sources have 20 fps. The camera, cursor and delivery render at 60 fps. Repeating source frames does not create more detail in recorded interface changes. The captures do not exercise native macOS or Windows adapters.
+
+## Design constraints
+
+No invented Nudge controls, offline corner labels, ornamental status captions, slow opening cursor, drifting headlines, gradient washes, glass cards or feature-card grid. Preserve the browser and Nudge framing across each task. Show actions before explanatory copy. Keep the approved closing pointer.
 
 ## Delivery
 
-Editable HyperFrames compositions, local recordings and license records, a 1080p H.264 MP4 with AAC music, static banner and poster, and documented capture and render commands. The README contains no GIF.
+Editable HyperFrames source, local recordings and license records, a 1080p H.264 MP4 with AAC audio, a cursor banner, one complete bank GIF, a terminal image and a labelled interface image.

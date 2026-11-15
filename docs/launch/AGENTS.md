@@ -1,6 +1,6 @@
 # Launch film instructions
 
-Read the HyperFrames skill before editing this project. The user authorized v2 browser footage, real model clients, a 30-second cut and removal of the offline corner labels.
+Read the HyperFrames skill before editing this project. The user authorized iteration through delivery, browser footage, real model clients, a roughly 30-second cut, live Nudge activity, Peek and restored action sounds.
 
 - Use the HyperFrames version pinned in package.json.
 - Keep one paused, seekable GSAP timeline per scene in window.__timelines.

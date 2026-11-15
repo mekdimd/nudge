@@ -11,15 +11,14 @@
     data-composition-id="hook"
     data-width="1920"
     data-height="1080"
-    data-duration="3.3666666666666667"
+    data-duration="4"
   >
-    <h1 id="hook-title" class="headline">Small targets add up.</h1>
-    <div class="screen">
-      <div id="hook-stage" class="screen-stage" data-layout-allow-overflow>
+    <div class="hook-screen">
+      <div id="hook-stage" data-layout-allow-overflow>
         <img
-          class="screen-media"
+          class="hook-media"
           src="assets/browser/bank-page-idle.png"
-          alt=""
+          alt="Bank website"
         /><img
           id="hook-cursor"
           class="actor human"
@@ -32,48 +31,44 @@
         <div id="miss-2" class="ring miss" data-layout-ignore></div>
       </div>
     </div>
+    <div id="hook-copy"><h1>Hard to click?</h1></div>
   </div>
   <script>
     {
       const tl = gsap.timeline({ paused: true });
-      tl.set("#hook-cursor", { x: 750, y: 210, opacity: 1 });
+      tl.set("#hook-cursor", { x: 850, y: 240, opacity: 1 });
       launchMove(
         tl,
         "#hook-cursor",
-        [748.125, 210.0],
+        [853.125, 236.25],
         [270.375, 338.625],
-        0.4,
+        0.25,
         0.24,
       );
-      launchClick(tl, "#hook-cursor", "#miss-0", [270.375, 338.625], 0.65);
+      launchClick(tl, "#hook-cursor", "#miss-0", [270.375, 338.625], 0.5);
       launchMove(
         tl,
         "#hook-cursor",
         [270.375, 338.625],
         [1601.25, 446.25],
-        1.1800000000000002,
+        0.97,
         0.24,
       );
-      launchClick(
-        tl,
-        "#hook-cursor",
-        "#miss-1",
-        [1601.25, 446.25],
-        1.4300000000000002,
-      );
+      launchClick(tl, "#hook-cursor", "#miss-1", [1601.25, 446.25], 1.22);
       launchMove(
         tl,
         "#hook-cursor",
         [1601.25, 446.25],
         [1010.625, 280.875],
-        1.96,
+        1.69,
         0.24,
       );
-      launchClick(tl, "#hook-cursor", "#miss-2", [1010.625, 280.875], 2.21);
+      launchClick(tl, "#hook-cursor", "#miss-2", [1010.625, 280.875], 1.94);
+      tl.to("#hook-stage", { opacity: 0.2, duration: 0.28 }, 2.42);
       tl.to(
-        "#hook-stage",
-        { scale: 1.045, x: -15, y: -15, duration: 0.32, ease: "power2.inOut" },
-        2.72,
+        "#hook-copy",
+        { opacity: 1, duration: 0.34, ease: "power2.out" },
+        2.5,
       );
       window.__timelines["hook"] = tl;
     }

@@ -11,130 +11,178 @@
     data-composition-id="bank"
     data-width="1920"
     data-height="1080"
-    data-duration="6.733333333333333"
+    data-duration="6.0"
   >
-    <h1 id="bank-title" class="headline">Download a statement.</h1>
-    <img
-      class="goal-bar"
-      src="assets/browser/bank-idle.png"
-      alt="Nudge task request"
-    />
+    <h1 class="headline">Download a statement.</h1>
     <div class="screen">
       <div id="bank-stage" class="screen-stage" data-layout-allow-overflow>
         <video
-          id="bank-nav-video"
+          id="bank-0-screen"
           class="clip screen-media"
-          src="assets/browser/bank-nav.mp4"
+          src="assets/browser/bank-0-screen.mp4"
           muted
           playsinline
           data-start="0"
-          data-duration="2.15"
+          data-duration="1.95"
           data-track-index="1"
+          data-beat="bank-0-screen"
           data-hf-media-start-basis="local"
-        ></video
-        ><video
-          id="bank-statement-video"
+        ></video>
+        <div id="bank-ring-0" class="ring" data-layout-ignore></div>
+        <video
+          id="bank-1-screen"
           class="clip screen-media"
-          src="assets/browser/bank-statement.mp4"
+          src="assets/browser/bank-1-screen.mp4"
           muted
           playsinline
-          data-start="2.15"
-          data-duration="2.15"
+          data-start="1.95"
+          data-duration="1.7"
           data-track-index="1"
+          data-beat="bank-1-screen"
           data-hf-media-start-basis="local"
-        ></video
-        ><video
-          id="bank-download-video"
+        ></video>
+        <div id="bank-ring-1" class="ring" data-layout-ignore></div>
+        <video
+          id="bank-2-screen"
           class="clip screen-media"
-          src="assets/browser/bank-download.mp4"
+          src="assets/browser/bank-2-screen.mp4"
           muted
           playsinline
-          data-start="4.3"
-          data-duration="2.433333"
+          data-start="3.65"
+          data-duration="2.35"
           data-track-index="1"
+          data-beat="bank-2-screen"
           data-hf-media-start-basis="local"
-        ></video
-        ><img
+        ></video>
+        <div id="bank-ring-2" class="ring" data-layout-ignore></div>
+        <img
           id="bank-cursor"
           class="actor"
           src="assets/pointer.png"
           alt=""
           data-layout-ignore
         />
-        <div id="bank-click-0" class="ring" data-layout-ignore></div>
-        <div id="bank-click-1" class="ring" data-layout-ignore></div>
-        <div id="bank-click-2" class="ring" data-layout-ignore></div>
       </div>
     </div>
     <div
-      id="bank-download-result"
-      class="clip"
-      data-start="5.7"
-      data-duration="1.03"
-      data-track-index="5"
-      data-track-kind="graphics"
-      data-beat="downloaded"
-    ></div>
+      class="nudge-screen"
+      style="top: 366.88186813186815px; height: 293.7362637362637px"
+    >
+      <div id="bank-nudge-stage" class="nudge-stage">
+        <video
+          id="bank-0-nudge"
+          class="clip nudge-media"
+          src="assets/browser/bank-0-nudge.mp4"
+          muted
+          playsinline
+          data-start="0"
+          data-duration="1.95"
+          data-track-index="1"
+          data-beat="bank-0-nudge"
+          data-hf-media-start-basis="local"
+        ></video
+        ><video
+          id="bank-1-nudge"
+          class="clip nudge-media"
+          src="assets/browser/bank-1-nudge.mp4"
+          muted
+          playsinline
+          data-start="1.95"
+          data-duration="1.7"
+          data-track-index="1"
+          data-beat="bank-1-nudge"
+          data-hf-media-start-basis="local"
+        ></video
+        ><video
+          id="bank-2-nudge"
+          class="clip nudge-media"
+          src="assets/browser/bank-2-nudge.mp4"
+          muted
+          playsinline
+          data-start="3.65"
+          data-duration="2.35"
+          data-track-index="1"
+          data-beat="bank-2-nudge"
+          data-hf-media-start-basis="local"
+        ></video
+        ><img
+          id="bank-human"
+          class="actor human"
+          src="assets/human-cursor.svg"
+          alt=""
+          data-layout-ignore
+        />
+        <div
+          id="bank-done-hold"
+          class="clip"
+          data-start="5.45"
+          data-duration=".55"
+          data-track-index="3"
+          data-beat="bank-finished"
+        >
+          <img
+            class="nudge-media"
+            src="assets/browser/bank-side-done.png"
+            alt="Nudge completed the task"
+          />
+        </div>
+      </div>
+    </div>
   </div>
   <script>
     {
       const tl = gsap.timeline({ paused: true });
-      tl.fromTo(
-        "#bank-title",
-        { x: -36, opacity: 0 },
-        { x: 0, opacity: 1, duration: 0.24, ease: "power3.out" },
-        0,
-      );
       launchMove(
         tl,
         "#bank-cursor",
-        [1233.75, 91.875],
-        [141.09375, 338.625],
-        0.52,
-        0.28,
+        [682.0, 206.25],
+        [92.383, 221.719],
+        1.16,
+        0.3,
       );
-      launchClick(
-        tl,
-        "#bank-cursor",
-        "#bank-click-0",
-        [141.09375, 338.625],
-        0.8,
-      );
+      launchClick(tl, "#bank-cursor", "#bank-ring-0", [92.383, 221.719], 1.5);
+      launchCamera(tl, "#bank-stage", [92.383, 221.719], 1.16, 1100, 687.5);
       launchMove(
         tl,
         "#bank-cursor",
-        [141.09375, 338.625],
-        [1503.2021484375, 523.5439453125],
-        2.67,
-        0.28,
+        [92.383, 221.719],
+        [984.24, 342.797],
+        2.8600000000000003,
+        0.3,
       );
-      launchClick(
+      launchClick(tl, "#bank-cursor", "#bank-ring-1", [984.24, 342.797], 3.2);
+      launchCamera(
         tl,
-        "#bank-cursor",
-        "#bank-click-1",
-        [1503.2021484375, 523.5439453125],
-        2.95,
-      );
-      launchMove(
-        tl,
-        "#bank-cursor",
-        [1503.2021484375, 523.5439453125],
-        [1373.39794921875, 704.6689453125],
-        4.82,
-        0.28,
-      );
-      launchClick(
-        tl,
-        "#bank-cursor",
-        "#bank-click-2",
-        [1373.39794921875, 704.6689453125],
-        5.1000000000000005,
-      );
-      tl.to(
         "#bank-stage",
-        { scale: 1.1, x: -20, y: -40, duration: 0.3, ease: "power2.inOut" },
-        2.15,
+        [984.24, 342.797],
+        2.8600000000000003,
+        1100,
+        687.5,
       );
+      launchMove(
+        tl,
+        "#bank-cursor",
+        [984.24, 342.797],
+        [899.249, 461.39],
+        4.460000000000001,
+        0.3,
+      );
+      launchClick(
+        tl,
+        "#bank-cursor",
+        "#bank-ring-2",
+        [899.249, 461.39],
+        4.800000000000001,
+      );
+      launchCamera(
+        tl,
+        "#bank-stage",
+        [899.249, 461.39],
+        4.460000000000001,
+        1100,
+        687.5,
+      );
+      tl.set(".headline", { opacity: 1 });
       window.__timelines["bank"] = tl;
     }
   </script>

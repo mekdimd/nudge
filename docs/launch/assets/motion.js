@@ -40,7 +40,7 @@ function launchClick(tl, selector, ring, point, at) {
       { scale: 1, opacity: 0.8, duration: 0.22, ease: "power2.out" },
       at,
     );
-    tl.to(ring, { opacity: 0, duration: 0.16 }, 3.1);
+    tl.to(ring, { opacity: 0, duration: 0.16 }, 2.4);
   } else
     tl.to(
       ring,
@@ -49,4 +49,23 @@ function launchClick(tl, selector, ring, point, at) {
     );
   tl.to(selector, { scale: 0.79, duration: 0.07, ease: "power2.in" }, at);
   tl.to(selector, { scale: 1, duration: 0.16, ease: "back.out(2)" }, at + 0.07);
+}
+
+// Follow the target during a flight, then return to the complete browser view.
+function launchCamera(tl, stage, point, at, width, height) {
+  const scale = 1.1;
+  const x = Math.max(
+    width * (1 - scale),
+    Math.min(0, width / 2 - point[0] * scale),
+  );
+  const y = Math.max(
+    height * (1 - scale),
+    Math.min(0, height / 2 - point[1] * scale),
+  );
+  tl.to(stage, { scale, x, y, duration: 0.34, ease: "power2.inOut" }, at);
+  tl.to(
+    stage,
+    { scale: 1, x: 0, y: 0, duration: 0.3, ease: "power2.inOut" },
+    at + 0.85,
+  );
 }

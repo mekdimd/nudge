@@ -11,273 +11,280 @@
     data-composition-id="mail"
     data-width="1920"
     data-height="1080"
-    data-duration="8.966666666666667"
+    data-duration="11.299999999999999"
   >
-    <h1 id="mail-title" class="headline">Draft an email.</h1>
-    <img
-      class="goal-bar"
-      src="assets/browser/mail-idle.png"
-      alt="Nudge task request"
-    />
+    <h1 class="headline">Review an email.</h1>
     <div class="screen">
       <div id="mail-stage" class="screen-stage" data-layout-allow-overflow>
         <video
-          id="mail-compose-video"
+          id="mail-0-screen"
           class="clip screen-media"
-          src="assets/browser/mail-compose.mp4"
+          src="assets/browser/mail-0-screen.mp4"
           muted
           playsinline
           data-start="0"
-          data-duration="1.15"
+          data-duration="1.05"
           data-track-index="1"
+          data-beat="mail-0-screen"
           data-hf-media-start-basis="local"
         ></video>
-        <div
-          id="mail-empty-hold"
-          class="clip"
-          data-start="1.15"
+        <div id="mail-ring-0" class="ring" data-layout-ignore></div>
+        <video
+          id="mail-1-screen"
+          class="clip screen-media"
+          src="assets/browser/mail-1-screen.mp4"
+          muted
+          playsinline
+          data-start="1.05"
+          data-duration="4.1"
+          data-track-index="1"
+          data-beat="mail-1-screen"
+          data-hf-media-start-basis="local"
+        ></video
+        ><video
+          id="mail-2-screen"
+          class="clip screen-media"
+          src="assets/browser/mail-2-screen.mp4"
+          muted
+          playsinline
+          data-start="5.1499999999999995"
+          data-duration="3.4"
+          data-track-index="1"
+          data-beat="mail-2-screen"
+          data-hf-media-start-basis="local"
+        ></video>
+        <div id="mail-ring-1" class="ring" data-layout-ignore></div>
+        <video
+          id="mail-3-screen"
+          class="clip screen-media"
+          src="assets/browser/mail-3-screen.mp4"
+          muted
+          playsinline
+          data-start="8.549999999999999"
           data-duration="2.75"
           data-track-index="1"
-          data-track-kind="graphics"
-        >
-          <img
-            class="screen-media"
-            src="assets/browser/mail-state-1.png"
-            alt=""
-          />
-        </div>
-        <video
-          id="mail-fill-video"
-          class="clip screen-media"
-          src="assets/browser/mail-fill.mp4"
-          muted
-          playsinline
-          data-start="3.9"
-          data-duration="1.35"
-          data-track-index="1"
+          data-beat="mail-3-screen"
           data-hf-media-start-basis="local"
         ></video>
-        <div
-          id="mail-filled-hold"
-          class="clip"
-          data-start="5.25"
-          data-duration="1.6"
-          data-track-index="1"
-          data-track-kind="graphics"
-        >
-          <img
-            class="screen-media"
-            src="assets/browser/mail-state-4.png"
-            alt=""
-          />
-        </div>
+        <div id="mail-ring-4" class="ring" data-layout-ignore></div>
+        <img
+          id="mail-cursor"
+          class="actor"
+          src="assets/pointer.png"
+          alt=""
+          data-layout-ignore
+        />
+      </div>
+    </div>
+    <div
+      class="nudge-screen"
+      style="top: 214.139010989011px; height: 599.221978021978px"
+    >
+      <div id="mail-nudge-stage" class="nudge-stage" data-layout-allow-overflow>
         <video
-          id="mail-send-video"
-          class="clip screen-media"
-          src="assets/browser/mail-send.mp4"
+          id="mail-0-nudge"
+          class="clip nudge-media"
+          src="assets/browser/mail-0-nudge.mp4"
           muted
           playsinline
-          data-start="6.85"
-          data-duration="2.116667"
-          data-track-index="1"
-          data-hf-media-start-basis="local"
-        ></video>
-        <div
-          id="mail-compose-cursor"
-          class="clip"
           data-start="0"
-          data-duration="1.15"
-          data-track-index="3"
-          data-track-kind="graphics"
-        >
-          <img
-            id="compose-cursor"
-            class="actor"
-            src="assets/pointer.png"
-            alt=""
-            data-layout-ignore
-          />
-          <div id="compose-ring" class="ring" data-layout-ignore></div>
-        </div>
+          data-duration="1.05"
+          data-track-index="1"
+          data-beat="mail-0-nudge"
+          data-hf-media-start-basis="local"
+        ></video
+        ><video
+          id="mail-1-nudge"
+          class="clip nudge-media"
+          src="assets/browser/mail-1-nudge.mp4"
+          muted
+          playsinline
+          data-start="1.05"
+          data-duration="4.1"
+          data-track-index="1"
+          data-beat="mail-1-nudge"
+          data-hf-media-start-basis="local"
+        ></video>
+        <div id="mail-approval-ring-1" class="ring" data-layout-ignore></div>
+        <video
+          id="mail-2-nudge"
+          class="clip nudge-media"
+          src="assets/browser/mail-2-nudge.mp4"
+          muted
+          playsinline
+          data-start="5.1499999999999995"
+          data-duration="3.4"
+          data-track-index="1"
+          data-beat="mail-2-nudge"
+          data-hf-media-start-basis="local"
+        ></video
+        ><video
+          id="mail-3-nudge"
+          class="clip nudge-media"
+          src="assets/browser/mail-3-nudge.mp4"
+          muted
+          playsinline
+          data-start="8.549999999999999"
+          data-duration="2.75"
+          data-track-index="1"
+          data-beat="mail-3-nudge"
+          data-hf-media-start-basis="local"
+        ></video>
+        <div id="mail-approval-ring-3" class="ring" data-layout-ignore></div>
+        <img
+          id="mail-human"
+          class="actor human"
+          src="assets/human-cursor.svg"
+          alt=""
+          data-layout-ignore
+        />
         <div
-          id="mail-send-cursor"
+          id="mail-done-hold"
           class="clip"
-          data-start="6.85"
-          data-duration="2.116667"
+          data-start="10.749999999999998"
+          data-duration=".55"
           data-track-index="3"
-          data-track-kind="graphics"
+          data-beat="mail-finished"
         >
           <img
-            id="send-cursor"
-            class="actor"
-            src="assets/pointer.png"
-            alt=""
-            data-layout-ignore
+            class="nudge-media"
+            src="assets/browser/mail-side-done.png"
+            alt="Nudge completed the task"
           />
-          <div id="send-ring" class="ring" data-layout-ignore></div>
         </div>
       </div>
     </div>
-    <div
-      id="draft-original"
-      class="clip"
-      data-start="1.15"
-      data-duration="0.45"
-      data-track-index="3"
-      data-track-kind="graphics"
-      data-beat="draft"
-    >
-      <div class="draft-plate">
-        <img class="panel-image" src="assets/browser/mail-draft.png" alt="" />
-      </div>
-    </div>
-    <div
-      id="draft-subject"
-      class="clip"
-      data-start="1.6"
-      data-duration="0.6"
-      data-track-index="3"
-      data-track-kind="graphics"
-      data-beat="before-edit"
-    >
-      <div class="subject-plate">
-        <img class="panel-image" src="assets/browser/mail-subject.png" alt="" />
-      </div>
-    </div>
-    <div
-      id="draft-edited"
-      class="clip"
-      data-start="2.2"
-      data-duration="1.0"
-      data-track-index="3"
-      data-track-kind="graphics"
-      data-beat="edit"
-    >
-      <div class="subject-plate">
-        <img
-          class="panel-image"
-          src="assets/browser/mail-subject-edited.png"
-          alt=""
-        />
-      </div>
-    </div>
-    <div
-      id="draft-type"
-      class="clip"
-      data-start="3.2"
-      data-duration="0.7"
-      data-track-index="3"
-      data-track-kind="graphics"
-      data-beat="type-it"
-    >
-      <div class="type-plate">
-        <img
-          class="panel-image"
-          src="assets/browser/mail-type-focus.png"
-          alt=""
-        />
-      </div>
-    </div>
-    <div
-      id="draft-approval-pointer"
-      class="clip"
-      data-start="3.2"
-      data-duration="0.7"
-      data-track-index="4"
-      data-track-kind="graphics"
-    >
-      <img
-        id="draft-cursor"
-        class="actor human"
-        src="assets/human-cursor.svg"
-        alt=""
-        data-layout-ignore
-      />
-      <div id="draft-ring" class="ring" data-layout-ignore></div>
-    </div>
-    <div
-      id="send-confirmation"
-      class="clip"
-      data-start="5.25"
-      data-duration="1.6"
-      data-track-index="3"
-      data-track-kind="graphics"
-      data-beat="approval"
-    >
-      <div class="confirm-plate">
-        <img
-          class="panel-image"
-          src="assets/browser/mail-confirm-focus.png"
-          alt=""
-        />
-      </div>
-      <img
-        id="confirm-cursor"
-        class="actor human"
-        src="assets/human-cursor.svg"
-        alt=""
-        data-layout-ignore
-      />
-      <div id="confirm-ring" class="ring" data-layout-ignore></div>
-    </div>
-    <div
-      id="mail-sent-result"
-      class="clip"
-      data-start="8.0"
-      data-duration="0.966667"
-      data-track-index="5"
-      data-track-kind="graphics"
-      data-beat="sent"
-    ></div>
   </div>
   <script>
     {
       const tl = gsap.timeline({ paused: true });
       launchMove(
         tl,
-        "#compose-cursor",
-        [997.5, 131.25],
-        [145.03125, 181.125],
-        0.26,
-        0.28,
+        "#mail-cursor",
+        [682.0, 206.25],
+        [94.961, 118.594],
+        0.3099999999999999,
+        0.3,
       );
       launchClick(
         tl,
-        "#compose-cursor",
-        "#compose-ring",
-        [145.03125, 181.125],
-        0.6,
+        "#mail-cursor",
+        "#mail-ring-0",
+        [94.961, 118.594],
+        0.6499999999999999,
       );
-      launchMove(tl, "#draft-cursor", [1500, 570], [960, 615], 3.21, 0.24);
-      launchClick(tl, "#draft-cursor", "#draft-ring", [960, 615], 3.55);
-      launchMove(tl, "#confirm-cursor", [1430, 690], [990, 744], 6.13, 0.25);
-      launchClick(tl, "#confirm-cursor", "#confirm-ring", [990, 744], 6.56);
+      launchCamera(
+        tl,
+        "#mail-stage",
+        [94.961, 118.594],
+        0.3099999999999999,
+        1100,
+        687.5,
+      );
       launchMove(
         tl,
-        "#send-cursor",
-        [577.5, 590.625],
-        [446.98828125, 847.875],
-        6.94,
+        "#mail-human",
+        [520, 389.443],
+        [296.151, 479.443],
+        4.63,
         0.28,
       );
       launchClick(
         tl,
-        "#send-cursor",
-        "#send-ring",
-        [446.98828125, 847.875],
+        "#mail-human",
+        "#mail-approval-ring-1",
+        [296.151, 479.443],
+        4.95,
+      );
+      tl.to("#mail-human", { opacity: 0, duration: 0.15 }, 5.25);
+      launchMove(
+        tl,
+        "#mail-cursor",
+        [94.961, 118.594],
+        [638.945, 233.75],
+        5.1899999999999995,
+        0.3,
+      );
+      launchClick(
+        tl,
+        "#mail-cursor",
+        "#mail-ring-1",
+        [638.945, 233.75],
+        5.279764041900634,
+      );
+      launchCamera(
+        tl,
+        "#mail-stage",
+        [638.945, 233.75],
+        5.1899999999999995,
+        1100,
+        687.5,
+      );
+      launchMove(
+        tl,
+        "#mail-cursor",
+        [638.945, 233.75],
+        [292.671, 555.156],
+        8.709999999999999,
+        0.3,
+      );
+      launchClick(
+        tl,
+        "#mail-cursor",
+        "#mail-ring-4",
+        [292.671, 555.156],
+        9.049999999999999,
+      );
+      launchCamera(
+        tl,
+        "#mail-stage",
+        [292.671, 555.156],
+        8.709999999999999,
+        1100,
+        687.5,
+      );
+      launchMove(
+        tl,
+        "#mail-human",
+        [520, 234.154],
+        [160.38, 324.154],
+        8.710235958099366,
+        0.28,
+      );
+      launchClick(
+        tl,
+        "#mail-human",
+        "#mail-approval-ring-3",
+        [160.38, 324.154],
+        9.030235958099366,
+      );
+      tl.to("#mail-human", { opacity: 0, duration: 0.15 }, 9.330235958099367);
+      tl.to(
+        "#mail-nudge-stage",
+        { scale: 2.5, x: -20, y: -540, duration: 0.4, ease: "power2.inOut" },
+        1.5,
+      );
+      tl.to(
+        "#mail-nudge-stage",
+        { x: -443, y: -850, duration: 0.38, ease: "power2.inOut" },
+        4.3,
+      );
+      tl.to(
+        "#mail-nudge-stage",
+        { scale: 1, x: 0, y: 0, duration: 0.35, ease: "power2.inOut" },
+        5.07,
+      );
+      tl.to(
+        "#mail-nudge-stage",
+        { scale: 2.25, x: -20, y: -460, duration: 0.4, ease: "power2.inOut" },
         7.3,
       );
       tl.to(
-        "#mail-stage",
-        { scale: 1.1, x: -60, y: -150, duration: 0.28, ease: "power2.inOut" },
-        3.9,
+        "#mail-nudge-stage",
+        { scale: 1, x: 0, y: 0, duration: 0.35, ease: "power2.inOut" },
+        9.25,
       );
-      tl.fromTo(
-        "#mail-title",
-        { x: -36, opacity: 0 },
-        { x: 0, opacity: 1, duration: 0.24, ease: "power3.out" },
-        0,
-      );
+      tl.set(".headline", { opacity: 1 });
       window.__timelines["mail"] = tl;
     }
   </script>

@@ -1,156 +1,324 @@
-"""Assemble editable v2 scenes from the verified browser recordings."""
+"""Build the split-screen launch film from synchronized browser and Qt captures."""
+
 from pathlib import Path
 import json
+import math
 import subprocess
+import wave
 
 P = Path(__file__).resolve().parents[1]
-A = P / 'assets' / 'browser'
-SCALE = 1680 / 1280
+A = P / "assets" / "browser"
+SCREEN_W = 1100
+SCREEN_H = 687.5
+SCALE = SCREEN_W / 1280
+SIDE_W = 594
+SOUND_CUES = []
 
 
-def trim(case, name, start, duration):
-    subprocess.run(['ffmpeg', '-y', '-v', 'error', '-ss', str(start), '-i', str(A / (case + '.webm')),
-                    '-t', str(duration), '-vf', 'fps=60', '-an', '-c:v', 'libx264', '-crf', '16',
-                    '-pix_fmt', 'yuv420p', '-movflags', '+faststart', str(A / (name + '.mp4'))], check=True)
+def encode(source, destination, start, duration, filters="fps=60"):
+    assert start >= 0 and duration > 0, (source, start, duration)
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-v",
+            "error",
+            "-ss",
+            str(start),
+            "-i",
+            str(source),
+            "-t",
+            str(duration),
+            "-vf",
+            filters,
+            "-an",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "fast",
+            "-crf",
+            "17",
+            "-pix_fmt",
+            "yuv420p",
+            "-movflags",
+            "+faststart",
+            str(destination),
+        ],
+        check=True,
+    )
 
 
-def clip(id, start, duration, contents, track=1, beat=''):
-    return f'<div id="{id}" class="clip" data-start="{start}" data-duration="{duration}" data-track-index="{track}" data-track-kind="graphics"'+(f' data-beat="{beat}"' if beat else '')+f'>{contents}</div>'
+def timed_video(id, source, start, duration, cls):
+    return (
+        f'<video id="{id}" class="clip {cls}" src="assets/browser/{source}" muted playsinline '
+        f'data-start="{start}" data-duration="{duration}" data-track-index="1" data-beat="{id}" data-hf-media-start-basis="local"></video>'
+    )
 
 
-def video(id, src, start, duration):
-    return f'<video id="{id}" class="clip screen-media" src="assets/browser/{src}.mp4" muted playsinline data-start="{start}" data-duration="{duration}" data-track-index="1" data-hf-media-start-basis="local"></video>'
-
-
-def image(name, cls='screen-media'):
-    return f'<img class="{cls}" src="assets/browser/{name}.png" alt="">'
-
-
-def cursor(id, dark=False):
-    return f'<img id="{id}" class="actor'+(' human' if dark else '')+'" src="assets/'+('human-cursor.svg' if dark else 'pointer.png')+'" alt="" data-layout-ignore>'
+def actor(id, human=False):
+    return f'<img id="{id}" class="actor{" human" if human else ""}" src="assets/{"human-cursor.svg" if human else "pointer.png"}" alt="" data-layout-ignore>'
 
 
 def ring(id, miss=False):
-    return f'<div id="{id}" class="ring'+(' miss' if miss else '')+'" data-layout-ignore></div>'
+    return f'<div id="{id}" class="ring{" miss" if miss else ""}" data-layout-ignore></div>'
 
 
-def move(id, first, last, at, duration=.28):
-    x,y=first;tx,ty=last
-    return f'launchMove(tl,"#{id}",[{x*SCALE},{y*SCALE}],[{tx*SCALE},{ty*SCALE}],{at},{duration});'
-
-
-def click(id, rid, position, at):
-    x,y=position
-    return f'launchClick(tl,"#{id}","#{rid}",[{x*SCALE},{y*SCALE}],{at});'
-
-
-def scene(name, duration, body, js, styles=''):
-    (P / 'compositions' / (name+'.html')).write_text(f'''<template>
+def scene(name, duration, body, script, styles=""):
+    (P / "compositions" / f"{name}.html").write_text(f'''<template>
 <style>#root{{position:absolute;inset:0}}{styles}</style>
 <div id="root" class="scene" data-composition-id="{name}" data-width="1920" data-height="1080" data-duration="{duration}">{body}</div>
-<script>{{const tl=gsap.timeline({{paused:true}});{js}window.__timelines["{name}"]=tl;}}</script>
+<script>{{const tl=gsap.timeline({{paused:true}});{script}window.__timelines["{name}"]=tl;}}</script>
 </template>
 ''')
 
 
-def title(name, text, goal=None):
-    return '<h1 id="'+name+'-title" class="headline">'+text+'</h1>'+('<img class="goal-bar" src="assets/browser/'+goal+'-idle.png" alt="Nudge task request">' if goal else '')
+def cue(name, at, volume=0.4):
+    SOUND_CUES.append((name, at, volume))
+
+
+def build_task(case, title, segments, absolute_start, peek=False, video_offsets=None):
+    data = json.loads((A / f"{case}-actions.json").read_text())
+    trace = json.loads((A / f"{case}-trace.json").read_text())
+    offset = trace["epoch_started"] - data["epochStarted"]
+    max_height = max(
+        trace["idle"]["height"],
+        trace["done"]["height"],
+        *[p["bar"]["height"] for p in trace["prompts"]],
+    )
+    crop_h = min(1000, math.ceil(max_height * 0.65 / 2) * 2 + 12)
+    side_height = crop_h * SIDE_W / 910
+    side_top = 170 + (SCREEN_H - side_height) / 2
+    screen = ""
+    side = ""
+    script = ""
+    clock = 0
+    emitted = []
+    for i, (source_start, duration) in enumerate(segments):
+        name = f"{case}-{i}"
+        video_offset = video_offsets[i] if video_offsets else data["recordingOffset"]
+        background = {"bank": "0xf5f7f6", "mail": "0xf5f5fb", "youtube": "white"}[case]
+        encode(
+            A / f"{case}.webm",
+            A / f"{name}-screen.mp4",
+            video_offset + source_start,
+            duration,
+            f"crop=1280:712:0:0,pad=1280:800:0:0:color={background},fps=60",
+        )
+        encode(
+            A / f"{case}-nudge.mp4",
+            A / f"{name}-nudge.mp4",
+            source_start - offset - trace["ui_frames"][0],
+            duration,
+            f"crop=910:{crop_h}:0:0,fps=60",
+        )
+        screen += timed_video(
+            name + "-screen", name + "-screen.mp4", clock, duration, "screen-media"
+        )
+        side += timed_video(
+            name + "-nudge", name + "-nudge.mp4", clock, duration, "nudge-media"
+        )
+        for j, a in enumerate(data["actions"]):
+            if (
+                case == "mail"
+                and a["operation"] == "type"
+                and a["label"] != "To recipients"
+            ):
+                continue
+            if (
+                source_start <= a["at"] < source_start + duration
+                and "center" in a
+                and j not in emitted
+            ):
+                emitted.append(j)
+                local = clock + a["at"] - source_start
+                point = [round(v * SCALE, 3) for v in a["center"]]
+                origin = (
+                    [SCREEN_W * 0.62, SCREEN_H * 0.30]
+                    if len(emitted) == 1
+                    else previous
+                )
+                before = max(clock + 0.04, local - 0.34)
+                script += (
+                    f'launchMove(tl,"#{case}-cursor",{origin},{point},{before},.30);'
+                )
+                script += f'launchClick(tl,"#{case}-cursor","#{case}-ring-{j}",{point},{local});'
+                script += f'launchCamera(tl,"#{case}-stage",{point},{before},{SCREEN_W},{SCREEN_H});'
+                screen += ring(f"{case}-ring-{j}")
+                if a["operation"] == "click":
+                    cue("click-soft.mp3", absolute_start + local, 0.65)
+                cue("tick.wav", absolute_start + local + 0.32, 0.38)
+                previous = point
+        for event in trace["events"]:
+            if event["kind"] == "approve":
+                host_at = offset + event["at"]
+                if source_start <= host_at < source_start + duration:
+                    local = clock + host_at - source_start
+                    point = [round(v * SIDE_W / 700, 3) for v in event["center"]]
+                    script += f'launchMove(tl,"#{case}-human",[520,{point[1] - 90}],{point},{max(clock + 0.02, local - 0.32)},.28);'
+                    script += f'launchClick(tl,"#{case}-human","#{case}-approval-ring-{i}",{point},{local});'
+                    script += f'tl.to("#{case}-human",{{opacity:0,duration:.15}},{local + 0.3});'
+                    side += ring(f"{case}-approval-ring-{i}")
+                    cue("click-soft.mp3", absolute_start + local, 0.65)
+        clock += duration
+    screen += actor(case + "-cursor")
+    side += actor(case + "-human", True)
+    done = A / f"{case}-side-done.png"
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-v",
+            "error",
+            "-i",
+            str(A / f"{case}-done.png"),
+            "-vf",
+            f"scale=910:-1,pad=910:{crop_h}:0:0:color=0x20252c",
+            "-frames:v",
+            "1",
+            str(done),
+        ],
+        check=True,
+    )
+    side += f'<div id="{case}-done-hold" class="clip" data-start="{clock - 0.55}" data-duration=".55" data-track-index="3" data-beat="{case}-finished"><img class="nudge-media" src="assets/browser/{done.name}" alt="Nudge completed the task"></div>'
+    if peek:
+        screen += '<div id="peek-frame" class="clip" data-start=".2" data-duration="1.35" data-track-index="3"><img class="screen-media" src="assets/browser/youtube-peek.png" alt="Nudge Peek outlines the browser controls"></div>'
+        script += 'tl.fromTo("#peek-frame img",{opacity:0},{opacity:1,duration:.16},.2);tl.to("#peek-frame img",{opacity:0,duration:.18},1.35);'
+    body = f'<h1 class="headline">{title}</h1><div class="screen"><div id="{case}-stage" class="screen-stage" data-layout-allow-overflow>{screen}</div></div>'
+    body += f'<div class="nudge-screen" style="top:{side_top}px;height:{side_height}px"><div id="{case}-nudge-stage" class="nudge-stage" data-layout-allow-overflow>{side}</div></div>'
+    if case == "mail":
+        # Enlarge the actual subject and approval controls while their decisions hold.
+        script += 'tl.to("#mail-nudge-stage",{scale:2.5,x:-20,y:-540,duration:.4,ease:"power2.inOut"},1.5);'
+        script += 'tl.to("#mail-nudge-stage",{x:-443,y:-850,duration:.38,ease:"power2.inOut"},4.3);'
+        script += 'tl.to("#mail-nudge-stage",{scale:1,x:0,y:0,duration:.35,ease:"power2.inOut"},5.07);'
+        script += 'tl.to("#mail-nudge-stage",{scale:2.25,x:-20,y:-460,duration:.4,ease:"power2.inOut"},7.3);'
+        script += 'tl.to("#mail-nudge-stage",{scale:1,x:0,y:0,duration:.35,ease:"power2.inOut"},9.25);'
+    script += 'tl.set(".headline",{opacity:1});'
+    cue("start.wav", absolute_start + 0.08, 0.38)
+    cue("success.wav", absolute_start + clock - 0.5, 0.42)
+    scene(case, clock, body, script)
+    return {
+        "segments": segments,
+        "video_offsets": video_offsets or [data["recordingOffset"]] * len(segments),
+        "duration": clock,
+        "side_top": side_top,
+        "side_height": side_height,
+    }
 
 
 def main():
-    for source,name,box in [('mail-draft','mail-subject','650:144:24:250'),('mail-draft-edited','mail-subject-edited','650:144:24:250'),('mail-draft','mail-type-focus','470:105:430:670'),('mail-confirm','mail-confirm-focus','656:236:0:0')]:
-        subprocess.run(['ffmpeg','-y','-v','error','-i',str(A/(source+'.png')),'-vf','crop='+box,'-frames:v','1',str(A/(name+'.png'))],check=True)
-    info={case:json.loads((A/(case+'-actions.json')).read_text()) for case in ('bank','youtube','mail')}
-    # These points follow decoded screen changes, including the recording pre-roll.
-    points=json.loads((A/'edit-points.json').read_text())
-    bank_onsets=[next(v['at'] for v in points['bank'] if v['state']==i) for i in (1,2,3)]
-    for name,point,duration in zip(('bank-nav','bank-statement','bank-download'),bank_onsets,(2.15,2.15,2.433333)):
-        trim('bank',name,point-.8,duration)
-    yt_type=next(v['at'] for v in points['youtube'] if v['state']==1)
-    yt_click=info['youtube']['recordingOffset']+info['youtube']['actions'][1]['at']-.7
-    trim('youtube','youtube-type',yt_type-.35,1.5)
-    trim('youtube','youtube-search',yt_click-.6,2.5)
-    duration=float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','default=noprint_wrappers=1:nokey=1',str(A/'youtube-result-closeup.webm')]))
-    trim('youtube-result-closeup','youtube-results',duration-2.5,2.5)
-    mail_onsets={i:next(v['at'] for v in points['mail'] if v['state']==i) for i in (1,4,5)}
-    trim('mail','mail-compose',mail_onsets[1]-.6,1.15)
-    trim('mail','mail-fill',mail_onsets[4]-.25,1.6)
-    trim('mail','mail-send',mail_onsets[5]-.45,2.116667)
+    # The same framing continues across trims; only waiting between decisions is removed.
+    bank = json.loads((A / "bank-actions.json").read_text())
+    youtube = json.loads((A / "youtube-actions.json").read_text())
+    mail = json.loads((A / "mail-actions.json").read_text())
+    mt = json.loads((A / "mail-trace.json").read_text())
+    clicks = bank["actions"]
+    bank_segments = [
+        (clicks[0]["at"] - 1.5, 1.95),
+        (clicks[1]["at"] - 1.25, 1.7),
+        (clicks[2]["at"] - 1.15, 2.35),
+    ]
+    yt_type = next(a for a in youtube["actions"] if a["operation"] == "type")
+    yt_click = next(a for a in youtube["actions"] if a["operation"] == "click")
+    scroll = next((a for a in youtube["actions"] if a["operation"] == "scroll"), None)
+    yt_segments = [
+        (yt_type["at"] - 2.4, 2.85),
+        (yt_click["at"] - 1.15, 2.05),
+        ((scroll["at"] - 0.15) if scroll else (yt_click["at"] + 1.1), 1.1),
+    ]
+    offset = mt["epoch_started"] - mail["epochStarted"]
+    draft = next(p for p in mt["prompts"] if p["kind"] == "draft")["at"] + offset
+    approve = (
+        next(
+            e
+            for e in mt["events"]
+            if e["kind"] == "approve" and e["prompt"] == "confirm"
+        )["at"]
+        + offset
+    )
+    compose = mail["actions"][0]["at"]
+    send = mail["actions"][-1]["at"]
+    mail_segments = [
+        (compose - 0.65, 1.05),
+        (draft - 0.3, 4.1),
+        (approve + 0.15 - 4.1, 3.4),
+        (send - 0.5, 2.75),
+    ]
+    cut = {}
+    cut["bank"] = build_task(
+        "bank", "Download a statement.", bank_segments, 4.8, video_offsets=[1.56] * 3
+    )
+    cut["youtube"] = build_task(
+        "youtube", "Find a how-to.", yt_segments, 10.8, peek=True
+    )
+    cut["mail"] = build_task(
+        "mail",
+        "Review an email.",
+        mail_segments,
+        16.8,
+        video_offsets=[1.48, 1.48, 1.52, 1.34],
+    )
+    (A / "edit-points-v3.json").write_text(json.dumps(cut, indent=2) + "\n")
 
-    # The hook shows only a website and ordinary cursor misses.
-    misses=[(206,258),(1220,340),(770,214)]
-    h=title('hook','Small targets add up.')
-    inner=image('bank-page-idle')+cursor('hook-cursor',True)+''.join(ring('miss-'+str(i),True) for i in range(3))
-    h+='<div class="screen"><div id="hook-stage" class="screen-stage" data-layout-allow-overflow>'+inner+'</div></div>'
-    js='tl.set("#hook-cursor",{x:750,y:210,opacity:1});'
-    source=(570,160)
-    for i,target in enumerate(misses):
-        at=.4+i*.78
-        js+=move('hook-cursor',source,target,at,.24)+click('hook-cursor','miss-'+str(i),target,at+.25)
-        source=target
-    js+='tl.to("#hook-stage",{scale:1.045,x:-15,y:-15,duration:.32,ease:"power2.inOut"},2.72);'
-    scene('hook',202/60,h,js)
+    misses = [(206, 258), (1220, 340), (770, 214)]
+    h = (
+        '<div class="hook-screen"><div id="hook-stage" data-layout-allow-overflow><img class="hook-media" src="assets/browser/bank-page-idle.png" alt="Bank website">'
+        + actor("hook-cursor", True)
+        + "".join(ring("miss-" + str(i), True) for i in range(3))
+        + '</div></div><div id="hook-copy"><h1>Hard to click?</h1></div>'
+    )
+    script = 'tl.set("#hook-cursor",{x:850,y:240,opacity:1});'
+    source = [650, 180]
+    for i, target in enumerate(misses):
+        a = [round(x * 1.3125, 3) for x in source]
+        b = [round(x * 1.3125, 3) for x in target]
+        at = 0.25 + i * 0.72
+        script += f'launchMove(tl,"#hook-cursor",{a},{b},{at},.24);launchClick(tl,"#hook-cursor","#miss-{i}",{b},{at + 0.25});'
+        cue("click-soft.mp3", at + 0.25, 0.65)
+        source = target
+    script += 'tl.to("#hook-stage",{opacity:.2,duration:.28},2.42);tl.to("#hook-copy",{opacity:1,duration:.34,ease:"power2.out"},2.5);'
+    scene("hook", 4, h, script)
+    cue("attention.wav", 2.48, 0.3)
 
-    body='<h1 id="reveal-word" class="wordmark">Nudge</h1>'+cursor('reveal-cursor')
-    js='tl.fromTo("#reveal-word",{y:65,opacity:0},{y:0,opacity:1,duration:.22,ease:"power3.out"},0);tl.fromTo("#reveal-cursor",{x:1590,y:670,scale:1.8,rotation:18},{x:1240,y:335,scale:2.3,rotation:0,opacity:1,duration:.34,ease:"power3.out"},.06);'
-    scene('reveal',67/60,body,js,'.wordmark{left:300px;top:325px;font-size:250px}')
-
-    body=title('bank','Download a statement.','bank')
-    inner=video('bank-nav-video','bank-nav',0,2.15)+video('bank-statement-video','bank-statement',2.15,2.15)+video('bank-download-video','bank-download',4.30,2.433333)
-    inner+=cursor('bank-cursor')+''.join(ring('bank-click-'+str(i)) for i in range(3))
-    body+='<div class="screen"><div id="bank-stage" class="screen-stage" data-layout-allow-overflow>'+inner+'</div></div>'
-    js='tl.fromTo("#bank-title",{x:-36,opacity:0},{x:0,opacity:1,duration:.24,ease:"power3.out"},0);'
-    source=(940,70)
-    for i,action in enumerate(info['bank']['actions']):
-        target=action['center'];at=[.52,2.67,4.82][i]
-        js+=move('bank-cursor',source,target,at)+click('bank-cursor','bank-click-'+str(i),target,at+.28)
-        source=target
-    js+='tl.to("#bank-stage",{scale:1.10,x:-20,y:-40,duration:.3,ease:"power2.inOut"},2.15);'
-    body+=clip('bank-download-result',5.7,1.03,'',5,'downloaded')
-    scene('bank',404/60,body,js)
-
-    body=title('search','Find a how-to.','youtube')
-    inner=clip('youtube-idle',0,1,image('youtube-page-idle'))+video('youtube-type-video','youtube-type',1,1.5)+video('youtube-search-video','youtube-search',2.5,2.5)+video('youtube-result-video','youtube-results',5,1.733333)
-    inner+=cursor('search-cursor')+ring('search-type-ring')+ring('search-click-ring')
-    body+='<div class="screen"><div id="search-stage" class="screen-stage" data-layout-allow-overflow>'+inner+'</div></div>'
-    query=info['youtube']['actions'][0]['center'];suggestion=info['youtube']['actions'][1]['center']
-    js=move('search-cursor',(850,170),query,.57)+click('search-cursor','search-type-ring',query,1.30)+move('search-cursor',query,suggestion,2.77)+click('search-cursor','search-click-ring',suggestion,3.10)
-    js+='tl.fromTo("#search-title",{x:-36,opacity:0},{x:0,opacity:1,duration:.24,ease:"power3.out"},0);tl.to("#search-stage",{scale:1,transformOrigin:"50% 0%",x:0,y:0,duration:.3,ease:"power2.inOut"},4.95);'
-    body+=clip('search-results-beat',5.0,1.73,'',5,'results')
-    js+='tl.to("#search-cursor",{opacity:0,duration:.15},4.8);'
-    scene('search',404/60,body,js)
-
-    body=title('mail','Draft an email.','mail')
-    inner=video('mail-compose-video','mail-compose',0,1.15)+clip('mail-empty-hold',1.15,2.75,image('mail-state-1'))+video('mail-fill-video','mail-fill',3.90,1.35)+clip('mail-filled-hold',5.25,1.6,image('mail-state-4'))+video('mail-send-video','mail-send',6.85,2.116667)
-    inner+=clip('mail-compose-cursor',0,1.15,cursor('compose-cursor')+ring('compose-ring'),3)+clip('mail-send-cursor',6.85,2.116667,cursor('send-cursor')+ring('send-ring'),3)
-    body+='<div class="screen"><div id="mail-stage" class="screen-stage" data-layout-allow-overflow>'+inner+'</div></div>'
-    body+=clip('draft-original',1.15,.45,'<div class="draft-plate">'+image('mail-draft','panel-image')+'</div>',3,'draft')
-    body+=clip('draft-subject',1.60,.60,'<div class="subject-plate">'+image('mail-subject','panel-image')+'</div>',3,'before-edit')
-    body+=clip('draft-edited',2.20,1.0,'<div class="subject-plate">'+image('mail-subject-edited','panel-image')+'</div>',3,'edit')
-    body+=clip('draft-type',3.20,.70,'<div class="type-plate">'+image('mail-type-focus','panel-image')+'</div>',3,'type-it')
-    body+=clip('draft-approval-pointer',3.2,.70,cursor('draft-cursor',True)+ring('draft-ring'),4)
-    body+=clip('send-confirmation',5.25,1.6,'<div class="confirm-plate">'+image('mail-confirm-focus','panel-image')+'</div>'+cursor('confirm-cursor',True)+ring('confirm-ring'),3,'approval')
-    compose=info['mail']['actions'][0]['center'];send=info['mail']['actions'][-1]['center']
-    js=move('compose-cursor',(760,100),compose,.26)+click('compose-cursor','compose-ring',compose,.60)
-    js+='launchMove(tl,"#draft-cursor",[1500,570],[960,615],3.21,.24);launchClick(tl,"#draft-cursor","#draft-ring",[960,615],3.55);'
-    js+='launchMove(tl,"#confirm-cursor",[1430,690],[990,744],6.13,.25);launchClick(tl,"#confirm-cursor","#confirm-ring",[990,744],6.56);'
-    js+=move('send-cursor',(440,450),send,6.94)+click('send-cursor','send-ring',send,7.30)
-    js+='tl.to("#mail-stage",{scale:1.1,x:-60,y:-150,duration:.28,ease:"power2.inOut"},3.90);tl.fromTo("#mail-title",{x:-36,opacity:0},{x:0,opacity:1,duration:.24,ease:"power3.out"},0);'
-    body+=clip('mail-sent-result',8.0,.966667,'',5,'sent')
-    scene('mail',538/60,body,js)
-
-    body='<h1 id="outro-word" class="wordmark">Nudge</h1><p id="outro-line" class="closing-line" data-var-text="tagline" data-hold>Fewer precise clicks.</p><p id="outro-repo" class="repository" data-var-text="repository" data-hold>github.com/mekdimd/nudge</p>'+cursor('outro-cursor')
-    js='tl.fromTo("#outro-word",{x:-55,opacity:0},{x:0,opacity:1,duration:.23,ease:"power3.out"},0);tl.fromTo("#outro-line",{y:20,opacity:0},{y:0,opacity:1,duration:.25,ease:"power3.out"},.12);tl.fromTo("#outro-cursor",{x:1510,y:710,scale:1.8,rotation:14},{x:1360,y:390,scale:2.3,rotation:0,opacity:1,duration:.3,ease:"power3.out"},.04);'
-    scene('outro',185/60,body,js)
-
-    slots=[('hook',0,202),('reveal',202,67),('bank',269,404),('search',673,404),('mail',1077,538),('outro',1615,185)]
-    hosts=''.join(f'<div id="{name}" class="clip" data-composition-id="{name}" data-composition-src="compositions/{name}.html" data-start="{start/60}" data-duration="{frames/60}" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>' for name,start,frames in slots)
-    (P/'index.html').write_text('''<!doctype html>
-<html lang="en" data-composition-variables='[{"id":"tagline","type":"string","label":"Closing line","default":"Fewer precise clicks."},{"id":"repository","type":"string","label":"Repository","default":"github.com/mekdimd/nudge"}]'>
-<head><meta charset="utf-8"><meta name="viewport" content="width=1920,height=1080"><title>Nudge launch film</title><link rel="stylesheet" href="assets/film.css"><script src="assets/vendor/gsap.min.js"></script><script src="assets/motion.js"></script><style>html,body{width:1920px;height:1080px;overflow:hidden}#root{position:relative;width:1920px;height:1080px}</style></head>
-<body><div id="root" data-composition-id="main" data-start="0" data-duration="30" data-width="1920" data-height="1080" data-fps="60">'''+hosts+'''<audio id="music" class="clip" src="assets/cloud-dancer.mp3" data-start="0" data-duration="30" data-track-index="2" data-volume="1"></audio></div><script>window.__timelines=window.__timelines||{};window.__timelines.main=gsap.timeline({paused:true});</script></body></html>
-''')
+    # Keep the approved pointer reveal and closing card.
+    reveal = (
+        (P / "compositions/reveal.html")
+        .read_text()
+        .replace('data-duration="1.1166666666666667"', 'data-duration="0.8"')
+    )
+    (P / "compositions/reveal.html").write_text(reveal)
+    slots = [
+        ("hook", 0, 4),
+        ("reveal", 4, 0.8),
+        ("bank", 4.8, 6),
+        ("youtube", 10.8, 6),
+        ("mail", 16.8, 11.3),
+        ("outro", 28.1, 3.1),
+    ]
+    hosts = "".join(
+        f'<div id="{name}" class="clip" data-composition-id="{name}" data-composition-src="compositions/{"search" if name == "youtube" else name}.html" data-start="{start}" data-duration="{duration}" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>'
+        for name, start, duration in slots
+    )
+    # The search filename stays stable for the editor.
+    (P / "compositions/search.html").write_text(
+        (P / "compositions/youtube.html").read_text()
+    )
+    (P / "compositions/youtube.html").unlink()
+    audio = '<audio id="music" class="clip" src="assets/inspired.mp3" data-start="0" data-duration="31.2" data-track-index="2" data-volume="1"></audio>'
+    for i, (name, at, volume) in enumerate(SOUND_CUES):
+        if name.endswith(".mp3"):
+            duration = 0.4
+        else:
+            with wave.open(str(P / "assets" / "sounds" / name)) as sound:
+                duration = sound.getnframes() / sound.getframerate()
+        audio += f'<audio id="cue-{i}" class="clip" src="assets/sounds/{name}" data-start="{round(at, 4)}" data-duration="{duration}" data-track-index="{3 + i % 6}" data-volume="{volume}"></audio>'
+    (P / "index.html").write_text(
+        """<!doctype html><html lang="en" data-composition-variables='[{"id":"tagline","type":"string","label":"Closing line","default":"Fewer precise clicks."},{"id":"repository","type":"string","label":"Repository","default":"github.com/mekdimd/nudge"}]'><head><meta charset="utf-8"><meta name="viewport" content="width=1920,height=1080"><title>Nudge launch film</title><link rel="stylesheet" href="assets/film.css"><script src="assets/vendor/gsap.min.js"></script><script src="assets/motion.js"></script><style>html,body{width:1920px;height:1080px;overflow:hidden}#root{position:relative;width:1920px;height:1080px}</style></head><body><div id="root" data-composition-id="main" data-start="0" data-duration="31.2" data-width="1920" data-height="1080" data-fps="60">"""
+        + hosts
+        + audio
+        + """</div><script>window.__timelines=window.__timelines||{};window.__timelines.main=gsap.timeline({paused:true});</script></body></html>"""
+    )
+    (P / "audio-cues.json").write_text(json.dumps(SOUND_CUES, indent=2) + "\n")
 
 
-if __name__=='__main__':
+if __name__ == "__main__":
     main()
