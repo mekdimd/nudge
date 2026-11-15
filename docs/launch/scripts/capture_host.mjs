@@ -69,9 +69,11 @@ const child = spawn(
   ],
   { cwd: root, stdio: ["ignore", "pipe", "pipe"] },
 );
-let log = "";
+let log = "",
+  stdoutLog = "";
 child.stdout.on("data", (d) => {
   log += d;
+  stdoutLog += d;
   process.stdout.write(d);
 });
 child.stderr.on("data", (d) => {
@@ -226,6 +228,10 @@ try {
   await page.screenshot({ path: join(assets, caseName + "-page-done.png") });
   const title = await page.title();
   const sent = await page.evaluate(() => window.sentMessage || null);
+  if (child.exitCode !== 0)
+    throw new Error(
+      "The Qt recording process failed. Check the local capture log.",
+    );
   const trace = JSON.parse(
     await readFile(join(assets, caseName + "-trace.json"), "utf8"),
   );
@@ -234,6 +240,7 @@ try {
     JSON.stringify(
       {
         case: caseName,
+        epochStarted: started / 1000,
         recordingOffset: (started - recordingStarted) / 1000,
         actions,
         title,
@@ -262,5 +269,6 @@ try {
   await copyFile(await page.video().path(), join(assets, caseName + ".webm"));
   await browser.close();
   await writeFile(join(rpc, "capture.log"), log);
+  await writeFile(join(assets, caseName + "-console.log"), stdoutLog);
   console.log("Recording log: " + join(rpc, "capture.log"));
 }
