@@ -128,14 +128,14 @@ def anatomy():
             "bottom": QPointF(box.center().x(), box.bottom()),
             "right": QPointF(box.right(), box.center().y()),
         }[edge]
-        p.setPen(QPen(QColor(BLUE), 2.5))
+        p.setPen(QPen(QColor("#245eb7"), 2.5))
         p.drawLine(start, point)
         p.setBrush(QColor(BLUE))
         p.drawEllipse(QRectF(point.x() - 4, point.y() - 4, 8, 8))
-        p.setPen(QPen(QColor("#cbd9ee"), 1.5))
-        p.setBrush(QColor("#e3ecfa"))
+        p.setPen(QPen(QColor("#2052a0"), 1.5))
+        p.setBrush(QColor("#245eb7"))
         p.drawRoundedRect(box, 16, 16)
-        p.setPen(QColor(INK))
+        p.setPen(QColor("#ffffff"))
         p.drawText(box, Qt.AlignmentFlag.AlignCenter, label)
     p.end()
     assert value.save(str(OUT / "nudge-interface.png"))
