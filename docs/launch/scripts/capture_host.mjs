@@ -18,10 +18,11 @@ if (!caseName || !url || !goal)
   throw new Error("Usage: capture_host.mjs CASE URL GOAL [ENV_FILE]");
 const allowed =
   url.startsWith("http://127.0.0.1:8765/") ||
-  url === "https://www.youtube.com/";
+  url === "https://www.youtube.com/" ||
+  (caseName === "jev" && url === "https://github.com/microsoft/vscode/issues");
 if (!allowed)
   throw new Error(
-    "Record only the local sample pages or public YouTube search.",
+    "Record only the local samples, public YouTube search or the VS Code issue list.",
   );
 const rpc = await mkdtemp(join(tmpdir(), "nudge-capture-"));
 const assets = join(project, "assets/browser");
@@ -179,6 +180,8 @@ try {
           path: join(assets, caseName + "-state-" + actions.length + ".png"),
         });
       } else {
+        if (caseName === "jev" && request.operation !== "click")
+          throw new Error("The Jev shot only permits the public Labels click.");
         const action = { ...request, at: (Date.now() - started) / 1000 };
         actions.push(action);
         console.log(
@@ -192,11 +195,23 @@ try {
           '[data-nudge-ref="' + request.control_id + '"]',
         );
         if (request.operation === "click") {
+          if (
+            caseName === "jev" &&
+            (await locator.getAttribute("href")) !== "/microsoft/vscode/labels"
+          )
+            throw new Error(
+              "The Jev shot only permits opening the public Labels page.",
+            );
           await locator.click({ clickCount: request.count || 1 });
           await page.waitForTimeout(500);
-        } else if (request.operation === "type")
-          await locator.fill(request.text);
-        else if (request.operation === "type_focused")
+        } else if (request.operation === "type") {
+          if (caseName === "jev")
+            throw new Error("The Jev shot only permits read-only navigation.");
+          await locator.fill("");
+          await locator.pressSequentially(request.text, {
+            delay: caseName === "youtube" ? 65 : 18,
+          });
+        } else if (request.operation === "type_focused")
           await page.keyboard.insertText(request.text);
         else if (request.operation === "navigate") {
           if (!request.url.startsWith("https://www.youtube.com/"))
@@ -215,6 +230,7 @@ try {
           );
         else
           throw new Error("Unknown recording operation " + request.operation);
+        action.endedAt = (Date.now() - started) / 1000;
       }
     } catch (e) {
       error = String(e);

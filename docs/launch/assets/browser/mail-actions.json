@@ -1,7 +1,7 @@
 {
   "case": "mail",
-  "epochStarted": 1794700028.414,
-  "recordingOffset": 1.825,
+  "epochStarted": 1794702592.125,
+  "recordingOffset": 1.78,
   "actions": [
     {
       "id": 2,
@@ -12,7 +12,8 @@
         110.5,
         138
       ],
-      "at": 3.131
+      "at": 4.029,
+      "endedAt": 4.565
     },
     {
       "id": 6,
@@ -24,31 +25,34 @@
         743.5,
         272
       ],
-      "at": 10.435
+      "at": 11.94,
+      "endedAt": 12.237
     },
     {
       "id": 7,
       "operation": "type",
       "control_id": "capture-7",
-      "text": "Missing today's lecture",
+      "text": "Missing from lecture today",
       "label": "Subject",
       "center": [
         743.5,
         337
       ],
-      "at": 10.49
+      "at": 12.261,
+      "endedAt": 12.767
     },
     {
       "id": 8,
       "operation": "type",
       "control_id": "capture-8",
-      "text": "Hello, I am feeling sick and will not be able to attend today's lecture. Thank you for understanding.",
+      "text": "Hello, I am sick and will miss today's lecture. Thank you.",
       "label": "Message Body",
       "center": [
         701,
         487.5
       ],
-      "at": 10.538
+      "at": 12.822,
+      "endedAt": 13.956
     },
     {
       "id": 12,
@@ -59,18 +63,19 @@
         340.5625,
         646
       ],
-      "at": 14.275
+      "at": 16.567,
+      "endedAt": 17.082
     }
   ],
   "title": "Message sent to prof.lee@sfu.ca | Mail",
   "sent": {
     "to": "prof.lee@sfu.ca",
-    "subject": "Missing today's lecture",
-    "body": "Hello, I am feeling sick and will not be able to attend today's lecture. Thank you for understanding."
+    "subject": "Missing from lecture today",
+    "body": "Hello, I am sick and will miss today's lecture. Thank you."
   },
   "downloads": [],
   "outcome": {
     "ok": true,
-    "message": "Done in 3 steps · 13.7 s · Jev 204 ms per decision"
+    "message": "Done in 3 steps · 16.3 s · Jev 201 ms per decision"
   }
 }

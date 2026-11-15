@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 
 from dotenv import load_dotenv
-from PySide6.QtCore import QObject, QPoint, QSettings, QTimer, Signal
+from PySide6.QtCore import QObject, QPoint, QSettings, QTimer, Signal, Qt
 from PySide6.QtGui import QColor, QImage, QPainter
 from PySide6.QtWidgets import QApplication, QLineEdit, QPushButton
 import nudge.__main__ as main
@@ -242,7 +242,7 @@ def main_capture():
         )
 
         def capture_peek(snapshot):
-            if args.case != "youtube" or not app.debug or "peek" in trace:
+            if args.case != "jev" or not app.debug or "peek" in trace:
                 return
             previous = app.overlay.alpha
             app.overlay.alpha = 0
@@ -252,6 +252,22 @@ def main_capture():
             event("peek", count=len(snapshot.controls))
 
         app.bridge.sig_observed.connect(capture_peek)
+
+        def capture_choice(action, target):
+            if args.case != "jev" or "choice" in trace:
+                return
+
+            def grab_choice():
+                previous = app.overlay.alpha
+                app.overlay.alpha = 0
+                app.overlay.repaint()
+                trace["choice"] = save("choice", app.overlay)
+                app.overlay.alpha = previous
+                event("choice", label=action.label)
+
+            QTimer.singleShot(80, grab_choice)
+
+        app.bridge.sig_propose.connect(capture_choice)
 
         def save(tag, widget=None):
             QApplication.processEvents()
@@ -269,22 +285,57 @@ def main_capture():
                     "panel": save(kind, app.bar.panel),
                     "bar": save(kind + "-bar"),
                 }
+                point = app.bar.panel.mapTo(app.bar, QPoint(0, 0))
+                record["panel_rect"] = [
+                    point.x() * 2,
+                    point.y() * 2,
+                    app.bar.panel.width() * 2,
+                    app.bar.panel.height() * 2,
+                ]
                 trace["prompts"].append(record)
                 if kind == "draft" and args.case == "mail":
                     fields = app.bar.panel.findChildren(QLineEdit)
                     if len(fields) > 1:
 
                         def edit_subject():
-                            fields[1].setText("Missing today's lecture")
-                            record["edited"] = save("draft-edited", app.bar.panel)
-                            event("edit-subject")
+                            field = fields[1]
+                            word = field.text().split()[0]
+                            point = field.mapTo(app.bar, QPoint(0, 0))
+                            width = field.fontMetrics().horizontalAdvance(word)
+                            field.setFocus(Qt.FocusReason.OtherFocusReason)
+                            field.setSelection(0, len(word))
+                            event(
+                                "edit-select",
+                                start=[point.x() + 14, point.y() + field.height() / 2],
+                                end=[
+                                    point.x() + 14 + width,
+                                    point.y() + field.height() / 2,
+                                ],
+                            )
+                            record["selection"] = save("draft-selection", app.bar.panel)
+
+                            def type_letter(index=0):
+                                if index == 0:
+                                    event("edit-typing")
+                                field.insert("Missing"[index])
+                                if index < 6:
+                                    QTimer.singleShot(
+                                        90, lambda: type_letter(index + 1)
+                                    )
+                                else:
+                                    record["edited"] = save(
+                                        "draft-edited", app.bar.panel
+                                    )
+                                    event("edit-subject")
+
+                            QTimer.singleShot(650, type_letter)
 
                         QTimer.singleShot(1350, edit_subject)
                 if kind == "confirm":
                     trace["confirmed_before_action"] = True
                 if kind in ("draft", "url", "confirm"):
                     delay = (
-                        3400
+                        4300
                         if kind == "draft" and args.case == "mail"
                         else 2000
                         if kind == "confirm"
@@ -341,7 +392,7 @@ def main_capture():
         app.bridge.sig_finished.connect(finished)
         QTimer.singleShot(300, lambda: trace.update(idle=save("idle")))
         QTimer.singleShot(700, lambda: app.start(args.goal))
-        if args.case == "youtube":
+        if args.case == "jev":
             QTimer.singleShot(720, lambda: app.bar.peek.setChecked(True))
         QTimer.singleShot(180000, app.stop)
         qapp.exec()
