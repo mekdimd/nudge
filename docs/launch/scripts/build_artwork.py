@@ -33,26 +33,6 @@ def load(name):
     return image
 
 
-def chrome_bar(name):
-    bar = load(f"browser/{name}")
-    # Coordinates match the saved bank captures at twice the UI size.
-    badges = [(160, 42, 32)]
-    if name == "bank-done.png":
-        badges.extend((36, y, 36) for y in (204, 300, 396))
-    icon = load("desktop/chrome.png")
-    backgrounds = [bar.pixelColor(x - 2, y + size // 2) for x, y, size in badges]
-    painter = QPainter(bar)
-    painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
-    for (x, y, size), background in zip(badges, backgrounds):
-        rect = QRectF(x, y, size, size)
-        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
-        painter.fillRect(rect, background)
-        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
-        painter.drawImage(rect, icon)
-    painter.end()
-    return bar
-
-
 def font(size, family="Outfit", weight=QFont.Weight.Medium):
     value = QFont(family)
     value.setPixelSize(size)
@@ -112,18 +92,18 @@ def banner():
     p.setBrush(Qt.BrushStyle.NoBrush)
     p.drawEllipse(QRectF(target.x() - 34, target.y() - 34, 68, 68))
     image(p, load("pointer.png"), target.x() - 18, target.y() - 18, 142)
-    image(p, chrome_bar("bank-idle.png"), 100, 570, 1600)
+    image(p, load("readme/bank-idle.png"), 100, 570, 1600)
     p.end()
     assert value.save(str(OUT / "nudge-banner.png"))
 
 
 def anatomy():
     value, p = canvas(1600, 940)
-    bar = chrome_bar("bank-done.png")
+    bar = load("readme/bank-done.png")
     x, y, width = 220, 190, 1160
     image(p, bar, x, y, width)
     scale = width / bar.width()
-    geometry = json.loads((A / "browser/bank-trace.json").read_text())["geometry"]
+    geometry = json.loads((A / "readme/bank-trace.json").read_text())["geometry"]
 
     def bottom(name):
         a, b, w, h = geometry[name]

@@ -28,9 +28,13 @@ A fresh subagent signed off on the latest editor cut with no P0 or P1 findings. 
 
 Automatic HyperFrames motion sampling is disabled in the pinned CLI. The dedicated timeline assertions and sampled motion frames cover the changed sequence. Timeline-density warnings describe the number of editable clips in a lane; the coherent scenes remain separate compositions.
 
+## README app icons
+
+The README banner and interface diagram now use fresh Qt captures with Chrome's actual process ID. Native icon lookup supplied the dark Chrome icon in the app badge and action rows. The capture completed the statement download with real model clients and sample data. A fresh subagent signed off on the source and both graphics at full size and README width. All 64 widget and bar tests, syntax checks and repeatable artwork builds passed. The source screenshots match the capture byte for byte. Video, editor and original bank recording hashes match the previous export. The artwork uses complete screenshots, with no icon overlays or standalone Chrome asset.
+
 ## Recording limits
 
-The recordings use real Jev and Gemini clients through a browser capture adapter. Native macOS Accessibility permission was unavailable, and no Windows session was tested. Live provider calls were not repeated for this edit. Bank and mail use fictitious local data; no email is sent. GitHub and YouTube use signed-out public pages.
+The recordings use real Jev and Gemini clients through a browser capture adapter. Native macOS Accessibility permission was unavailable, and no Windows session was tested. The film retains its earlier provider recordings; the README bank stills use the fresh capture above. Bank and mail use fictitious local data; no email is sent. GitHub and YouTube use signed-out public pages.
 
 The wake shot loads the repository's Hey Nudge model and replays voice callbacks into the actual UI. It does not verify microphone input, wake detection or transcription. The approval speech uses user-added recordings, whose provider and voice license are not recorded.
 
