@@ -139,3 +139,23 @@ function launchDone(tl, title, at) {
     at + 0.18,
   );
 }
+
+// Pop a request chip in, type its words letter by letter, then blink the caret.
+function launchPrompt(tl, selector, at) {
+  const chip = document.querySelector(selector);
+  const text = chip.querySelector(".prompt-text");
+  if (!text.dataset.split) {
+    text.innerHTML = [...text.textContent]
+      .map((ch) => '<span class="ch">' + (ch === " " ? "&nbsp;" : ch) + "</span>")
+      .join("");
+    text.dataset.split = "1";
+  }
+  const chars = text.querySelectorAll(".ch");
+  const step = Math.min(0.035, 0.9 / chars.length);
+  tl.fromTo(chip, { opacity: 0, scale: 0.86 }, { opacity: 1, scale: 1, duration: 0.32, ease: "back.out(1.8)" }, at);
+  tl.fromTo(chars, { opacity: 0 }, { opacity: 1, duration: 0.01, stagger: step }, at + 0.18);
+  const typed = at + 0.18 + step * chars.length;
+  tl.to(chip, { scale: 1.05, duration: 0.16, ease: "power2.out", yoyo: true, repeat: 1 }, typed);
+  tl.set(selector + " .caret", { opacity: 0 }, at);
+  tl.fromTo(selector + " .caret", { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "steps(1)", yoyo: true, repeat: 5 }, typed + 0.1);
+}

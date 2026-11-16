@@ -39,7 +39,7 @@ The interface diagram uses white text on #245eb7 label boxes. The label contrast
 
 "Inspired" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0 License. https://creativecommons.org/licenses/by/4.0/
 
-The excerpt uses the [official MP3](https://incompetech.com/music/royalty-free/mp3-royaltyfree/Inspired.mp3). The delivery excerpt lasts 110.35 seconds, with fades and delivery loudness normalization. The delivery MP4 carries the credit in metadata. Include the attribution above when sharing the film outside this repository.
+The excerpt uses the [official MP3](https://incompetech.com/music/royalty-free/mp3-royaltyfree/Inspired.mp3). The delivery excerpt lasts 108.15 seconds, with fades and delivery loudness normalization. The delivery MP4 carries the credit in metadata. Include the attribution above when sharing the film outside this repository.
 
 ## Keyboard attribution
 
@@ -63,6 +63,6 @@ The wake shot loads the repository's models/hey_nudge.onnx and replays voice cal
 
 ## Animated Jev ranking
 
-The scoring diagram uses the README's saved VS Code accessibility capture and the varied example probabilities in assets/desktop/jev-example.json. Its crop is rebuilt by scripts/build_recognition_artwork.py as assets/browser/jev-score-controls.png. The probabilities illustrate the ranking process; they are not the recorded Jev response for the shown goal. The actual browser clip still performs the recorded Labels click. A decoded final frame holds the resulting Labels page through the transition to mail.
+The video overlays an editable probability card on its recorded VS Code issue tracker. It shares the README's varied example probabilities in assets/desktop/jev-example.json. Those scores illustrate ranking; they are not the recorded Jev response for the shown goal. The browser clip performs the recorded Labels click, and a decoded final frame holds the resulting page through the transition to mail.
 
-The animated-bar-chart registry component informed the deterministic growth tween. The scene uses editable rows, mint probability bars and a blue connector in compositions/jev.html. Jev ranks labelled actions, and Peek draws debug boxes around the corresponding UI items.
+The animated-bar-chart registry component informed the deterministic growth tween. The current scene uses editable rows, mint probability bars and a connector in compositions/jev.html. Jev ranks labelled actions, and Nudge's debug boxes outline the corresponding UI items.

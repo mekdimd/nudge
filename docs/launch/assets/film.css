@@ -254,3 +254,23 @@ body {
   left: -20px;
   top: -20px;
 }
+
+/* A request the person gives Nudge: blue chip, typed in with a caret. */
+.prompt {
+  display: inline-block;
+  padding: 0.06em 0.4em 0.12em;
+  border-radius: 0.5em;
+  background: #dfeaff;
+  color: #2f6fe4;
+  box-shadow: 0 0 0 3px #4f8ef733, 0 14px 34px #4f8ef726;
+  white-space: nowrap;
+}
+.prompt .caret {
+  display: inline-block;
+  width: 0.07em;
+  height: 0.86em;
+  margin-left: 0.06em;
+  border-radius: 0.035em;
+  background: currentColor;
+  vertical-align: -0.1em;
+}
