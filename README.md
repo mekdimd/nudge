@@ -42,7 +42,7 @@ Nudge works across your desktop. Ask it to open Notes from the macOS Dock, launc
 | ![Dock mockup with the actual Nudge bar, an open Notes request and a blue cursor path to the macOS Notes icon](docs/assets/nudge-dock.png) | Mockup of opening Notes from the macOS Dock, using Nudge's actual bar and macOS app icons. |
 | ![A dark VS Code issue tracker with blue boxes around recorded controls and the command uv run nudge](docs/assets/nudge-accessibility.png) | VS Code issue tracker showing recorded accessibility controls. |
 | ![Figma editor mockup with blue accessibility controls, orange text and icon detections, and the command uv run --extra vision nudge](docs/assets/nudge-vision.png) | Figma mockup using [Travel app UI design](https://www.figma.com/community/file/1502285519770933220/travel-app-ui-design-explore-the-world-with-ease) by Samiul Reshad, under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). |
-| ![Jev scores four labelled controls for the goal Show the project labels for this repository. Example probabilities select Labels, connected to Nudge's blue cursor on the screen](docs/assets/nudge-jev.png) | Jev ranks labelled controls and selects Labels for the requested task. |
+| ![Jev ranks four labelled controls for the goal Show the project labels for this repository. Example probabilities select Labels, connected to Nudge's blue cursor on the screen](docs/assets/nudge-jev.png) | Jev ranks labelled controls and selects Labels for the requested task. |
 | ![Nudge's captured CLI output in a dark terminal, showing the statement request, selected controls and successful completion](docs/assets/nudge-terminal.png) | Terminal output from the bank recording. |
 
 ## Quick start

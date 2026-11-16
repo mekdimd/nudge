@@ -158,9 +158,10 @@ def jev():
     assert ranked[0]["id"] == data["choice"].split(":", 1)[1]
     assert abs(sum(row["probability"] for row in ranked) - 1) < 0.0001
     source = load("desktop/vscode-accessibility.png")
+    assert source.copy(0, 168, 760, 552).save(str(A / "browser/jev-score-controls.png"))
     value, p = canvas(1600, 1100, BG)
     text(p, "Jev chooses the next action", 60, 115, 84, INK, QFont.Weight.DemiBold)
-    text(p, "Jev model scores labelled items against your goal.",
+    text(p, "Jev ranks options and selects the highest probability.",
          62, 193, 46, MUTED, QFont.Weight.Normal)
     panel(p, QRectF(60, 230, 1480, 68), "#242a32")
     text(p, "Your goal", 82, 273, 31, MUTED)
@@ -205,7 +206,6 @@ def jev():
     p.setBrush(Qt.BrushStyle.NoBrush)
     p.setPen(QPen(QColor(BLUE), 4, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
     p.drawPath(curve)
-    text(p, "Jev selects the item with the highest score.", 60, 1057, 29, MUTED)
     p.end()
     assert value.save(str(OUT / "nudge-jev.png"))
 
