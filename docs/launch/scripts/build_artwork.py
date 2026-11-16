@@ -1,5 +1,6 @@
 """Create README artwork from recorded controls and the actual console output."""
 
+import argparse
 import json
 import os
 import re
@@ -30,6 +31,26 @@ def load(name):
     image = QImage(str(A / name))
     assert not image.isNull(), name
     return image
+
+
+def chrome_bar(name):
+    bar = load(f"browser/{name}")
+    # Coordinates match the saved bank captures at twice the UI size.
+    badges = [(160, 42, 32)]
+    if name == "bank-done.png":
+        badges.extend((36, y, 36) for y in (204, 300, 396))
+    icon = load("desktop/chrome.png")
+    backgrounds = [bar.pixelColor(x - 2, y + size // 2) for x, y, size in badges]
+    painter = QPainter(bar)
+    painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
+    for (x, y, size), background in zip(badges, backgrounds):
+        rect = QRectF(x, y, size, size)
+        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
+        painter.fillRect(rect, background)
+        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
+        painter.drawImage(rect, icon)
+    painter.end()
+    return bar
 
 
 def font(size, family="Outfit", weight=QFont.Weight.Medium):
@@ -91,14 +112,14 @@ def banner():
     p.setBrush(Qt.BrushStyle.NoBrush)
     p.drawEllipse(QRectF(target.x() - 34, target.y() - 34, 68, 68))
     image(p, load("pointer.png"), target.x() - 18, target.y() - 18, 142)
-    image(p, load("browser/bank-idle.png"), 100, 570, 1600)
+    image(p, chrome_bar("bank-idle.png"), 100, 570, 1600)
     p.end()
     assert value.save(str(OUT / "nudge-banner.png"))
 
 
 def anatomy():
     value, p = canvas(1600, 940)
-    bar = load("browser/bank-done.png")
+    bar = chrome_bar("bank-done.png")
     x, y, width = 220, 190, 1160
     image(p, bar, x, y, width)
     scale = width / bar.width()
@@ -189,13 +210,22 @@ def terminal():
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--only",
+        nargs="+",
+        choices=("banner", "interface", "terminal"),
+        default=("banner", "interface", "terminal"),
+        help="Build only the selected README graphics.",
+    )
+    args = parser.parse_args()
     _app = QApplication.instance() or QApplication([])
     assert QFontDatabase.addApplicationFont(str(A / "fonts/Outfit.ttf")) != -1
     OUT.mkdir(exist_ok=True)
-    banner()
-    anatomy()
-    terminal()
-    print("Created cursor banner, labelled interface and captured terminal output.")
+    builders = {"banner": banner, "interface": anatomy, "terminal": terminal}
+    for name in args.only:
+        builders[name]()
+    print("Created README graphics: " + ", ".join(args.only))
 
 
 if __name__ == "__main__":
