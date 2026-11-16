@@ -50,6 +50,21 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["nudge"]
 
+[tool.hatch.build.targets.sdist]
+include = [
+    "/nudge",
+    "/tests",
+    "/scripts",
+    "/pyproject.toml",
+    "/uv.lock",
+    "/README.md",
+    "/.env.example",
+    "/requirements*.txt",
+    "/LICENSE",
+    "/THIRD_PARTY_NOTICES.md",
+    "/docs/RELEASING.md",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 

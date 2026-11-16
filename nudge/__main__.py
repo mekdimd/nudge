@@ -413,6 +413,9 @@ def load_vision():
 
 
 def main() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="backslashreplace")
     parser = argparse.ArgumentParser(prog="nudge", description="Type a goal; Nudge points to and presses each step.")
     parser.add_argument("--offline", choices=["live_caption", "gmail"], help="rehearse the UI on a scripted screen, no keys needed")
     parser.add_argument("--debug", action="store_true", help="start with Peek on: box every element Nudge can see")
