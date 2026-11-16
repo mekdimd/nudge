@@ -32,6 +32,10 @@ Automatic HyperFrames motion sampling is disabled in the pinned CLI. The dedicat
 
 The README banner and interface diagram now use fresh Qt captures with Chrome's actual process ID. Native icon lookup supplied the dark Chrome icon in the app badge and action rows. The capture completed the statement download with real model clients and sample data. A fresh subagent signed off on the source and both graphics at full size and README width. All 64 widget and bar tests, syntax checks and repeatable artwork builds passed. The source screenshots match the capture byte for byte. Video, editor and original bank recording hashes match the previous export. The artwork uses complete screenshots, with no icon overlays or standalone Chrome asset.
 
+## Sol-loop review
+
+[sol-loop](https://github.com/t3dotgg/tstack/blob/main/skills/sol-loop/SKILL.md) completed two rounds with gpt-6.1-sol on xhigh and approved the behavior. S1 corrected the YouTube capture check to wait for watch-page playback. The focused regression and browser fixture checks passed. No findings were declined. Usage was not exposed.
+
 ## Recording limits
 
 The recordings use real Jev and Gemini clients through a browser capture adapter. Native macOS Accessibility permission was unavailable, and no Windows session was tested. The film retains its earlier provider recordings; the README bank stills use the fresh capture above. Bank and mail use fictitious local data; no email is sent. GitHub and YouTube use signed-out public pages.
