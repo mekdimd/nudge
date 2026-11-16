@@ -50,7 +50,7 @@ Nudge works across your desktop. Ask it to open Notes from the macOS Dock, launc
 Install [uv](https://docs.astral.sh/uv/getting-started/installation/) on macOS or Windows. Nudge uses Python 3.12 or 3.13; uv can install it.
 
 ~~~bash
-git clone https://github.com/mekdimd/nudge.git
+git clone https://github.com/mekdimd/nudge
 cd nudge
 uv sync --frozen
 uv run nudge --offline gmail
