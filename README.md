@@ -97,6 +97,9 @@ Try goals that name the task and its destination. Here are a few examples:
 › download my October bank statement
 › play a tutorial on YouTube about Excel pivot tables
 › email prof.lee@sfu.ca that I'm sick and will miss today's lecture
+› increase the zoom in this browser so the text is easier to read
+› open my calendar and show tomorrow's appointments
+› open the accessibility settings in this app
 ~~~
 
 <details>
@@ -108,7 +111,7 @@ Try goals that name the task and its destination. Here are a few examples:
 Nudge has a few command line options to control its behavior.
 
 ~~~bash
-uv run nudge                 # Run Nudge in the foreground. Closing nudge quits the app.
+uv run nudge                 # Run Nudge. Clicking the close (×) button quits the app.
 uv run nudge --help          # Show all options.
 uv run nudge --debug         # Open with Peek debug mode enabled.
 uv run nudge --persistent    # Run in the background (attached to terminal)
