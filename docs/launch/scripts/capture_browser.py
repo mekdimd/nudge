@@ -44,9 +44,9 @@ class RecordingHotkeys(QObject):
 class BrowserCaptureAdapter:
     name = "Browser recording harness"
 
-    def __init__(self, directory):
+    def __init__(self, directory, app_pid):
         self.directory = directory
-        self.app = AppRef(name="Google Chrome", pid=999999)
+        self.app = AppRef(name="Google Chrome", pid=app_pid)
         self.sequence = 0
         self.address = False
         self.pending_url = ""
@@ -159,13 +159,18 @@ def main_capture():
     parser.add_argument("--case", required=True)
     parser.add_argument("--goal", required=True)
     parser.add_argument("--rpc", type=Path, required=True)
+    parser.add_argument("--app-pid", type=int, required=True)
+    parser.add_argument("--output-dir", type=Path, default=ASSETS)
     parser.add_argument("--env-file", type=Path, default=ROOT / ".env")
     args = parser.parse_args()
+    if args.app_pid <= 0:
+        parser.error("--app-pid must be the recording browser's process ID")
+    assets = args.output_dir
     load_dotenv(args.env_file)
     if not os.environ.get("TYPESAFE_API_KEY") or not os.environ.get("GEMINI_API_KEY"):
         raise SystemExit("The recording harness requires TypeSafe and Gemini keys.")
     args.rpc.mkdir(parents=True, exist_ok=True)
-    ASSETS.mkdir(parents=True, exist_ok=True)
+    assets.mkdir(parents=True, exist_ok=True)
     qapp = QApplication([])
     main.Hotkeys = RecordingHotkeys
     main.Console = lambda timeline: Console(timeline, color=True)
@@ -176,7 +181,7 @@ def main_capture():
             super().__init__(*values, **options)
 
     main.NudgeLoop = RecordingLoop
-    adapter = BrowserCaptureAdapter(args.rpc)
+    adapter = BrowserCaptureAdapter(args.rpc, args.app_pid)
     processing_hold = float(os.environ.get("NUDGE_CAPTURE_PROCESSING_HOLD", "0"))
 
     class RecordingJev(JevClient):
@@ -195,6 +200,7 @@ def main_capture():
 
     trace = {
         "case": args.case,
+        "app": {"name": adapter.app.name, "pid": adapter.app.pid},
         "goal": args.goal,
         "prompts": [],
         "events": [],
@@ -293,7 +299,7 @@ def main_capture():
             QApplication.processEvents()
             image = (widget or app.bar).grab().toImage()
             image.setDevicePixelRatio(1)
-            path = ASSETS / (args.case + "-" + tag + ".png")
+            path = assets / (args.case + "-" + tag + ".png")
             assert image.save(str(path))
             return {"file": path.name, "width": image.width(), "height": image.height()}
 
@@ -429,7 +435,7 @@ def main_capture():
         QTimer.singleShot(180000, app.stop)
         qapp.exec()
         recording.stop()
-        (ASSETS / (args.case + "-trace.json")).write_text(
+        (assets / (args.case + "-trace.json")).write_text(
             json.dumps(trace, indent=2) + "\n"
         )
         manifest = frames / "frames.txt"
@@ -470,7 +476,7 @@ def main_capture():
                 "yuv420p",
                 "-movflags",
                 "+faststart",
-                str(ASSETS / (args.case + "-nudge.mp4")),
+                str(assets / (args.case + "-nudge.mp4")),
             ],
             check=True,
         )

@@ -13,9 +13,9 @@ import { fileURLToPath } from "node:url";
 
 const project = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const root = resolve(project, "../..");
-const [caseName, url, goal, envFile] = process.argv.slice(2);
+const [caseName, url, goal, envFile, outputDir] = process.argv.slice(2);
 if (!caseName || !url || !goal)
-  throw new Error("Usage: capture_host.mjs CASE URL GOAL [ENV_FILE]");
+  throw new Error("Usage: capture_host.mjs CASE URL GOAL [ENV_FILE] [OUTPUT_DIR]");
 const allowed =
   url.startsWith("http://127.0.0.1:8765/") ||
   url === "https://www.youtube.com/" ||
@@ -25,9 +25,17 @@ if (!allowed)
     "Record only the local samples, public YouTube search or the VS Code issue list.",
   );
 const rpc = await mkdtemp(join(tmpdir(), "nudge-capture-"));
-const assets = join(project, "assets/browser");
+const assets = resolve(outputDir || join(project, "assets/browser"));
 await mkdir(assets, { recursive: true });
 const browser = await chromium.launch({ channel: "chrome", headless: true });
+const session = await browser.newBrowserCDPSession();
+const { processInfo } = await session.send("SystemInfo.getProcessInfo");
+const browserPid = processInfo.find((process) => process.type === "browser")?.id;
+await session.detach();
+if (!Number.isInteger(browserPid) || browserPid <= 0) {
+  await browser.close();
+  throw new Error("Chrome did not report its browser process ID.");
+}
 const context = await browser.newContext({
   viewport: { width: 1280, height: 800 },
   deviceScaleFactor: 1,
@@ -66,6 +74,10 @@ const child = spawn(
     goal,
     "--rpc",
     rpc,
+    "--app-pid",
+    String(browserPid),
+    "--output-dir",
+    assets,
     ...(envFile ? ["--env-file", envFile] : []),
   ],
   { cwd: root, stdio: ["ignore", "pipe", "pipe"] },
