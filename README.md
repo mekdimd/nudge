@@ -35,26 +35,15 @@ Nudge is a macOS and Windows prototype built at StormHacks 2026. Read the [Devpo
 
 Nudge works across your desktop. Ask it to open Notes from the macOS Dock, launch an app from the Windows taskbar, fill in a form or draft an email for review. It can continue the task in the app it opens. [Watch the launch video](docs/assets/nudge-launch.mp4) or read the [recording details and credits](docs/launch/ASSETS.md).
 
-<details>
-<summary>Photos</summary>
+### Photos
 
-![Dock mockup with the actual Nudge bar, an open Notes request and a blue cursor path to the macOS Notes icon](docs/assets/nudge-dock.png)
-
-Mockup of opening Notes from the macOS Dock, using Nudge's actual bar and macOS app icons.
-
-![A dark VS Code issue tracker with blue boxes around recorded controls and the command uv run nudge](docs/assets/nudge-accessibility.png)
-
-![Figma editor mockup with blue accessibility controls, orange text and icon detections, and the command uv run --extra vision nudge](docs/assets/nudge-vision.png)
-
-Figma mockup using [Travel app UI design](https://www.figma.com/community/file/1502285519770933220/travel-app-ui-design-explore-the-world-with-ease) by Samiul Reshad, under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-
-![Jev scores four labelled controls for the goal Show the project labels for this repository. Example probabilities select Labels, connected to Nudge's blue cursor on the screen](docs/assets/nudge-jev.png)
-
-![Nudge's captured CLI output in a dark terminal, showing the statement request, selected controls and successful completion](docs/assets/nudge-terminal.png)
-
-Terminal output from the bank recording.
-
-</details>
+| Preview | Description and credits |
+| --- | --- |
+| ![Dock mockup with the actual Nudge bar, an open Notes request and a blue cursor path to the macOS Notes icon](docs/assets/nudge-dock.png) | Mockup of opening Notes from the macOS Dock, using Nudge's actual bar and macOS app icons. |
+| ![A dark VS Code issue tracker with blue boxes around recorded controls and the command uv run nudge](docs/assets/nudge-accessibility.png) | VS Code issue tracker showing recorded accessibility controls. |
+| ![Figma editor mockup with blue accessibility controls, orange text and icon detections, and the command uv run --extra vision nudge](docs/assets/nudge-vision.png) | Figma mockup using [Travel app UI design](https://www.figma.com/community/file/1502285519770933220/travel-app-ui-design-explore-the-world-with-ease) by Samiul Reshad, under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). |
+| ![Jev scores four labelled controls for the goal Show the project labels for this repository. Example probabilities select Labels, connected to Nudge's blue cursor on the screen](docs/assets/nudge-jev.png) | Jev ranks labelled controls and selects Labels for the requested task. |
+| ![Nudge's captured CLI output in a dark terminal, showing the statement request, selected controls and successful completion](docs/assets/nudge-terminal.png) | Terminal output from the bank recording. |
 
 ## Quick start
 
@@ -67,7 +56,9 @@ uv sync --frozen
 uv run nudge --offline gmail
 ~~~
 
-The offline demo needs no keys or desktop permissions. It uses a scripted screen and does not control your computer.
+If you want to try Nudge without real apps, use the offline demo.
+
+The offline demo needs no API keys or desktop permissions. It uses a scripted screen and does not control your computer.
 
 <details>
 <summary>Use Nudge with real apps</summary>
@@ -99,29 +90,36 @@ Real tasks send your goal and control details to Jev. [Setup and privacy](docs/S
 
 ![The actual Nudge bar with boxed labels for the current app, step feed, goal field, debug mode, voice input and Start or Stop control](docs/assets/nudge-interface.png)
 
-Try goals that name the task and its destination:
+Try goals that name the task and its destination. Here are a few examples:
 
 ~~~text
-open Notes from the Dock
-download my October bank statement
-play a tutorial on YouTube about Excel pivot tables
-email prof.lee@sfu.ca that I'm sick and will miss today's lecture
+> open Notes from the Dock
+> download my October bank statement
+> play a tutorial on YouTube about Excel pivot tables
+> email prof.lee@sfu.ca that I'm sick and will miss today's lecture
 ~~~
 
 <details>
-<summary>Command line, voice and vision</summary>
+<summary>CLI Commands, voice and vision</summary>
+<!-- <summary>Command line, voice and vision</summary> -->
 
-The CLI launches the bar. Enter your goal there, or speak it when voice is configured.
+<!-- The CLI launches the bar. Enter your goal there, or speak it when voice is configured. -->
+
+Nudge has a few command line options to control its behavior.
 
 ~~~bash
+uv run nudge                 # Run Nudge in the foreground. Closing bar quits the app.
 uv run nudge --help          # Show all options.
 uv run nudge --debug         # Open with Peek debug mode enabled.
-uv run nudge --background    # Run in the background.
+uv run nudge --persistent    # Run in the background (attached to terminal)
+uv run nudge --background    # Run in the background (detached from terminal)
 uv run nudge --stop          # Quit a background or persistent instance.
 uv run nudge --offline gmail # Try the scripted demo without keys.
 ~~~
 
 Use `--persistent` to keep Nudge in the terminal while the close button hides the bar. The hotkey brings it back. Press Ctrl+C to quit a foreground instance.
+
+Use `--background` to run Nudge detached from the terminal. Use `--stop` to quit a background instance. Logs will be written to the default location (e.g.`~/Library/Logs/Nudge` on macOS).
 
 For voice input and spoken approval prompts, set `ELEVENLABS_API_KEY` in .env. To use "Hey Nudge" as the wake word, set `WAKE_WORD=models/hey_nudge.onnx`; the default is "Hey Jarvis." The orb starts or stops listening. The mic button mutes the microphone, and its menu selects the microphone and controls spoken replies.
 
@@ -139,15 +137,15 @@ Nudge uses vision when the app exposes too few accessibility controls or the nex
 </details>
 
 <details>
-<summary>Controls, confirmation and limits</summary>
+<summary>Controls and limits</summary>
 
-- Peek outlines the controls Nudge can see. Blue marks accessibility controls, green marks text fields and orange marks local vision results.
+- Peek mode outlines the controls Nudge can see. Blue marks accessibility controls, green marks text fields and orange marks local vision results.
 - With voice configured, click the orb or say the wake word to speak. The mic button mutes the microphone.
 - Nudge pauses before acting. You can edit drafts, and controls labelled Send, Delete, Buy, Pay and other consequential words require confirmation.
 - If a choice is uncertain or an action changes nothing, Nudge asks for your help. Each run is capped at 12 steps.
 - Nudge can follow another app after a step, including a manual focus change. Press Esc or Stop before switching apps during a task.
 
-Confirmation depends on control labels. It cannot identify every consequential action in an unfamiliar app. Windows has an implementation, but end-to-end Windows results are not yet reported. [Demo notes](docs/DEMO.md) and [setup limits](docs/SETUP.md#support-and-limits) describe the tested scope.
+Confirmation depends on control labels. It cannot identify every consequential action in an unfamiliar app. [Demo notes](docs/DEMO.md) and [setup limits](docs/SETUP.md#support-and-limits) describe the tested scope.
 
 </details>
 
@@ -176,7 +174,7 @@ Nudge uses the [MIT license](LICENSE). Dependencies and media retain their own l
 <details>
 <summary>Acknowledgments</summary>
 
-Built with [PySide6](https://doc.qt.io/qtforpython-6/), TypeSafe's Jev, [Gemini](https://ai.google.dev/gemini-api/docs), [ElevenLabs](https://elevenlabs.io/docs), [openWakeWord](https://github.com/dscripka/openWakeWord) and [OmniParser](https://github.com/microsoft/OmniParser).
+Built with [PySide6](https://doc.qt.io/qtforpython-6/), [Jev from TypeSafe AI](https://docs.typesafe.ai/introduction), [Gemini](https://ai.google.dev/gemini-api/docs), [ElevenLabs](https://elevenlabs.io/docs), [openWakeWord](https://github.com/dscripka/openWakeWord) and [OmniParser](https://github.com/microsoft/OmniParser).
 
 The README structure follows [Best-README-Template](https://github.com/othneildrew/Best-README-Template). The video uses [HyperFrames](https://github.com/heygen-com/hyperframes), Outfit and "Inspired" by Kevin MacLeod under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
