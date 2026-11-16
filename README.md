@@ -93,10 +93,10 @@ Real tasks send your goal and control details to Jev. [Setup and privacy](docs/S
 Try goals that name the task and its destination. Here are a few examples:
 
 ~~~text
-> open Notes from the Dock
-> download my October bank statement
-> play a tutorial on YouTube about Excel pivot tables
-> email prof.lee@sfu.ca that I'm sick and will miss today's lecture
+› open Notes from the Dock
+› download my October bank statement
+› play a tutorial on YouTube about Excel pivot tables
+› email prof.lee@sfu.ca that I'm sick and will miss today's lecture
 ~~~
 
 <details>
@@ -108,7 +108,7 @@ Try goals that name the task and its destination. Here are a few examples:
 Nudge has a few command line options to control its behavior.
 
 ~~~bash
-uv run nudge                 # Run Nudge in the foreground. Closing bar quits the app.
+uv run nudge                 # Run Nudge in the foreground. Closing nudge quits the app.
 uv run nudge --help          # Show all options.
 uv run nudge --debug         # Open with Peek debug mode enabled.
 uv run nudge --persistent    # Run in the background (attached to terminal)
