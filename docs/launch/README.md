@@ -1,6 +1,6 @@
 # Nudge launch film
 
-[Watch the launch video](../assets/nudge-launch.mp4). The editable HyperFrames project renders a 108.7-second film at 1920 × 1080 and 60 fps. It introduces the Hey Nudge wake word, downloads a bank statement, plays an Excel tutorial on YouTube, explains Jev through Peek and reviews an email draft. Large Nudge shots show processing before focus moves to the browser.
+[Watch the launch video](../assets/nudge-launch.mp4). The editable HyperFrames project renders a 110.35-second film at 1920 × 1080 and 60 fps. It introduces the Hey Nudge wake word, downloads a bank statement, plays an Excel tutorial on YouTube, explains Jev through Peek and reviews an email draft. Large Nudge shots show processing before focus moves to the browser. The Jev demo pauses to animate candidate probabilities and connect the winning control to its debug box.
 
 Bank and mail use fictitious local data. Mail stores a local result without sending email. Real model clients and the task loop run through a browser capture adapter, which does not test native desktop backends. Read [capture limits and media credits](ASSETS.md).
 
@@ -17,6 +17,8 @@ npm run render
 ~~~
 
 The preview opens the HyperFrames timeline editor. Edit there or open the project in the HyperFrames desktop app. The current index.html and compositions define the film. The sync script refreshes shot-slots.json and audio-cues.json from that HTML. Rendering writes ../assets/nudge-launch.mp4, then normalizes the audio and adds the music credit.
+
+The check command also verifies score growth, the reading hold, reverse seeking and the cursor handoff.
 
 For visual review:
 
@@ -86,7 +88,7 @@ The GIF reads the bank interval from the current HTML. It begins with the reques
 
 ## Music and effects
 
-"Inspired" Kevin MacLeod (incompetech.com). Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The film uses a 108.7-second excerpt, Nudge's actual tones, a soft click effect, keyboard typing and user-added recordings of the draft and Send prompts. Their speech provider is not recorded. Include the [music attribution](ASSETS.md#music-attribution) and [keyboard attribution](ASSETS.md#keyboard-attribution) when sharing the video. The click effect has separate Pixabay rights.
+"Inspired" Kevin MacLeod (incompetech.com). Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The film uses a 110.35-second excerpt, Nudge's actual tones, a soft click effect, keyboard typing and user-added recordings of the draft and Send prompts. Their speech provider is not recorded. Include the [music attribution](ASSETS.md#music-attribution) and [keyboard attribution](ASSETS.md#keyboard-attribution) when sharing the video. The click effect has separate Pixabay rights.
 
 ## Project files
 
