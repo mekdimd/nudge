@@ -10,6 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { tutorialIsPlaying } from "./capture_playback.mjs";
 
 const project = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const root = resolve(project, "../..");
@@ -288,8 +289,8 @@ try {
       !downloads.some((d) => d.name === "October-2026-statement.pdf" && d.pdf))
   )
     throw new Error("Statement PDF download did not complete.");
-  if (caseName === "youtube" && !page.url().includes("/results?"))
-    throw new Error("Search results did not load.");
+  if (caseName === "youtube")
+    await page.waitForFunction(tutorialIsPlaying, null, { timeout: 15_000 });
   if (caseName === "mail" && (!sent || !trace.confirmed_before_action))
     throw new Error("Mail did not reach an approved local Send result.");
 } finally {
