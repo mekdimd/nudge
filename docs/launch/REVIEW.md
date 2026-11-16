@@ -16,8 +16,8 @@ A fresh subagent signed off on the latest editor cut with no P0 or P1 findings. 
 
 | Check | Result |
 | --- | --- |
-| Application tests | 165 tests passed in the earlier application review. This sync changes video assets and export checks; application tests were not repeated. |
-| Package build | The wheel and source distribution built in the earlier application review. The package code is unchanged by this sync. |
+| Application tests | 177 tests passed after syncing main and updating the capture tests to pass the browser process ID. |
+| Package build | The wheel and source distribution built, installed in fresh environments and passed the offline package checks. Locked dependency checks passed. |
 | HyperFrames | The full check and focused transition checks passed. Runtime, layout, contrast, craft and audio have no errors. Four timeline-density authoring warnings remain. Runtime, layout, contrast, craft and audio have no warnings. |
 | Motion | scripts/verify_jev_motion.mjs passes. It verifies the continuous Peek zoom and click, growing scores, mint selection, dimmed alternatives, connector completion, reading hold, delayed cursor and click, audio timing, reference data and reverse seeking. npm run check includes this verification. |
 | Visuals | Full-film storyboard, phone and transition sheets inspected. Exact frames confirm the typed request chips, scoring connector and sent confirmation. The README still graphics retain the earlier review; the GIF and poster are regenerated from this export. |
