@@ -1,19 +1,18 @@
-"""Build a Dock illustration and local OCR example from saved source assets."""
+"""Build desktop app examples and control recognition graphics from saved assets."""
 
 import argparse
-import json
 import os
 import sys
 from pathlib import Path
 
 from build_artwork import BLUE, OUT, A, canvas, font, image, load, text
+from build_recognition_artwork import main as recognition_artwork
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import (
     QColor,
     QFont,
     QFontDatabase,
     QImage,
-    QPainter,
     QPainterPath,
     QPen,
 )
@@ -30,30 +29,16 @@ APPS = {
     "Notes": "/System/Applications/Notes.app",
     "Calendar": "/System/Applications/Calendar.app",
 }
-OCR_LABELS = {
-    "Statements",
-    "Transfers",
-    "October statement",
-    "Account statement",
-    "Opening balance",
-    "Closing balance",
-    "Statement details",
-    "Statement period",
-    "File format",
-    "L Download PDF",
-}
 
 
 def refresh_sources():
-    """Read local macOS icons, render the real bar and run OCR on a saved screen."""
+    """Read local macOS icons and render the real bar."""
     from AppKit import NSBitmapImageRep, NSMakeSize, NSPNGFileType, NSWorkspace
-    from PIL import Image
     from PySide6.QtGui import QPixmap
 
     from nudge.core.models import AppRef
     from nudge.ui.bar import Bar
     from nudge.ui.timeline import Timeline
-    from nudge.vision.ocr import load_ocr
 
     workspace = NSWorkspace.sharedWorkspace()
     for name, path in APPS.items():
@@ -88,23 +73,7 @@ def refresh_sources():
     assert bar.grab().save(str(DESKTOP / "dock-bar.png"))
     bar.close()
 
-    source = "browser/bank-state-2.png"
-    screen = Image.open(A / source).convert("RGB")
-    regions = load_ocr().read(screen)
-    assert regions, "Local OCR found no text"
-    (DESKTOP / "vision-ocr.json").write_text(
-        json.dumps(
-            {
-                "input": f"assets/{source}",
-                "engine": "Nudge MacOCR / Apple Vision",
-                "size": list(screen.size),
-                "regions": [{"text": t, "box": list(b)} for t, b in regions],
-            },
-            indent=2,
-        )
-        + "\n"
-    )
-    print(f"Saved macOS icons, the offscreen Nudge bar and {len(regions)} OCR regions.")
+    print("Saved macOS icons and the offscreen Nudge bar.")
 
 
 def dock():
@@ -152,57 +121,12 @@ def dock():
     assert value.save(str(OUT / "nudge-dock.png"))
 
 
-def vision():
-    from nudge.core.models import Control, Rect
-    from nudge.ui.overlay import Overlay
-
-    data = json.loads((DESKTOP / "vision-ocr.json").read_text())
-    screen = load(data["input"].removeprefix("assets/"))
-    assert [screen.width(), screen.height()] == data["size"]
-    controls = []
-    for index, region in enumerate(data["regions"], 1):
-        if region["text"] not in OCR_LABELS:
-            continue
-        x1, y1, x2, y2 = region["box"]
-        controls.append(
-            Control(
-                id=f"v{index}",
-                label=region["text"],
-                role="text",
-                bounds=Rect(x1, y1, x2 - x1, y2 - y1),
-                source="vision",
-            )
-        )
-    assert len(controls) >= 8, "Missing expected text regions"
-    overlay = Overlay()
-    overlay.setGeometry(0, 0, screen.width(), screen.height())
-    overlay.show_boxes(controls)
-    view = QImage(screen)
-    painter = QPainter(view)
-    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    overlay._paint_boxes(painter)
-    painter.end()
-    overlay.close()
-
-    value, p = canvas(1600, 1220)
-    text(p, "Local vision in debug mode", 64, 96, 58, weight=QFont.Weight.DemiBold)
-    p.setBrush(QColor("#f5a524"))
-    p.setPen(QPen(QColor("#ad6d00"), 2))
-    p.drawRoundedRect(QRectF(65, 133, 28, 28), 5, 5)
-    text(p, "Orange boxes mark detected text.", 108, 159, 34)
-    image(p, view, 48, 210, 1504)
-    text(p, "Local OCR on a recorded screen", 64, 1180, 30, "#525b69")
-    p.end()
-    assert value.save(str(OUT / "nudge-vision.png"))
-    print(f"Rendered {len(controls)} selected OCR regions with Nudge's Peek overlay.")
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--refresh-sources",
         action="store_true",
-        help="Read macOS icons and run local OCR. Requires Pillow and Apple Vision.",
+        help="Read macOS app icons and render Nudge's bar offscreen.",
     )
     args = parser.parse_args()
     os.environ["QT_QPA_PLATFORM"] = "offscreen"
@@ -214,9 +138,9 @@ def main():
         assert sys.platform == "darwin", "Refreshing sources requires macOS"
         refresh_sources()
     dock()
-    vision()
+    recognition_artwork()
     app.processEvents()
-    print("Created the Dock mockup and local vision image.")
+    print("Created the Dock mockup and control recognition graphics.")
 
 
 if __name__ == "__main__":

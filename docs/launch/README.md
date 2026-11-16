@@ -60,19 +60,19 @@ uv run python docs/launch/scripts/capture_wake.py
 uv run python docs/launch/scripts/build_artwork.py
 ~~~
 
-Build the README's Dock mockup and local OCR image from their saved inputs:
+Build the README's Dock, accessibility, local vision and Jev graphics from saved inputs:
 
 ~~~bash
 uv run python docs/launch/scripts/build_desktop_artwork.py
 ~~~
 
-To refresh the inputs on macOS, add `--refresh-sources`. This reads local app icons, renders Nudge's bar offscreen and runs text recognition on the saved bank screenshot. It does not open an app or make provider calls.
+To refresh the Dock inputs on macOS, add `--refresh-sources`. This reads local app icons and renders Nudge's bar offscreen. It does not open an app or make provider calls.
 
 ~~~bash
-QT_SCALE_FACTOR=2 uv run --with pillow --with pyobjc-framework-Vision python docs/launch/scripts/build_desktop_artwork.py --refresh-sources
+QT_SCALE_FACTOR=2 uv run python docs/launch/scripts/build_desktop_artwork.py --refresh-sources
 ~~~
 
-The orange outlines show selected OCR detections, rather than a full OmniParser run. See [image sources](ASSETS.md#readme-image-sources).
+To rebuild only the three control recognition graphics, run `uv run python docs/launch/scripts/build_recognition_artwork.py`. The Figma mockup preserves saved local OCR and OmniParser icon detections. Its blue toolbar outlines and the Jev probability scores are illustrative. See [image sources](ASSETS.md#readme-image-sources).
 
 scripts/build_film.py reconstructs the earlier v6 cut. Running it replaces the editor's HTML, media trims and timing. Use it only to reconstruct that earlier cut.
 
