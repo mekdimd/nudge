@@ -114,15 +114,16 @@ Nudge has a few command line options to control its behavior.
 uv run nudge                 # Run Nudge. Clicking the close (×) button quits the app.
 uv run nudge --help          # Show all options.
 uv run nudge --debug         # Open with Peek debug mode enabled.
-uv run nudge --persistent    # Run in the background (attached to terminal)
-uv run nudge --background    # Run in the background (detached from terminal)
-uv run nudge --stop          # Quit a background or persistent instance.
+uv run nudge --keep-running  # Keep running when the bar closes; logs stay in the terminal.
+uv run nudge --background    # Detach from the terminal; logs go to a file.
+uv run nudge --detach        # Same as --background.
+uv run nudge --stop          # Quit a --keep-running, --background, or --detach instance.
 uv run nudge --offline gmail # Try the scripted demo without keys.
 ~~~
 
-Use `--persistent` to keep Nudge in the terminal while the close button hides the bar. The hotkey brings it back. Press Ctrl+C to quit a foreground instance.
+Use `--keep-running` to stay attached to the terminal with logs in the terminal. The close button hides the bar, and the hotkey brings it back. Press Ctrl+C or run `nudge --stop` in another terminal to quit.
 
-Use `--background` to run Nudge detached from the terminal. Use `--stop` to quit a background instance. Logs will be written to the default location (e.g.`~/Library/Logs/Nudge` on macOS).
+Use `--background` or its alias `--detach` to run Nudge independently of the terminal. Closing the terminal leaves Nudge running. The close button hides the bar, the hotkey brings it back, and the menu bar or tray icon offers Show and Quit. Run `nudge --stop` to quit. Logs go to `~/Library/Logs/Nudge/nudge.log` on macOS and `%LOCALAPPDATA%\Nudge\nudge.log` on Windows.
 
 For voice input and spoken approval prompts, set `ELEVENLABS_API_KEY` in .env. To use "Hey Nudge" as the wake word, set `WAKE_WORD=models/hey_nudge.onnx`; the default is "Hey Jarvis." The orb starts or stops listening. The mic button mutes the microphone, and its menu selects the microphone and controls spoken replies.
 

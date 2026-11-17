@@ -136,8 +136,8 @@ def test_closing_quits_by_default(offline):
     assert quits == [True]
 
 
-def test_persistent_close_hides_and_the_hotkey_brings_it_back(offline):
-    app, _, _ = offline("live_caption", persistent=True)
+def test_keep_running_close_hides_and_the_hotkey_brings_it_back(offline):
+    app, _, _ = offline("live_caption", keep_running=True)
     quits = []
     app.quit = lambda: quits.append(True)
     app.bar.summon()

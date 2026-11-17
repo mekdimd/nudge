@@ -321,7 +321,7 @@ class Bar(QWidget):
         else:
             self.hide()
 
-    def set_persistent(self, on: bool) -> None:
+    def set_keep_running(self, on: bool) -> None:
         self.close_button.setToolTip(f"Hide Nudge. {HOTKEY} brings it back." if on else "Quit Nudge")
 
     def add_mic(self, widget: QWidget) -> None:
