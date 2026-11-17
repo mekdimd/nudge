@@ -26,7 +26,7 @@ from PySide6.QtCore import QObject, QPoint, QSettings, Qt, QTimer, Signal
 from PySide6.QtGui import QImage, QPainter
 from PySide6.QtWidgets import QApplication, QLineEdit, QPushButton
 
-import nudge.__main__ as main
+import nudge.app as main
 from nudge.core.jev import JevClient
 from nudge.core.models import AppRef, Control, Rect, Snapshot
 from nudge.core.writer import Writer

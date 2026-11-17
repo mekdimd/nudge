@@ -106,6 +106,15 @@ Try goals that name the task and its destination. Here are a few examples:
 <summary>CLI Commands, voice and vision</summary>
 <!-- <summary>Command line, voice and vision</summary> -->
 
+Check the installed version or diagnose setup problems offline:
+
+~~~bash
+uv run nudge --version
+uv run nudge --doctor
+~~~
+
+Doctor reports key presence, permissions and optional vision dependencies with suggested fixes. It never prints key values or starts the UI. See [setup checks](docs/SETUP.md#check-your-setup) for exit codes and limits.
+
 <!-- The CLI launches the bar. Enter your goal there, or speak it when voice is configured. -->
 
 Nudge has a few command line options to control its behavior.

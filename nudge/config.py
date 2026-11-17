@@ -26,11 +26,16 @@ def _wake_word(value: str, base: Path = ROOT) -> str:
     return value
 
 
-def load_config() -> Config:
+def load_environment() -> Path:
     env_file = Path.cwd() / ".env"
     if not env_file.is_file() and (ROOT / ".env").is_file():
         env_file = ROOT / ".env"
     load_dotenv(env_file)
+    return env_file
+
+
+def load_config() -> Config:
+    env_file = load_environment()
     return Config(
         typesafe_api_key=os.environ.get("TYPESAFE_API_KEY", "").strip(),
         gemini_api_key=os.environ.get("GEMINI_API_KEY", "").strip(),

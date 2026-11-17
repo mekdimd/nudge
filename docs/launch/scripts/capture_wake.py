@@ -17,7 +17,7 @@ from PySide6.QtCore import QObject, QSettings, Qt, QTimer, Signal
 from PySide6.QtGui import QImage, QPainter
 from PySide6.QtWidgets import QApplication
 
-import nudge.__main__ as main
+import nudge.app as main
 from nudge.dev import OfflineJev, OfflineWriter
 from nudge.platform.fake import FakeAdapter
 from nudge.ui.audio_settings import AudioSettings

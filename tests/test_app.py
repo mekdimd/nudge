@@ -23,7 +23,7 @@ def wait_until(condition, timeout=30.0):
 
 @pytest.fixture
 def offline(qapp, monkeypatch, tmp_path):
-    import nudge.__main__ as main
+    import nudge.app as main
     from nudge.dev import GOALS, PATHS, OfflineJev, OfflineWriter
     from nudge.platform.fake import FakeAdapter
     from nudge.ui.audio_settings import AudioSettings
