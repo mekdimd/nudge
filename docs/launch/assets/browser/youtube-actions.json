@@ -1,0 +1,75 @@
+{
+  "case": "youtube",
+  "epochStarted": 1794738169.287,
+  "recordingOffset": 2.65,
+  "actions": [
+    {
+      "id": 2,
+      "operation": "type",
+      "control_id": "capture-3",
+      "text": "Excel pivot tables for beginners",
+      "label": "Search",
+      "center": [
+        596.5,
+        28
+      ],
+      "at": 7.646,
+      "endedAt": 9.85
+    },
+    {
+      "id": 6,
+      "operation": "click",
+      "control_id": "capture-6",
+      "label": "excel pivot tables for beginners",
+      "center": [
+        460.046875,
+        81.5
+      ],
+      "at": 12.645,
+      "endedAt": 13.168
+    },
+    {
+      "id": 10,
+      "operation": "click",
+      "control_id": "capture-24",
+      "label": "Pivot Table Excel | Step-by-Step Tutorial 8 minutes, 36 seconds",
+      "center": [
+        934,
+        231
+      ],
+      "at": 16.245,
+      "endedAt": 16.78
+    },
+    {
+      "id": 15,
+      "operation": "click",
+      "control_id": "capture-9",
+      "label": "Pause (k)",
+      "center": [
+        48,
+        535
+      ],
+      "at": 21.545,
+      "endedAt": 22.084
+    },
+    {
+      "id": 19,
+      "operation": "click",
+      "control_id": "capture-9",
+      "label": "Play keyboard shortcut k",
+      "center": [
+        48,
+        535
+      ],
+      "at": 24.795,
+      "endedAt": 25.33
+    }
+  ],
+  "title": "Pivot Table Excel | Step-by-Step Tutorial - YouTube",
+  "sent": null,
+  "downloads": [],
+  "outcome": {
+    "ok": true,
+    "message": "Done in 5 steps · 25.6 s · Jev 135 ms per decision"
+  }
+}

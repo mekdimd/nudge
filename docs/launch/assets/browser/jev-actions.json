@@ -1,0 +1,26 @@
+{
+  "case": "jev",
+  "epochStarted": 1794774796.216,
+  "recordingOffset": 3.63,
+  "actions": [
+    {
+      "id": 3,
+      "operation": "click",
+      "control_id": "capture-30",
+      "label": "Labels",
+      "center": [
+        127.5,
+        497
+      ],
+      "at": 6.054,
+      "endedAt": 6.611
+    }
+  ],
+  "title": "Labels · microsoft/vscode · GitHub",
+  "sent": null,
+  "downloads": [],
+  "outcome": {
+    "ok": true,
+    "message": "Done in 1 step · 5.0 s · Jev 236 ms per decision"
+  }
+}

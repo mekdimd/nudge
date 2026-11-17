@@ -1,0 +1,66 @@
+{
+  "audio": "assets/sounds/voice-send.mp3",
+  "language": "en",
+  "words": [
+    {
+      "text": "Press",
+      "start": 0.06,
+      "end": 0.34,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "send.",
+      "start": 0.5,
+      "end": 0.92,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "This",
+      "start": 1.56,
+      "end": 1.72,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "will",
+      "start": 1.78,
+      "end": 1.96,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "send",
+      "start": 2.02,
+      "end": 2.34,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "and",
+      "start": 2.38,
+      "end": 2.48,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "may",
+      "start": 2.54,
+      "end": 2.66,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "not",
+      "start": 2.68,
+      "end": 2.84,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "be",
+      "start": 2.9,
+      "end": 2.98,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "undoable",
+      "start": 3.04,
+      "end": 3.6,
+      "speaker": "speaker_0"
+    }
+  ]
+}

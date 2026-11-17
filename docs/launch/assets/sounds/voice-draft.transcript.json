@@ -1,0 +1,78 @@
+{
+  "audio": "assets/sounds/voice-draft.mp3",
+  "language": "en",
+  "words": [
+    {
+      "text": "Check",
+      "start": 0.08,
+      "end": 0.3,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "what",
+      "start": 0.34,
+      "end": 0.44,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "I'll",
+      "start": 0.52,
+      "end": 0.68,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "type,",
+      "start": 0.72,
+      "end": 1.04,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "then",
+      "start": 1.36,
+      "end": 1.56,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "say",
+      "start": 1.62,
+      "end": 1.8,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "yes",
+      "start": 1.86,
+      "end": 2.1,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "to",
+      "start": 2.14,
+      "end": 2.24,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "type",
+      "start": 2.28,
+      "end": 2.52,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "it",
+      "start": 2.56,
+      "end": 2.66,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "or",
+      "start": 2.82,
+      "end": 2.9,
+      "speaker": "speaker_0"
+    },
+    {
+      "text": "stop",
+      "start": 3.04,
+      "end": 3.34,
+      "speaker": "speaker_0"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+Nudge · [32mJev[0m  [32mGemini[0m  [90mvoice off[0m  [90mwake word off[0m  [90mvision off[0m
+[1m▶ download my October bank statement[0m · Google Chrome
+  [35mJev      [0m Picked “Statements”  [90m89% · 250 ms[0m
+  [32mGoogle Chrome[0m Pressed “Statements”
+  [35mJev      [0m Picked “View October statement”  [90m100% · 64 ms[0m
+  [32mGoogle Chrome[0m Pressed “View October statement”
+  [35mJev      [0m Picked “Download PDF”  [90m100% · 78 ms[0m
+  [32mGoogle Chrome[0m Pressed “Download PDF”
+  [35mJev      [0m Says the task is done  [90m95% · 127 ms[0m
+[32m✓[0m Done in 3 steps · 11.9 s · Jev 129 ms per decision
+{"finished": "bank", "ok": true}

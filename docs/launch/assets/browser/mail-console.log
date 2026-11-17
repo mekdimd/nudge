@@ -1,0 +1,14 @@
+Nudge · [32mJev[0m  [32mGemini[0m  [90mvoice off[0m  [90mwake word off[0m  [90mvision off[0m
+[1m▶ email prof.lee@sfu.ca that I'm sick and will miss today's lecture. Use the subject Absent from lecture today[0m · Google Chrome
+  [35mJev      [0m Picked “Compose”  [90m100% · 179 ms[0m
+  [32mGoogle Chrome[0m Pressed “Compose”
+  [35mJev      [0m Picked “Type into the empty fields”  [90m97% · 92 ms[0m
+  [34mGemini   [0m Wrote the text  [90m0.8 s[0m
+  [37mNudge    [0m Check the text before I type it  [33mwaiting for you[0m
+  [32mGoogle Chrome[0m Typed into “To recipients, Subject, Message Body”
+  [35mJev      [0m Picked “Send”  [90m100% · 127 ms[0m
+  [37mNudge    [0m Waiting for your OK  [33mwaiting for you[0m
+  [32mGoogle Chrome[0m Pressed “Send”
+  [35mJev      [0m Says the task is done  [90m100% · 120 ms[0m
+[32m✓[0m Done in 3 steps · 22.1 s · Jev 129 ms per decision
+{"finished": "mail", "ok": true}

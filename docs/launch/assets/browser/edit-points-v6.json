@@ -1,0 +1,187 @@
+{
+  "bank": {
+    "duration": 13.2,
+    "phases": [
+      [
+        "request",
+        0,
+        1.8
+      ],
+      [
+        "thinking",
+        1.8,
+        2.0
+      ],
+      [
+        "action-0",
+        3.8,
+        2.4
+      ],
+      [
+        "action-1",
+        6.199999999999999,
+        2.4
+      ],
+      [
+        "action-2",
+        8.6,
+        3.0
+      ],
+      [
+        "completed",
+        11.6,
+        1.6
+      ]
+    ],
+    "browser_intervals": [
+      [
+        7.81,
+        3.8,
+        2.4
+      ],
+      [
+        11.49,
+        6.199999999999999,
+        2.4
+      ],
+      [
+        14.97,
+        8.6,
+        3.0
+      ]
+    ]
+  },
+  "youtube": {
+    "duration": 14.3,
+    "phases": [
+      [
+        "request",
+        0,
+        1.8
+      ],
+      [
+        "thinking",
+        1.8,
+        2.0
+      ],
+      [
+        "action-0",
+        3.8,
+        4.7
+      ],
+      [
+        "action-1",
+        8.5,
+        4.2
+      ],
+      [
+        "completed",
+        12.7,
+        1.6
+      ]
+    ],
+    "browser_intervals": [
+      [
+        8.770000000000001,
+        3.8,
+        4.7
+      ],
+      [
+        14.65,
+        8.5,
+        4.2
+      ]
+    ]
+  },
+  "jev": {
+    "duration": 14.4,
+    "source": "https://github.com/microsoft/vscode/issues",
+    "peek_controls": 71,
+    "phases": [
+      [
+        "enable Peek",
+        0,
+        2.4
+      ],
+      [
+        "control outlines",
+        2.4,
+        3.4
+      ],
+      [
+        "Jev processing",
+        5.8,
+        3.4
+      ],
+      [
+        "Jev decision",
+        9.2,
+        1.6
+      ],
+      [
+        "chosen action",
+        10.8,
+        3.6
+      ]
+    ]
+  },
+  "mail": {
+    "duration": 23.2,
+    "phases": [
+      [
+        "compose",
+        0,
+        2.6,
+        "browser"
+      ],
+      [
+        "writing",
+        2.4,
+        3.9,
+        "writing"
+      ],
+      [
+        "review",
+        6.1,
+        5.2,
+        "draft"
+      ],
+      [
+        "fill",
+        11.1,
+        6.2,
+        "browser"
+      ],
+      [
+        "approval",
+        17.1,
+        2.4,
+        "confirm"
+      ],
+      [
+        "send",
+        19.3,
+        3.9,
+        "browser"
+      ]
+    ],
+    "draft_source": 8.145999999999999,
+    "draft_stretch": 1,
+    "fill_source": [
+      15.78,
+      6.2,
+      1.32
+    ],
+    "field_starts": [
+      16.12,
+      16.56,
+      17.16
+    ],
+    "send_source": 22.5,
+    "processing_source": [
+      4.2,
+      3.7
+    ],
+    "processing_hold_seconds": 1.2
+  }
+}

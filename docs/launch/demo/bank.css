@@ -1,0 +1,714 @@
+@font-face {
+  font-family: Inter;
+  src: url("assets/Inter.ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: swap;
+}
+body.bank {
+  --ink: #1c2926;
+  --muted: #687570;
+  --accent: #21644f;
+  --line: #e3e9e5;
+  --surface: #fff;
+  --ground: #f5f7f6;
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: Inter, Arial, sans-serif;
+  font-size: 14px;
+}
+.bank header {
+  height: 72px;
+  margin-left: 216px;
+  padding: 0 42px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bank .brand {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+.bank .header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: var(--ink);
+  font-size: 13px;
+}
+.bank .avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e9eeea;
+  color: #345548;
+  font-size: 11px;
+  display: grid;
+  place-items: center;
+  font-weight: 650;
+}
+.bank aside {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 216px;
+  padding: 0 16px;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+}
+.bank .bank-logo {
+  height: 100px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 23px;
+  letter-spacing: -1px;
+  font-weight: 720;
+  color: #224c3d;
+}
+.bank .bank-logo img {
+  width: 26px;
+  height: 26px;
+}
+.bank .nav-label {
+  margin: 14px 14px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.bank aside button {
+  padding: 12px 14px;
+  margin: 3px 0;
+  border-radius: 7px;
+  border: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: transparent;
+  color: #56665f;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 520;
+}
+.bank aside button img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.76;
+}
+.bank aside button.active {
+  background: #e8f2eb;
+  color: #24583f;
+  font-weight: 650;
+}
+.bank .nav-bottom {
+  margin-top: auto;
+  margin-bottom: 22px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.bank .nav-bottom p {
+  font-size: 10px;
+  line-height: 1.6;
+  padding: 8px 14px;
+  color: var(--muted);
+}
+.bank main {
+  margin: 0 0 0 216px;
+  padding: 36px 42px 40px;
+  max-width: 1500px;
+}
+.bank h1 {
+  font-size: 27px;
+  font-weight: 600;
+  letter-spacing: -0.8px;
+  margin: 0;
+  line-height: 1.2;
+}
+.bank h2 {
+  font-size: 15px;
+  font-weight: 620;
+  letter-spacing: -0.2px;
+  margin: 0;
+}
+.bank .sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 9px 0 27px;
+  line-height: 1.5;
+}
+.bank .muted {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.bank button,
+.bank input,
+.bank select {
+  font: inherit;
+}
+.bank button {
+  cursor: pointer;
+  transition: background 0.14s ease;
+  white-space: nowrap;
+}
+.bank button:hover {
+  filter: brightness(0.97);
+}
+.bank button:active {
+  transform: translateY(1px);
+}
+.bank button:focus-visible,
+.bank input:focus-visible,
+.bank select:focus-visible {
+  outline: 3px solid #72a88d;
+  outline-offset: 3px;
+}
+.bank button.primary {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.bank button.secondary {
+  background: var(--surface);
+  border: 1px solid #d5dfd9;
+  color: #315d48;
+  padding: 9px 13px;
+  border-radius: 7px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.bank button.text-button {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  background: transparent;
+  border: 0;
+  padding: 6px 0;
+}
+.bank button img {
+  width: 16px;
+  height: 16px;
+}
+.bank .primary img {
+  filter: brightness(0) invert(1);
+}
+.bank .icon-button {
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bank .overview-top {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+.bank .account-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.bank .card-title {
+  padding: 20px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+.bank .account {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 21px 22px;
+}
+.bank .account + .account {
+  border-top: 1px solid var(--line);
+}
+.bank .account-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  background: #e6f0e9;
+  flex: none;
+}
+.bank .account-mark img {
+  width: 20px;
+  height: 20px;
+}
+.bank .account-mark.savings {
+  background: #eff0f8;
+}
+.bank .account-name {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.bank .account-number {
+  font-size: 11px;
+  color: var(--muted);
+}
+.bank .amount {
+  margin-left: auto;
+  text-align: right;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  font-variant-numeric: tabular-nums;
+}
+.bank .amount small {
+  display: block;
+  font-size: 10px;
+  font-weight: 450;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: 0;
+}
+.bank .quick-card {
+  padding: 22px;
+  border: 1px solid #d8e6dc;
+  border-radius: 10px;
+  background: #edf4ef;
+}
+.bank .quick-card h2 {
+  margin-bottom: 17px;
+}
+.bank .quick-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+}
+.bank .quick-row img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+}
+.bank .quick-row div {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 520;
+}
+.bank .quick-row small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-weight: 400;
+}
+.bank .activity {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.bank .activity-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 22px;
+}
+.bank table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.bank th {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--muted);
+  background: #fafbfa;
+  padding: 12px 22px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.bank td {
+  font-size: 12px;
+  padding: 15px 22px;
+  border-bottom: 1px solid #edf0ee;
+  vertical-align: middle;
+}
+.bank tr:last-child td {
+  border-bottom: 0;
+}
+.bank th:last-child,
+.bank td:last-child {
+  text-align: right;
+}
+.bank .merchant {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 210px;
+}
+.bank .merchant-mark {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #eef0ee;
+  font-size: 11px;
+  font-weight: 650;
+  color: #52665b;
+}
+.bank .merchant small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 4px;
+}
+.bank .positive {
+  color: #267251;
+  font-weight: 550;
+}
+.bank .table-foot {
+  padding: 13px 22px;
+  color: var(--muted);
+  font-size: 10px;
+  background: #fafbfa;
+  display: flex;
+  justify-content: space-between;
+}
+.bank .page-footer {
+  margin-top: 20px;
+  font-size: 10px;
+  color: var(--muted);
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+.bank .page-footer img {
+  width: 12px;
+  height: 12px;
+  opacity: 0.6;
+}
+.bank .filter-strip {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.bank select,
+.bank input {
+  border: 1px solid #d5dfd9;
+  border-radius: 7px;
+  padding: 10px 13px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+}
+.bank .statements-table td {
+  padding-top: 23px;
+  padding-bottom: 23px;
+}
+.bank .file-mark {
+  width: 35px;
+  height: 42px;
+  border: 1px solid #d6e3db;
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  background: #f4f8f5;
+}
+.bank .file-mark img {
+  width: 19px;
+  height: 19px;
+}
+.bank .statement-title {
+  font-weight: 600;
+  font-size: 13px;
+}
+.bank .statement-title small {
+  display: block;
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 11px;
+  margin-top: 5px;
+}
+.bank .crumb {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 24px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.bank .crumb img {
+  width: 12px;
+  height: 12px;
+}
+.bank .detail-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 22px;
+  align-items: start;
+}
+.bank .document-preview {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 32px 38px;
+  box-shadow: 0 3px 14px #23493404;
+}
+.bank .document-brand {
+  font-weight: 700;
+  font-size: 20px;
+  color: #224c3d;
+  margin-bottom: 32px;
+  letter-spacing: -0.8px;
+}
+.bank .document-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 28px;
+}
+.bank .document-preview h2 {
+  font-size: 19px;
+  margin: 0 0 9px;
+}
+.bank .document-preview p {
+  font-size: 10px;
+  color: var(--muted);
+}
+.bank .document-summary {
+  margin-top: 28px;
+}
+.bank .document-summary div {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+}
+.bank .document-summary div:last-child {
+  font-weight: 600;
+  font-size: 13px;
+  background: #f2f7f3;
+  margin: 0 -12px;
+  padding: 14px 12px;
+  border-bottom: 0;
+}
+.bank .document-note {
+  margin-top: 32px;
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.bank .download-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 24px;
+  background: var(--surface);
+}
+.bank .download-card h2 {
+  margin-bottom: 20px;
+}
+.bank dl {
+  margin: 0;
+}
+.bank dt {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 17px;
+}
+.bank dd {
+  font-size: 12px;
+  margin: 5px 0 0;
+}
+.bank .download-card button {
+  width: 100%;
+  margin-top: 26px;
+  padding: 12px;
+}
+.bank .success {
+  background: #e8f3eb;
+  color: #285c40;
+  border-radius: 7px;
+  padding: 12px;
+  margin-top: 16px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.bank #toast:empty {
+  display: none;
+}
+.bank .settings-card {
+  max-width: 620px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 24px;
+}
+.bank .settings-card label {
+  display: block;
+  margin: 18px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.bank .settings-card input,
+.bank .settings-card select {
+  display: block;
+  margin-top: 8px;
+  width: 100%;
+}
+.bank dialog {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 28px;
+  color: var(--ink);
+  background: var(--surface);
+  width: 380px;
+  line-height: 1.6;
+}
+.bank dialog::backdrop {
+  background: #203b3240;
+}
+@media (prefers-color-scheme: dark) {
+  body.bank:not([data-theme="light"]) {
+    --ink: #e4eae6;
+    --muted: #a4b1a9;
+    --accent: #72b494;
+    --line: #334139;
+    --surface: #1d2b24;
+    --ground: #17221c;
+  }
+  .bank:not([data-theme="light"]) .quick-card {
+    background: #243a2d;
+    border-color: #334b3b;
+  }
+  .bank:not([data-theme="light"]) th,
+  .bank:not([data-theme="light"]) .table-foot {
+    background: #223027;
+  }
+  .bank:not([data-theme="light"]) .document-summary div:last-child {
+    background: #2b3e30;
+  }
+  .bank:not([data-theme="light"]) button.primary {
+    background: #326e51;
+    border-color: #326e51;
+  }
+  .bank:not([data-theme="light"]) .bank-logo,
+  .bank:not([data-theme="light"]) .document-brand {
+    color: #a7d4b9;
+  }
+}
+@media (max-width: 800px) {
+  .bank aside {
+    width: 72px;
+    padding: 0 8px;
+  }
+  .bank .bank-logo {
+    padding: 0;
+    justify-content: center;
+  }
+  .bank .bank-logo span,
+  .bank aside button span,
+  .bank .nav-label,
+  .bank .nav-bottom p {
+    display: none;
+  }
+  .bank aside button {
+    justify-content: center;
+    padding: 14px 0;
+  }
+  .bank header {
+    margin-left: 72px;
+    padding: 0 22px;
+  }
+  .bank main {
+    margin-left: 72px;
+    padding: 28px 22px;
+  }
+  .bank .overview-top,
+  .bank .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .bank .header-right > span:first-child {
+    display: none;
+  }
+  .bank .activity {
+    overflow: auto;
+  }
+  .bank table {
+    min-width: 560px;
+  }
+  .bank .document-preview {
+    padding: 26px;
+  }
+  .bank .filter-strip {
+    flex-wrap: wrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bank * {
+    transition: none !important;
+  }
+  .bank button:active {
+    transform: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .bank .account {
+    flex-wrap: wrap;
+  }
+  .bank .amount {
+    width: 100%;
+    margin-left: 54px;
+    text-align: left;
+  }
+  .bank .quick-row {
+    flex-wrap: wrap;
+  }
+  .bank .quick-row button {
+    margin-left: 30px;
+  }
+  .bank .header-right > span:not(.avatar) {
+    display: none;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .bank:not([data-theme="light"]) button.secondary {
+    color: #c5dece;
+    border-color: #526b5c;
+  }
+  .bank:not([data-theme="light"]) aside button {
+    color: #c0cdc5;
+  }
+  .bank:not([data-theme="light"]) aside button.active {
+    background: #294735;
+    color: #d5e6db;
+  }
+  .bank:not([data-theme="light"]) aside button img,
+  .bank:not([data-theme="light"]) .bank-logo img,
+  .bank:not([data-theme="light"]) .icon-button img {
+    filter: invert(0.85);
+  }
+}

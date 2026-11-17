@@ -1,0 +1,27 @@
+{
+  "goal": "Show the project labels for this repository",
+  "choice": "press:capture-30",
+  "scope": "Illustrative probabilities for a layout explanation, not a returned Jev response.",
+  "ranked": [
+    {
+      "id": "capture-30",
+      "label": "Labels",
+      "probability": 0.55
+    },
+    {
+      "id": "capture-27",
+      "label": "Views",
+      "probability": 0.22
+    },
+    {
+      "id": "capture-28",
+      "label": "Projects",
+      "probability": 0.14
+    },
+    {
+      "id": "capture-29",
+      "label": "Milestones",
+      "probability": 0.09
+    }
+  ]
+}
