@@ -1,7 +1,19 @@
 import os
+from importlib import import_module
+
+import pytest
 
 from docs.launch.scripts.capture_browser import BrowserCaptureAdapter
 from nudge.core.actions import FILL_KEY, build_options
+
+
+@pytest.mark.parametrize('script', ['capture_browser', 'capture_ui', 'capture_wake'])
+def test_capture_scripts_can_construct_the_gui_controller(script):
+    capture = import_module(f'docs.launch.scripts.{script}')
+    from nudge.app import Nudge, NudgeLoop
+
+    assert capture.main.Nudge is Nudge
+    assert capture.main.NudgeLoop is NudgeLoop
 
 
 def test_capture_adapter_exposes_search_fields_for_drafting(tmp_path):

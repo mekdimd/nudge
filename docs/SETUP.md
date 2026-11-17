@@ -37,6 +37,19 @@ uv run python scripts/smoke.py
 
 On macOS, allow the terminal or editor that launches Nudge in System Settings → Privacy & Security → Accessibility, then restart Nudge. On Windows, a normal process cannot control an elevated app. Run both without administrator privileges.
 
+## Check your setup
+
+~~~bash
+uv run nudge --version
+uv run nudge --doctor
+~~~
+
+Both commands exit without starting the UI. Doctor reports Nudge, Python and OS versions, API key presence, accessibility permissions and optional vision dependencies. It uses the same .env lookup as Nudge and never prints key values or makes network calls. Each missing setting or permission includes a suggested fix.
+
+Doctor exits with code 1 when the TypeSafe key is missing, Python or the OS is unsupported, or macOS Accessibility access is missing or cannot be checked. Missing Gemini, voice or vision setup produces warnings. Gemini is required for drafting, and voice and vision are optional.
+
+On macOS, Doctor checks Accessibility and Screen Recording access without requesting permission. Windows has no global accessibility permission toggle. Keep Nudge and the target app at the same privilege level. Doctor checks whether vision dependencies are installed. It does not load or download models, check cached weights or validate API keys.
+
 ## Optional voice and vision
 
 With voice configured, click the orb or say the wake word to speak. Click the orb again to stop listening. The mic button mutes the microphone; its arrow chooses a microphone and toggles voice and sound effects.
