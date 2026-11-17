@@ -612,7 +612,7 @@ def build_jev(absolute_start):
         1.22,
         5.8,
         3.4,
-        "Jev is TypeSafe AI's action model.",
+        "Jev is TypeSafe AI's decision model.",
     )
     body += b
     script += t

@@ -69,3 +69,5 @@ The wake shot loads the repository's models/hey_nudge.onnx and replays voice cal
 The video overlays an editable probability card on its recorded VS Code issue tracker. It shares the README's varied example probabilities in assets/desktop/jev-example.json. Those scores illustrate ranking; they are not the recorded Jev response for the shown goal. The browser clip performs the recorded Labels click, and a decoded final frame holds the resulting page through the transition to mail.
 
 The animated-bar-chart registry component informed the deterministic growth tween. The current scene uses editable rows, mint probability bars and a connector in compositions/jev.html. Jev ranks labelled actions, and Nudge's debug boxes outline the corresponding UI items.
+
+The model caption says "Jev is TypeSafe AI's decision model." [TypeSafe's documentation](https://docs.typesafe.ai/introduction) describes Jev as making structured decisions. Nudge uses those decisions to choose its next action.
