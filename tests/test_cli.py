@@ -52,6 +52,7 @@ else:
     )
     assert result.returncode == (0 if flag == '--version' else 1), result.stderr.decode('cp1252')
     output = result.stdout.decode('cp1252')
+    assert '\x1b[' not in output
     assert f'Nudge {version("nudge")}' in output
     if flag == '--doctor':
         assert 'Python ' in output and 'OS ' in output

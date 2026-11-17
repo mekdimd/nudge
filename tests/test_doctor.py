@@ -58,9 +58,9 @@ def test_mac_permissions_are_checked_without_requesting_access(doctor_env, monke
     output = capsys.readouterr().out
     assert f'Accessibility: {"granted" if trusted else "missing"}' in output
     assert 'Screen Recording: missing' in output
-    assert 'Privacy & Security > Screen Recording' in output
+    assert 'Privacy & Security > Screen Recording' in ' '.join(output.split())
     if not trusted:
-        assert 'Privacy & Security > Accessibility' in output
+        assert 'Privacy & Security > Accessibility' in ' '.join(output.split())
 
 
 def test_missing_mac_bridge_reports_fix_and_continues(doctor_env, monkeypatch, capsys):
