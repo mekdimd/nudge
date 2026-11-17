@@ -53,3 +53,7 @@ The email remains the weakest shot at phone width because its fields contain sma
 The current editor HTML defines the film. scripts/sync_timeline.py derives shot-slots.json and audio-cues.json from it. scripts/build_film.py reconstructs an earlier cut and must not replace the editor changes during routine exports. The HyperFrames desktop app retains its editing history.
 
 See [asset sources, rights and capture details](ASSETS.md). The Figma graphic combines a real interface reference and credited travel artwork with saved local detections. The README's example Jev scores explain ranking rather than report a live result.
+
+## Jev model caption
+
+The loading caption now says "Jev is TypeSafe AI's decision model." The scene, legacy builder, storyboard and spec agree. HyperFrames, playback tests and Jev motion checks pass. Beat, phone and transition frames show the full caption on one line. A frame decoded at 57.35 seconds confirms the wording in the updated 108.15-second, 1080p, 60 fps MP4, which passes a complete FFmpeg decode. Audio measures -17.02 LUFS and -2.20 dB true peak with no signal-analysis warnings.
