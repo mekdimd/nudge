@@ -60,7 +60,7 @@ uv run nudge --background
 uv run nudge --stop
 ~~~
 
-Closing a background bar hides it. The hotkey brings it back, and the menu bar or tray icon offers Show and Quit. Use --persistent for the same behavior without detaching from the terminal.
+Closing a background bar hides it. The hotkey brings it back, and the menu bar or tray icon offers Show and Quit. Use --keep-running for the same behavior without detaching from the terminal.
 
 Logs go to ~/Library/Logs/Nudge on macOS and %LOCALAPPDATA%\Nudge on Windows. Ctrl+C quits a foreground process.
 
