@@ -23,8 +23,8 @@ def _pid_file() -> Path:
 
 
 def child_args(argv: list[str]) -> list[str]:
-    args = [a for a in argv if a not in ("--background", "--persistent")]
-    return args + ["--persistent"]
+    args = [a for a in argv if a not in ("--background", "--detach", "--keep-running")]
+    return args + ["--keep-running"]
 
 
 def _alive(pid: int) -> bool:
