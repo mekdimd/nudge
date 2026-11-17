@@ -21,7 +21,7 @@ A fresh subagent signed off on the latest editor cut with no P0 or P1 findings. 
 | HyperFrames | The full check and focused transition checks passed. Runtime, layout, contrast, craft and audio have no errors. Four timeline-density authoring warnings remain. Runtime, layout, contrast, craft and audio have no warnings. |
 | Motion | scripts/verify_jev_motion.mjs passes. It verifies the continuous Peek zoom and click, growing scores, mint selection, dimmed alternatives, connector completion, reading hold, delayed cursor and click, audio timing, reference data and reverse seeking. npm run check includes this verification. |
 | Visuals | Full-film storyboard, phone and transition sheets inspected. Exact frames confirm the typed request chips, scoring connector and sent confirmation. The README still graphics retain the earlier review; the GIF and poster are regenerated from this export. |
-| Delivery | The complete MP4 decodes without FFmpeg errors. H.264 video is 1920 x 1080 at 60 fps, with 6,489 frames and a 108.15-second picture. The container lasts 108.20 seconds due to the AAC tail. The file is 28.86 MiB. Decoded frames confirm the Peek click, scoring hold and Labels navigation. |
+| Delivery | The complete MP4 decodes without FFmpeg errors. H.264 video is 1920 x 1080 at 60 fps, with 6,489 frames and a 108.15-second picture. The container lasts 108.20 seconds due to the AAC tail. The file is 28.84 MiB. Decoded frames confirm the Peek click, scoring hold and Labels navigation. |
 | Audio | Stereo AAC at 48 kHz. The final mix measures -17.02 LUFS integrated and -2.20 dB true peak. Signal analysis reports no warnings. Music and keyboard credits remain in metadata. Audio was measured, not heard. |
 | README media | Regenerated the poster and one 13.2-second bank GIF, 2,044 KiB. The GIF begins with the bank request, shows processing and browser actions, and ends on the completed feed. It has no terminal intro. README media links pass. |
 | Source integrity | Reviewed scene, timeline, CSS, motion helper, music and bank recording hashes match the delivery render inputs. Python compilation and Git whitespace checks pass. |
@@ -35,6 +35,10 @@ The README banner and interface diagram now use fresh Qt captures with Chrome's 
 ## Sol-loop review
 
 [sol-loop](https://github.com/t3dotgg/tstack/blob/main/skills/sol-loop/SKILL.md) completed two rounds with gpt-6.1-sol on xhigh and approved the behavior. S1 corrected the YouTube capture check to wait for watch-page playback. The focused regression and browser fixture checks passed. No findings were declined. Usage was not exposed.
+
+## Email prompt correction
+
+The email request now says "Write an email to my professor." The scene, storyboard and legacy builder agree. HyperFrames and Jev motion checks passed. The changed frames and transition were inspected at full size and phone width. A frame decoded at 74.8 seconds confirms the wording in the delivery MP4, which passes a complete FFmpeg decode at 1920 x 1080 and 60 fps. This caption edit did not repeat the earlier subagent review.
 
 ## Recording limits
 

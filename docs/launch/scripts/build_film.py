@@ -412,7 +412,7 @@ def build_mail(absolute_start):
     for name, start, duration, kind in phases:
         ident = f"mail-{name}"
         titles = {
-            "compose": "Write an email to your professor.",
+            "compose": "Write an email to my professor.",
             "writing": "Nudge works out the next steps.",
             "review": "Edit the draft before Nudge types it.",
             "fill": "Nudge types it for you.",
