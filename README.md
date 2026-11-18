@@ -126,13 +126,15 @@ uv run nudge --debug         # Open with Peek debug mode enabled.
 uv run nudge --keep-running  # Keep running when the bar closes; logs stay in the terminal.
 uv run nudge --background    # Detach from the terminal; logs go to a file.
 uv run nudge --detach        # Same as --background.
-uv run nudge --stop          # Quit a --keep-running, --background, or --detach instance.
+uv run nudge --stop          # Quit the running Nudge, including a foreground instance.
 uv run nudge --offline gmail # Try the scripted demo without keys.
 ~~~
 
 Use `--keep-running` to stay attached to the terminal with logs in the terminal. The close button hides the bar, and the hotkey brings it back. Press Ctrl+C or run `nudge --stop` in another terminal to quit.
 
 Use `--background` or its alias `--detach` to run Nudge independently of the terminal. Closing the terminal leaves Nudge running. The close button hides the bar, the hotkey brings it back, and the menu bar or tray icon offers Show and Quit. Run `nudge --stop` to quit. Logs go to `~/Library/Logs/Nudge/nudge.log` on macOS and `%LOCALAPPDATA%\Nudge\nudge.log` on Windows.
+
+Only one Nudge can run per user, including during startup. A second launch reports the existing instance. Background launches wait for initialization and report startup failures. The stop command waits up to five seconds for the owner to exit and reports a failure if it cannot stop. Crashes release ownership automatically.
 
 For voice input and spoken approval prompts, set `ELEVENLABS_API_KEY` in .env. To use "Hey Nudge" as the wake word, set `WAKE_WORD=models/hey_nudge.onnx`; the default is "Hey Jarvis." The orb starts or stops listening. The mic button mutes the microphone, and its menu selects the microphone and controls spoken replies.
 

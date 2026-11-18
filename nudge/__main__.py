@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import os
+import traceback
 import sys
 
 from . import get_version
@@ -16,7 +18,7 @@ def main() -> None:
     parser.add_argument("--no-vision", action="store_true", help="never use the screenshot fallback")
     parser.add_argument("--keep-running", action="store_true", help="closing the bar hides it; stay attached to the terminal with logs in the terminal")
     parser.add_argument("--background", "--detach", action="store_true", help="closing the bar hides it; detach from this terminal with logs in a file")
-    parser.add_argument("--stop", action="store_true", help="quit a Nudge running with --keep-running, --background, or --detach")
+    parser.add_argument("--stop", action="store_true", help="quit the running Nudge, including a foreground instance")
     parser.add_argument("--version", action="version", version=f"Nudge {get_version()}", help="show the installed version and exit")
     parser.add_argument("--doctor", action="store_true", help="check setup offline without starting the UI")
     args = parser.parse_args()
@@ -25,9 +27,40 @@ def main() -> None:
 
         raise SystemExit(run_doctor())
 
-    from .app import run
+    from . import background
 
-    run(args)
+    try:
+        if args.stop:
+            pid = background.stop()
+            print(f"Stopped Nudge (pid {pid})." if pid else "Nudge isn't running.")
+            return
+        if args.background:
+            if pid := background.running_pid():
+                print(f"Nudge is already running (pid {pid}). Run 'nudge --stop' to quit it.")
+                return
+            pid = background.detach(sys.argv[1:])
+            print(f"Nudge is running in the background (pid {pid}).")
+            print(f"Quit from the menu bar icon or with 'nudge --stop'. Logs: {background.log_path()}")
+            return
+        owner = background.acquire()
+        if owner is None:
+            pid = background.running_pid()
+            detail = f" (pid {pid})" if pid else " or still starting"
+            print(f"Nudge is already running{detail}. Run 'nudge --stop' to quit it.")
+            return
+        try:
+            from .app import run
+
+            run(args, owner)
+        except BaseException:
+            traceback.print_exc()
+            sys.stderr.flush()
+            os._exit(1)  # An initialized worker must not outlive failed startup.
+        finally:
+            owner.close()
+    except background.ProcessError as exc:
+        print(str(exc), file=sys.stderr)
+        raise SystemExit(1) from exc
 
 
 if __name__ == "__main__":
