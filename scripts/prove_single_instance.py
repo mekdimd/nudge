@@ -76,10 +76,13 @@ def render(rows, destination):
 
     app = QApplication.instance() or QApplication([])
     destination.parent.mkdir(parents=True, exist_ok=True)
-    lines = [line for row in rows for line in textwrap.wrap(row, width=92) or [""]]
+    ends = [index for index, row in enumerate(rows) if index and (
+        row.startswith("$ ") or row == "[First launch finishes initialization]"
+    )] + [len(rows)]
     with tempfile.TemporaryDirectory(prefix="nudge-gif-") as directory:
         root = Path(directory)
-        for frame in range(1, len(lines) + 1):
+        for frame, end in enumerate(ends, start=1):
+            lines = [line for row in rows[:end] for line in textwrap.wrap(row, width=92) or [""]]
             canvas = QImage(1120, 900, QImage.Format.Format_RGB32)
             canvas.fill(QColor("#10151d"))
             painter = QPainter(canvas)
@@ -91,7 +94,7 @@ def render(rows, destination):
             painter.setPen(QColor("#9daebf"))
             painter.drawText(32, 78, "macOS | terminal replay | CLI subprocesses | UI stub | isolated state")
             painter.setFont(QFont("Menlo", 13))
-            visible = lines[:frame][-27:]
+            visible = lines[-27:]
             for index, line in enumerate(visible):
                 painter.setPen(QColor("#7ed9a6" if line.startswith("$") else "#dae2ec"))
                 painter.drawText(32, 126 + 27 * index, line)
@@ -99,9 +102,9 @@ def render(rows, destination):
             assert canvas.save(str(root / f"{frame:03}.png"))
         subprocess.run([
             "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-            "-framerate", "3", "-i", str(root / "%03d.png"),
-            "-filter_complex", "tpad=stop_mode=clone:stop_duration=3,split[a][b];[a]palettegen[p];[b][p]paletteuse",
-            "-loop", "0", str(destination),
+            "-framerate", "1/6", "-i", str(root / "%03d.png"),
+            "-filter_complex", "split[a][b];[a]palettegen[p];[b][p]paletteuse",
+            "-loop", "0", "-final_delay", "600", str(destination),
         ], check=True)
     app.quit()
 
