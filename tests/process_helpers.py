@@ -75,8 +75,17 @@ class Processes:
         stdout, stderr = child.communicate(timeout=10)
         return subprocess.CompletedProcess(child.args, child.returncode, stdout, stderr)
 
-    def wait_initialized(self):
-        wait_for(lambda: (self.root / 'initialized').exists())
+    def wait_initialized(self, count=1):
+        """Return the app PID. A Windows venv launcher has its own PID."""
+        path = self.root / 'initialized'
+
+        def initialized():
+            if not path.exists():
+                return None
+            pids = path.read_text().splitlines()
+            return int(pids[count - 1]) if len(pids) >= count else None
+
+        return wait_for(initialized)
 
     def close(self):
         try:

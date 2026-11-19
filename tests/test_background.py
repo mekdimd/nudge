@@ -99,9 +99,10 @@ def test_crash_releases_lock_and_allows_restart(processes):
     child.communicate(timeout=5)
     assert background.running_pid() is None
     (processes.root / "continue").touch()
-    replacement = processes.start(["--keep-running"])
+    processes.start(["--keep-running"])
+    replacement_pid = processes.wait_initialized(count=2)
     wait_for(lambda: background.owner_status() and background.owner_status()["ready"])
-    assert background.running_pid() == replacement.pid
+    assert background.running_pid() == replacement_pid
 
 
 def test_lock_is_atomic_and_can_be_reacquired(tmp_path, monkeypatch):
@@ -202,7 +203,7 @@ def test_transient_lock_contention_does_not_skip_initialization(processes):
 def test_duplicate_waits_for_owner_endpoint_publication(processes):
     import time
 
-    first = processes.start([], NUDGE_TEST_PUBLISH_GATE="1")
+    processes.start([], NUDGE_TEST_PUBLISH_GATE="1")
     wait_for(lambda: (processes.root / "locked").exists())
     second = processes.start(["--background"])
     # Hold endpoint publication while the duplicate tries to acquire ownership.
@@ -214,15 +215,15 @@ def test_duplicate_waits_for_owner_endpoint_publication(processes):
     stdout, stderr = second.communicate(timeout=5)
     assert second.returncode == 0, stderr
     assert "running" in stdout
-    processes.wait_initialized()
+    first_pid = processes.wait_initialized()
     assert len((processes.root / "initialized").read_text().splitlines()) == 1
-    assert background.running_pid() == first.pid
+    assert background.running_pid() == first_pid
 
 
 def test_detach_checks_child_exit_before_observing_owner(processes, monkeypatch):
     import subprocess
 
-    first = processes.start([], NUDGE_TEST_PUBLISH_GATE="1")
+    processes.start([], NUDGE_TEST_PUBLISH_GATE="1")
     wait_for(lambda: (processes.root / "locked").exists())
     for key in ("PYTHONPATH", "NUDGE_TEST_STATE", "NUDGE_TEST_ROOT"):
         monkeypatch.setenv(key, processes.environment[key])
@@ -249,5 +250,6 @@ def test_detach_checks_child_exit_before_observing_owner(processes, monkeypatch)
         return status
 
     monkeypatch.setattr(background, "owner_status", observe_status)
-    assert background.detach(["--background"], timeout=5) == first.pid
+    owner_pid = background.detach(["--background"], timeout=5)
+    assert owner_pid == processes.wait_initialized()
     assert children[0].returncode == 0
