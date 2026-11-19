@@ -411,22 +411,7 @@ def load_vision():
     return ScreenParser(to_physical=logical_to_physical if sys.platform == "win32" else None)
 
 
-def run(args) -> None:
-    from . import background
-
-    if args.stop:
-        pid = background.stop()
-        print(f"Stopped Nudge (pid {pid})." if pid else "Nudge isn't running in the background.")
-        return
-    if (args.background or args.keep_running) and (pid := background.running_pid()):
-        print(f"Nudge is already running (pid {pid}). Press {HOTKEY} to open it, or run `nudge --stop`.")
-        return
-    if args.background:
-        pid = background.detach(sys.argv[1:])
-        print(f"Nudge is running in the background (pid {pid}). Press {HOTKEY} to open it.")
-        print(f"Quit from the menu bar icon or with `nudge --stop`. Logs: {background.log_path()}")
-        return
-
+def run(args, owner) -> None:
     app = QApplication(sys.argv)
     app.setApplicationName("Nudge")
     app.setQuitOnLastWindowClosed(False)
@@ -472,11 +457,9 @@ def run(args) -> None:
     app._nudge = controller
     signal.signal(signal.SIGINT, lambda *_: controller.quit())
     signal.signal(signal.SIGTERM, lambda *_: controller.quit())
-    if args.keep_running:
-        background.write_pid()
     heartbeat = QTimer()  # Qt's loop blocks Python signal handlers unless Python code runs now and then
-    heartbeat.timeout.connect(lambda: None)
+    heartbeat.timeout.connect(lambda: controller.quit() if owner.stop_requested.is_set() else None)
     heartbeat.start(200)
+    owner.mark_ready()
     code = app.exec()
-    background.clear_pid()
     os._exit(code)  # a run may be stuck in a network call; don't wait for it

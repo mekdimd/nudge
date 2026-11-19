@@ -83,21 +83,6 @@ def test_detached_flags_launch_without_starting_the_ui(flag, monkeypatch, capsys
 
 
 @pytest.mark.parametrize("flag", ["--keep-running", "--background", "--detach"])
-def test_running_modes_detect_an_existing_instance(flag, monkeypatch, capsys):
-    import nudge.__main__ as cli
-    from nudge import app
-
-    monkeypatch.setattr(sys, "argv", ["nudge", flag])
-    monkeypatch.setattr(background, "running_pid", lambda: 123)
-    launch = Mock()
-    monkeypatch.setattr(background, "detach", launch)
-    monkeypatch.setattr(app, "QApplication", Mock(side_effect=AssertionError("UI started twice")))
-    cli.main()
-    launch.assert_not_called()
-    assert "already running (pid 123)" in capsys.readouterr().out
-
-
-@pytest.mark.parametrize("flag", ["--keep-running", "--background", "--detach"])
 def test_stop_takes_precedence_over_launch_flags(flag, monkeypatch, capsys):
     import nudge.__main__ as cli
 
@@ -108,3 +93,17 @@ def test_stop_takes_precedence_over_launch_flags(flag, monkeypatch, capsys):
     cli.main()
     stop.assert_called_once_with()
     assert "Stopped Nudge (pid 123)" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("operation", ["stop", "detach"])
+def test_process_failures_have_a_nonzero_exit(operation, monkeypatch, capsys):
+    import nudge.__main__ as cli
+
+    flag = "--stop" if operation == "stop" else "--background"
+    monkeypatch.setattr(sys, "argv", ["nudge", flag])
+    monkeypatch.setattr(background, "running_pid", lambda: None)
+    monkeypatch.setattr(background, operation, Mock(side_effect=background.ProcessError("startup or exit failed")))
+    with pytest.raises(SystemExit) as result:
+        cli.main()
+    assert result.value.code == 1
+    assert "failed" in capsys.readouterr().err

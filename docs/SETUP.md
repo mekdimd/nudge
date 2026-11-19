@@ -73,6 +73,8 @@ uv run nudge --background
 uv run nudge --stop
 ~~~
 
+Nudge allows one instance per user across foreground and background modes. Background launches wait for startup to finish. The stop command also reaches a foreground or initializing instance and waits up to five seconds for it to exit.
+
 Closing a background bar hides it. The hotkey brings it back, and the menu bar or tray icon offers Show and Quit. Use --keep-running for the same behavior without detaching from the terminal.
 
 Logs go to ~/Library/Logs/Nudge on macOS and %LOCALAPPDATA%\Nudge on Windows. Ctrl+C quits a foreground process.
