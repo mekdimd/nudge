@@ -23,7 +23,7 @@ def test_demo_names_select_the_scripted_fixture(arguments, fixture, monkeypatch)
     owner = Mock()
     monkeypatch.setattr(background, 'acquire', lambda: owner)
     selected = []
-    monkeypatch.setattr(app, 'run', lambda args, owner: selected.append(args.offline))
+    monkeypatch.setattr(app, 'run', lambda args, owner, startup: selected.append(args.offline))
     cli.main()
     assert selected == [fixture]
 

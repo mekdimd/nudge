@@ -54,7 +54,7 @@ def test_clearing_starts_a_fresh_run():
 def test_banner_lists_features():
     _, out, stream = console()
     out.banner({"Jev": True, "Gemini": False})
-    assert stream.getvalue().strip() == "Nudge · Jev  Gemini off"
+    assert stream.getvalue() == "\nNudge · Jev  Gemini off\n"
 
 
 def test_color_is_off_when_not_a_terminal():

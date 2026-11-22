@@ -6,7 +6,7 @@ import sys
 import threading
 import time
 
-from PySide6.QtCore import QObject, QTimer, Signal
+from PySide6.QtCore import QObject, QtMsgType, QTimer, Signal, qInstallMessageHandler
 from PySide6.QtWidgets import QApplication
 
 from .config import load_config
@@ -411,7 +411,31 @@ def load_vision():
     return ScreenParser(to_physical=logical_to_physical if sys.platform == "win32" else None)
 
 
-def run(args, owner) -> None:
+class _Quiet:
+    def step(self, text: str) -> None:
+        pass
+
+    def ready(self) -> None:
+        pass
+
+    def fail(self) -> None:
+        pass
+
+
+def _qt_printer(startup):
+    def show(mode, context, message) -> None:
+        if mode == QtMsgType.QtFatalMsg:
+            startup.fail()  # Qt aborts the process after this message
+        category = context.category if context.category not in (None, "default") else ""
+        print(f"{category}: {message}" if category else message, file=sys.stderr, flush=True)
+
+    return show
+
+
+def run(args, owner, startup=None) -> None:
+    startup = startup or _Quiet()
+    qInstallMessageHandler(_qt_printer(startup))  # Qt writes straight to stderr and would garble the spinner line
+    startup.step("Starting Qt")
     app = QApplication(sys.argv)
     app.setApplicationName("Nudge")
     app.setQuitOnLastWindowClosed(False)
@@ -421,6 +445,7 @@ def run(args, owner) -> None:
         run_as_accessory()
 
     if args.offline:
+        startup.step("Loading the offline rehearsal")
         from .dev import DEMO_INSTRUCTIONS, GOALS, PATHS, OfflineJev, OfflineWriter
         from .platform.fake import FakeAdapter
 
@@ -429,16 +454,19 @@ def run(args, owner) -> None:
         print("The demo shows Nudge's bar, cursor and step feed, with no browser window.", flush=True)
         print("For a real task, install and open Google Chrome, then restart with 'nudge' without --demo or --offline.", flush=True)
         adapter = FakeAdapter.from_fixture(args.offline)
+        startup.step("Opening the bar")
         controller = Nudge(adapter, OfflineJev(PATHS[args.offline]), OfflineWriter(), offline_goal=GOALS[args.offline], debug=args.debug, keep_running=args.keep_running)
     else:
         from .platform.base import load_adapter
 
+        startup.step("Reading settings")
         config = load_config()
         audio = AudioSettings()
         jev = JevClient(config.typesafe_api_key) if config.typesafe_api_key else None
         writer = Writer(config.gemini_api_key) if config.gemini_api_key else None
         voice = None
         if config.elevenlabs_api_key:
+            startup.step("Setting up voice")
             from .ui.voice import Voice
 
             voice = Voice(config.elevenlabs_api_key, audio)
@@ -449,14 +477,21 @@ def run(args, owner) -> None:
             speaker = Speaker(config.elevenlabs_api_key, config.elevenlabs_voice_id)
         wake = None
         if voice is not None and config.wake_word:
+            startup.step("Loading the wake word model")
             from .ui.wake import WakeWord
 
             try:
                 wake = WakeWord(config.wake_word, config.wake_threshold, settings=audio)
             except Exception as exc:  # missing model file, or no network on the first download
                 print(f"Wake word disabled: {exc}", file=sys.stderr)
-        vision = None if args.no_vision else load_vision()
-        controller = Nudge(load_adapter(physical_to_logical), jev, writer, vision, debug=args.debug, voice=voice, wake=wake, speaker=speaker, audio=audio, keep_running=args.keep_running)
+        vision = None
+        if not args.no_vision:
+            startup.step("Loading vision")
+            vision = load_vision()
+        startup.step("Loading the desktop adapter")
+        adapter = load_adapter(physical_to_logical)
+        startup.step("Opening the bar")
+        controller = Nudge(adapter, jev, writer, vision, debug=args.debug, voice=voice, wake=wake, speaker=speaker, audio=audio, keep_running=args.keep_running)
 
     app._nudge = controller
     signal.signal(signal.SIGINT, lambda *_: controller.quit())
@@ -465,5 +500,7 @@ def run(args, owner) -> None:
     heartbeat.timeout.connect(lambda: controller.quit() if owner.stop_requested.is_set() else None)
     heartbeat.start(200)
     owner.mark_ready()
+    startup.ready()
+    qInstallMessageHandler(None)
     code = app.exec()
     os._exit(code)  # a run may be stuck in a network call; don't wait for it

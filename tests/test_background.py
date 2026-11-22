@@ -75,6 +75,7 @@ def test_detached_launcher_waits_for_readiness(mode, processes):
     stdout, stderr = launcher.communicate(timeout=5)
     assert launcher.returncode == 0, stderr
     assert "running in the background" in stdout
+    assert stdout.index("Ready in") < stdout.index("running in the background")
     assert background.owner_status()["ready"]
 
 
@@ -90,6 +91,20 @@ def test_startup_failure_reports_failure_and_releases_ownership(mode, processes)
     recovered = background.acquire()
     assert recovered is not None
     recovered.close()
+
+
+@pytest.mark.parametrize("mode", [[], ["--background"]])
+def test_redirected_startup_prints_plain_steps_and_keeps_errors_visible(mode, processes):
+    result = processes.run(mode, NUDGE_TEST_FAIL="1")
+    assert result.returncode == 1
+    assert result.stdout.startswith("Starting Nudge ")
+    assert "\x1b[" not in result.stdout + result.stderr
+    child = background.log_path().read_text() if mode else result.stdout + result.stderr
+    assert "  Loading Qt and Nudge modules..." in child
+    assert "Startup failed while loading Qt and Nudge modules." in child
+    assert "RuntimeError: deliberate startup failure" in child
+    if mode:
+        assert "Startup failed while waiting for the background process to start." in result.stderr
 
 
 def test_crash_releases_lock_and_allows_restart(processes):

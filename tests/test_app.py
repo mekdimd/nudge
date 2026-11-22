@@ -1,4 +1,9 @@
+import argparse
+import sys
+import threading
 import time
+import types
+from unittest.mock import Mock
 
 import pytest
 from PySide6.QtCore import QObject, QSettings, Qt, Signal
@@ -195,3 +200,50 @@ def test_stopping_mid_run_marks_the_feed_and_offers_retry(offline):
     assert wait_until(lambda: finished(app))
     assert app.timeline.entries[-1].state == "failed"
     assert "Retry" in app.bar.go.text()
+
+
+def test_run_reports_steps_and_ready_only_after_the_owner_is_ready(qapp, monkeypatch):
+    import nudge.app as main
+
+    events = []
+
+    class Progress:
+        def step(self, text):
+            events.append(text)
+
+        def ready(self):
+            events.append("ready")
+
+    class Owner:
+        stop_requested = threading.Event()
+
+        def mark_ready(self):
+            events.append("owner ready")
+
+    window_system = Mock()
+    window_system.exec.side_effect = lambda: events.append("exec") or 0
+    monkeypatch.setattr(main, "QApplication", Mock(return_value=window_system))
+    monkeypatch.setattr(main, "Hotkeys", StubHotkeys)
+    monkeypatch.setattr(main.signal, "signal", Mock())
+    monkeypatch.setitem(sys.modules, "nudge.ui.mac_window", types.SimpleNamespace(run_as_accessory=lambda: None))
+    monkeypatch.setattr(main.os, "_exit", Mock(side_effect=SystemExit))
+    args = argparse.Namespace(offline="live_caption", debug=False, keep_running=False, no_vision=True)
+    with pytest.raises(SystemExit):
+        main.run(args, Owner(), Progress())
+    window_system._nudge.bar.close()
+    window_system._nudge.overlay.close()
+    assert events == ["Starting Qt", "Loading the offline rehearsal", "Opening the bar", "owner ready", "ready", "exec"]
+
+
+def test_qt_fatal_messages_name_the_failed_step_before_qt_aborts(capsys):
+    from PySide6.QtCore import QtMsgType
+
+    from nudge.app import _qt_printer
+
+    progress = Mock()
+    show = _qt_printer(progress)
+    show(QtMsgType.QtWarningMsg, types.SimpleNamespace(category="qt.qpa.plugin"), "plugin missing")
+    progress.fail.assert_not_called()
+    show(QtMsgType.QtFatalMsg, types.SimpleNamespace(category="default"), "no platform plugin")
+    progress.fail.assert_called_once_with()
+    assert capsys.readouterr().err == "qt.qpa.plugin: plugin missing\nno platform plugin\n"
