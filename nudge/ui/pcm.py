@@ -32,7 +32,7 @@ def input_format(device: QAudioDevice) -> QAudioFormat | None:
         (rate, QAudioFormat.SampleFormat.Int16),
         (rate, QAudioFormat.SampleFormat.Float),
         (48000, QAudioFormat.SampleFormat.Int16),
-        (TARGET_RATE, QAudioFormat.SampleFormat.Int16),
+        (TARGET_RATE, QAudioFormat.SampleFormat.Int16),  # last resort: Qt's 16 kHz resampler runs fast
     ):
         fmt = QAudioFormat()
         fmt.setSampleRate(sample_rate)
@@ -73,12 +73,18 @@ class PcmStream:
         self.kind = kind
         self._hold = np.zeros(0, dtype=np.float32)
         self._pos = 0.0
+        self._raw = b""
 
     def push(self, data: bytes) -> bytes:
+        frame = _WIDTH[self.kind] * max(1, self.channels)
+        blob = self._raw + data
+        usable = len(blob) // frame * frame
+        self._raw = blob[usable:]
+        data = blob[:usable]
         if not data:
             return b""
         if self.rate == TARGET_RATE and self.channels == 1 and self.kind == "int16":
-            return data[: len(data) // 2 * 2]
+            return data
         samples = _mono_float(data, self.channels, self.kind)
         if samples.size == 0:
             return b""

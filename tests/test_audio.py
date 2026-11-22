@@ -41,8 +41,9 @@ def test_native_rate_audio_stays_at_the_spoken_pitch():
     whole = PcmStream(48000, 1, "float32").push(raw)
     streamed = b""
     stream = PcmStream(48000, 1, "float32")
-    for i in range(0, len(raw), 480 * 4):
-        streamed += stream.push(raw[i : i + 480 * 4])
+    streamed += stream.push(raw[:2])  # a read that ends in the middle of a float sample
+    for i in range(2, len(raw), 2048):
+        streamed += stream.push(raw[i : i + 2048])
     assert streamed == whole
     assert abs(len(whole) // 2 - 16000) <= 2
     assert abs(peak_hz(whole) - 440) < 15
@@ -64,6 +65,8 @@ def test_sixteen_khz_int16_passes_through():
     raw = (sine(16000, seconds=0.1) * 16000).astype("<i2").tobytes()
     assert PcmStream(16000, 1, "int16").push(raw) == raw
     assert PcmStream(16000, 1, "int16").push(b"") == b""
+    split = PcmStream(16000, 1, "int16")
+    assert split.push(raw[:1]) + split.push(raw[1:]) == raw
 
 
 def test_capture_uses_the_device_rate(qapp):
