@@ -7,7 +7,7 @@ import sys
 import threading
 import time
 
-BANNER = r"""
+WORDMARK = r"""
                     __
    ____  __  ______/ /___ ____
   / __ \/ / / / __  / __ `/ _ \
@@ -15,6 +15,15 @@ BANNER = r"""
 /_/ /_/\__,_/\__,_/\__, /\___/
                   /____/
 """.strip("\n")
+CURSOR = """
+⢻⣶⣤⣄⡀
+ ⢿⣿⣿⣿⣿⣶⣤⣄⡀
+ ⠈⣿⣿⣿⣿⣿⣿⣿⡿⠿⠒
+  ⠘⣿⣿⣿⡟⠁
+   ⠹⣿⡿
+    ⢻⠃
+""".strip("\n")
+BANNER = "\n".join(f"{cursor:<12}   {word}" for cursor, word in zip(CURSOR.splitlines(), WORDMARK.splitlines()))
 FRAMES = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 ASCII_FRAMES = "|/-\\"
 TICK = 0.08
@@ -52,7 +61,11 @@ class Startup:
         self._saved = None
         if self.live:
             self._frames = FRAMES if _can_encode(self.stream, FRAMES) else ASCII_FRAMES
-            self._print(self._paint(BANNER, "36"))
+            if _can_encode(self.stream, CURSOR):
+                for cursor, word in zip(CURSOR.splitlines(), WORDMARK.splitlines()):
+                    self._print(self._paint(f"{cursor:<12}", "38;2;79;142;247") + "   " + word)
+            else:
+                self._print(self._paint(WORDMARK, "36"))
             self._print(self._paint(f"v{version}", "90") + "\n")
         else:
             self._print(f"Starting Nudge {version}")

@@ -39,6 +39,7 @@ def test_terminal_prints_the_banner_at_once_then_a_spinner_until_ready():
 def test_terminal_without_unicode_uses_an_ascii_spinner():
     terminal = Terminal("cp1252")
     progress = Startup("1.2.3", terminal)
+    terminal.getvalue().encode("cp1252")
     progress.step("Starting Qt")
     assert terminal.getvalue().rsplit("\r\x1b[2K", 1)[1][0] in ASCII_FRAMES
     progress.ready()
