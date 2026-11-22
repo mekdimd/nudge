@@ -30,7 +30,7 @@ if os.environ.get('NUDGE_TEST_PUBLISH_GATE'):
         original_init(self, fd)
     background.Instance.__init__ = delayed_init
 
-def run(args, owner):
+def run(args, owner, startup=None):
     root = Path(os.environ['NUDGE_TEST_ROOT'])
     with (root / 'initialized').open('a') as log:
         log.write(str(os.getpid()) + '\\n')
@@ -42,6 +42,8 @@ def run(args, owner):
         raise RuntimeError('deliberate startup failure')
     print('UI stub ready; keep_running=' + str(args.keep_running), flush=True)
     owner.mark_ready()
+    if startup is not None:
+        startup.ready()
     while not owner.stop_requested.wait(0.01):
         pass
     os._exit(0)
