@@ -7,9 +7,10 @@ import threading
 from urllib.parse import urlencode
 
 from PySide6.QtCore import QObject, QTimer, Signal
-from PySide6.QtMultimedia import QAudioFormat, QAudioSource, QMediaDevices
+from PySide6.QtMultimedia import QMediaDevices
 
 from .levels import rms_level
+from .pcm import open_mic
 
 URL = "wss://api.elevenlabs.io/v1/speech-to-text/realtime?" + urlencode(
     {
@@ -39,7 +40,7 @@ class Voice(QObject):
         self.api_key = api_key
         self.settings = settings
         self.active = False
-        self._source: QAudioSource | None = None
+        self._source = None
         self._io = None
         self._audio: queue.Queue[bytes | None] = queue.Queue()
         self._done = threading.Event()
@@ -59,18 +60,14 @@ class Voice(QObject):
         if device.isNull():
             self.state.emit("no_mic")
             return
-        fmt = QAudioFormat()
-        fmt.setSampleRate(16000)
-        fmt.setChannelCount(1)
-        fmt.setSampleFormat(QAudioFormat.SampleFormat.Int16)
-        if not device.isFormatSupported(fmt):
-            self.state.emit("error: microphone doesn't support 16 kHz mono audio")
+        opened = open_mic(device, self)
+        if opened is None:
+            self.state.emit("error: microphone can't be opened")
             return
         self.active = True
         self._audio = queue.Queue()
         self._done = threading.Event()
-        self._source = QAudioSource(device, fmt, self)
-        self._io = self._source.start()
+        self._source, self._io, self._pcm = opened
         self._io.readyRead.connect(self._read_mic)
         threading.Thread(target=self._session, args=(self._audio, self._done), name="scribe", daemon=True).start()
         self._timeout.start(LISTEN_WINDOW_MS)
@@ -96,9 +93,13 @@ class Voice(QObject):
 
     def _read_mic(self) -> None:
         data = bytes(self._io.readAll())
-        if data and self.active:
-            self._audio.put(data)
-            self.level.emit(rms_level(data))
+        if not data or not self.active:
+            return
+        pcm = self._pcm.push(data)
+        if not pcm:
+            return
+        self._audio.put(pcm)
+        self.level.emit(rms_level(pcm))
 
     def _on_transcript(self, text: str, committed: bool) -> None:
         if not self.active:

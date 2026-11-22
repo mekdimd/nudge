@@ -4,7 +4,9 @@ from pathlib import Path
 
 import numpy as np
 from PySide6.QtCore import QObject, Signal
-from PySide6.QtMultimedia import QAudioFormat, QAudioSource, QMediaDevices
+from PySide6.QtMultimedia import QMediaDevices
+
+from .pcm import open_mic
 
 FRAME = 1280  # 80 ms at 16 kHz, what openWakeWord expects
 
@@ -26,7 +28,7 @@ class WakeWord(QObject):
         self._model = Model(wakeword_models=[model], inference_framework="onnx")
         self.threshold = threshold
         self._pending = b""
-        self._source: QAudioSource | None = None
+        self._source = None
         self._io = None
 
     def start(self) -> None:
@@ -35,17 +37,13 @@ class WakeWord(QObject):
         if self.settings is not None and self.settings.mic_muted:
             return
         device = self.settings.input_device() if self.settings is not None else QMediaDevices.defaultAudioInput()
-        fmt = QAudioFormat()
-        fmt.setSampleRate(16000)
-        fmt.setChannelCount(1)
-        fmt.setSampleFormat(QAudioFormat.SampleFormat.Int16)
-        if device.isNull() or not device.isFormatSupported(fmt):
+        opened = open_mic(device, self)
+        if opened is None:
             self.failed.emit("no usable microphone")
             return
         self._pending = b""
         self._model.reset()
-        self._source = QAudioSource(device, fmt, self)
-        self._io = self._source.start()
+        self._source, self._io, self._pcm = opened
         self._io.readyRead.connect(self._read)
 
     def pause(self) -> None:
@@ -67,7 +65,7 @@ class WakeWord(QObject):
         io = self._io
         if io is None:
             return
-        self._pending += bytes(io.readAll())
+        self._pending += self._pcm.push(bytes(io.readAll()))
         size = FRAME * 2
         while len(self._pending) >= size:
             chunk, self._pending = self._pending[:size], self._pending[size:]

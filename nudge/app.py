@@ -138,6 +138,8 @@ class Nudge(QObject):
     def on_wake(self) -> None:
         if (self.running and self.bar.spoken is None) or self.voice is None:
             return
+        if self.wake is not None:
+            self.wake.pause()  # free the mic before speech-to-text opens it
         self.summon()
         self.voice.listen()
 

@@ -22,6 +22,63 @@ def test_rms_level_is_zero_for_silence_and_rises_with_volume():
     assert 0 < rms_level(tone(0.05)) < rms_level(tone(0.2)) <= 1.0
 
 
+def sine(rate, freq=440.0, seconds=1.0):
+    t = np.arange(int(rate * seconds)) / rate
+    return np.sin(2 * np.pi * freq * t).astype(np.float32)
+
+
+def peak_hz(pcm, rate=16000):
+    samples = np.frombuffer(pcm, dtype="<i2").astype(np.float32)
+    spec = np.abs(np.fft.rfft(samples * np.hanning(len(samples))))
+    return spec.argmax() * rate / len(samples)
+
+
+def test_native_rate_audio_stays_at_the_spoken_pitch():
+    """48 kHz in must come out as 16 kHz at the same pitch, not sped up."""
+    from nudge.ui.pcm import PcmStream
+
+    raw = sine(48000).tobytes()
+    whole = PcmStream(48000, 1, "float32").push(raw)
+    streamed = b""
+    stream = PcmStream(48000, 1, "float32")
+    for i in range(0, len(raw), 480 * 4):
+        streamed += stream.push(raw[i : i + 480 * 4])
+    assert streamed == whole
+    assert abs(len(whole) // 2 - 16000) <= 2
+    assert abs(peak_hz(whole) - 440) < 15
+
+
+def test_odd_rate_and_stereo_keep_pitch():
+    from nudge.ui.pcm import PcmStream
+
+    mono = sine(44100, seconds=0.5)
+    stereo = np.column_stack((mono, mono)).astype(np.float32).reshape(-1).tobytes()
+    pcm = PcmStream(44100, 2, "float32").push(stereo)
+    assert abs(len(pcm) // 2 - 8000) < 20
+    assert abs(peak_hz(pcm) - 440) < 20
+
+
+def test_sixteen_khz_int16_passes_through():
+    from nudge.ui.pcm import PcmStream
+
+    raw = (sine(16000, seconds=0.1) * 16000).astype("<i2").tobytes()
+    assert PcmStream(16000, 1, "int16").push(raw) == raw
+    assert PcmStream(16000, 1, "int16").push(b"") == b""
+
+
+def test_capture_uses_the_device_rate(qapp):
+    from PySide6.QtMultimedia import QMediaDevices
+
+    from nudge.ui.pcm import input_format
+
+    device = QMediaDevices.defaultAudioInput()
+    if device.isNull():
+        pytest.skip("no microphone")
+    fmt = input_format(device)
+    assert fmt is not None
+    assert fmt.sampleRate() == device.preferredFormat().sampleRate()
+
+
 def test_envelope_has_one_value_per_window():
     from nudge.ui.levels import envelope
 
