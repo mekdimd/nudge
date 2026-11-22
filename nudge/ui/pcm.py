@@ -1,11 +1,12 @@
 """Microphone capture that yields 16 kHz mono PCM.
 
-Qt's resampler delivers 16 kHz too fast on macOS (measured around 1.2x to 1.4x on
-the built-in mic), so the wake word and speech-to-text heard sped-up speech and
-missed it. Record at the device's own rate and convert here.
+On macOS, Qt's 16 kHz conversion can return too many samples. Capture at the
+device's native rate and convert here. Other platforms keep 16 kHz capture.
 """
 
 from __future__ import annotations
+
+import sys
 
 import numpy as np
 from PySide6.QtMultimedia import QAudioDevice, QAudioFormat, QAudioSource
@@ -22,7 +23,13 @@ _WIDTH = {"uint8": 1, "int16": 2, "int32": 4, "float32": 4}
 
 
 def input_format(device: QAudioDevice) -> QAudioFormat | None:
-    """The format to open. Prefer the device's own rate over asking Qt to resample."""
+    """Use native capture on macOS and keep 16 kHz mono int16 elsewhere."""
+    if sys.platform != "darwin":
+        fmt = QAudioFormat()
+        fmt.setSampleRate(TARGET_RATE)
+        fmt.setChannelCount(1)
+        fmt.setSampleFormat(QAudioFormat.SampleFormat.Int16)
+        return fmt if device.isFormatSupported(fmt) else None
     preferred = device.preferredFormat()
     candidates = []
     if preferred.sampleRate() >= 8000:
@@ -32,7 +39,7 @@ def input_format(device: QAudioDevice) -> QAudioFormat | None:
         (rate, QAudioFormat.SampleFormat.Int16),
         (rate, QAudioFormat.SampleFormat.Float),
         (48000, QAudioFormat.SampleFormat.Int16),
-        (TARGET_RATE, QAudioFormat.SampleFormat.Int16),  # last resort: Qt's 16 kHz resampler runs fast
+        (TARGET_RATE, QAudioFormat.SampleFormat.Int16),
     ):
         fmt = QAudioFormat()
         fmt.setSampleRate(sample_rate)
@@ -55,7 +62,8 @@ def open_mic(device: QAudioDevice, parent):
         return None
     source = QAudioSource(device, fmt, parent)
     frame = _WIDTH[kind] * max(1, fmt.channelCount())
-    source.setBufferSize(fmt.sampleRate() * frame)  # a second of slack so a busy UI doesn't drop audio
+    if sys.platform == "darwin":
+        source.setBufferSize(fmt.sampleRate() * frame)
     io = source.start()
     # PySide wraps this enum twice, so identity comparison against QAudio.Error is unreliable.
     if io is None or source.error().name != "NoError":
@@ -72,8 +80,15 @@ class PcmStream:
         self.channels = channels
         self.kind = kind
         self._hold = np.zeros(0, dtype=np.float32)
-        self._pos = 0.0
+        self._pos = 0  # input position in units of 1/16000 of a sample
         self._raw = b""
+        self._filter = None
+        if rate > TARGET_RATE:
+            cutoff = 7200.0 / rate
+            offsets = np.arange(63) - 31
+            kernel = 2 * cutoff * np.sinc(2 * cutoff * offsets) * np.hamming(63)
+            self._filter = kernel / kernel.sum()
+            self._history = np.zeros(62, dtype=np.float32)
 
     def push(self, data: bytes) -> bytes:
         frame = _WIDTH[self.kind] * max(1, self.channels)
@@ -90,37 +105,27 @@ class PcmStream:
             return b""
         if self.rate == TARGET_RATE:
             return _float_to_i16(samples)
-        if self.rate % TARGET_RATE == 0:
-            return self._decimate(samples, self.rate // TARGET_RATE)
-        return self._resample(samples, self.rate / TARGET_RATE)
+        if self._filter is not None:
+            block = np.concatenate((self._history, samples))
+            self._history = block[-62:].copy()
+            samples = np.convolve(block, self._filter, mode="valid")
+        return self._resample(samples)
 
-    def _decimate(self, samples: np.ndarray, factor: int) -> bytes:
+    def _resample(self, samples: np.ndarray) -> bytes:
         block = samples if self._hold.size == 0 else np.concatenate((self._hold, samples))
-        usable = len(block) // factor * factor
-        self._hold = block[usable:]
-        if usable == 0:
-            return b""
-        return _float_to_i16(block[:usable].reshape(-1, factor).mean(axis=1))
-
-    def _resample(self, samples: np.ndarray, step: float) -> bytes:
-        block = samples if self._hold.size == 0 else np.concatenate((self._hold, samples))
-        window = max(1, int(round(step)))
-        limit = len(block) - window
+        limit = (len(block) - 1) * TARGET_RATE
         if limit < self._pos:
             self._hold = block
             return b""
-        count = int(np.floor((limit - self._pos) / step)) + 1
-        starts = self._pos + np.arange(count) * step
-        index = starts.astype(np.int32)
-        reduced = block[index[:, None] + np.arange(window)].mean(axis=1)
-        end = float(starts[-1] + step)
-        if end >= len(block):
-            self._hold = np.zeros(0, dtype=np.float32)
-            self._pos = end - len(block)
-        else:
-            consumed = int(end)
-            self._hold = block[consumed:]
-            self._pos = end - consumed
+        count = (limit - self._pos) // self.rate + 1
+        positions = self._pos + np.arange(count, dtype=np.int64) * self.rate
+        index, remainder = np.divmod(positions, TARGET_RATE)
+        fraction = remainder / TARGET_RATE
+        reduced = block[index] * (1 - fraction) + block[np.minimum(index + 1, len(block) - 1)] * fraction
+        end = int(positions[-1]) + self.rate
+        consumed = min(end // TARGET_RATE, len(block))
+        self._hold = block[consumed:].copy()
+        self._pos = end - consumed * TARGET_RATE
         return _float_to_i16(reduced)
 
 

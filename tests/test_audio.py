@@ -59,6 +59,31 @@ def test_odd_rate_and_stereo_keep_pitch():
     assert abs(peak_hz(pcm) - 440) < 20
 
 
+@pytest.mark.parametrize("rate", [44100, 48000])
+def test_conversion_does_not_depend_on_read_boundaries(rate):
+    from nudge.ui.pcm import PcmStream
+
+    raw = sine(rate, freq=3000).tobytes()
+    whole = PcmStream(rate, 1, "float32").push(raw)
+    stream = PcmStream(rate, 1, "float32")
+    pieces = [stream.push(raw[:1])]
+    pieces.extend(stream.push(raw[i:i + 4096]) for i in range(1, len(raw), 4096))
+    assert b"".join(pieces) == whole
+    assert abs(len(whole) // 2 - 16000) <= 2
+
+
+@pytest.mark.parametrize("rate", [44100, 48000])
+def test_downsampling_removes_sound_above_the_speech_sample_band(rate):
+    from nudge.ui.pcm import PcmStream
+
+    speech = PcmStream(rate, 1, "float32").push(sine(rate, freq=3000).tobytes())
+    high = PcmStream(rate, 1, "float32").push(sine(rate, freq=10000).tobytes())
+    speech_samples = np.frombuffer(speech, dtype="<i2")[1600:].astype(np.float64)
+    high_samples = np.frombuffer(high, dtype="<i2")[1600:].astype(np.float64)
+    assert np.sqrt(np.mean(speech_samples ** 2)) > 20000
+    assert np.sqrt(np.mean(high_samples ** 2)) < 200
+
+
 def test_sixteen_khz_int16_passes_through():
     from nudge.ui.pcm import PcmStream
 
@@ -69,17 +94,47 @@ def test_sixteen_khz_int16_passes_through():
     assert split.push(raw[:1]) + split.push(raw[1:]) == raw
 
 
-def test_capture_uses_the_device_rate(qapp):
-    from PySide6.QtMultimedia import QMediaDevices
+@pytest.mark.parametrize("platform,expected_rate,expected_kind", [
+    ("darwin", 48000, "Float"),
+    ("win32", 16000, "Int16"),
+])
+def test_capture_preserves_windows_format_and_uses_native_rate_on_mac(monkeypatch, platform, expected_rate, expected_kind):
+    import sys
+    from types import SimpleNamespace
 
-    from nudge.ui.pcm import input_format
+    from PySide6.QtMultimedia import QAudioFormat
 
-    device = QMediaDevices.defaultAudioInput()
-    if device.isNull():
-        pytest.skip("no microphone")
-    fmt = input_format(device)
-    assert fmt is not None
-    assert fmt.sampleRate() == device.preferredFormat().sampleRate()
+    from nudge.ui import pcm
+
+    preferred = QAudioFormat()
+    preferred.setSampleRate(48000)
+    preferred.setChannelCount(1)
+    preferred.setSampleFormat(QAudioFormat.SampleFormat.Float)
+    device = SimpleNamespace(isNull=lambda: False, preferredFormat=lambda: preferred, isFormatSupported=lambda fmt: True)
+    class Source:
+        def __init__(self, device, fmt, parent):
+            self.fmt = fmt
+            self.buffers = []
+
+        def setBufferSize(self, size):
+            self.buffers.append(size)
+
+        def start(self):
+            return object()
+
+        def error(self):
+            return SimpleNamespace(name="NoError")
+
+    monkeypatch.setattr(sys, "platform", platform)
+    monkeypatch.setattr(pcm, "QAudioSource", Source)
+    source, io, converter = pcm.open_mic(device, None)
+    assert source.fmt.sampleRate() == expected_rate
+    assert source.fmt.sampleFormat().name == expected_kind
+    assert source.fmt.channelCount() == 1
+    if platform == "win32":
+        assert source.buffers == []
+        raw = tone(0.2)
+        assert converter.push(raw) == raw
 
 
 def test_envelope_has_one_value_per_window():
