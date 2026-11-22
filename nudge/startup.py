@@ -60,6 +60,7 @@ class Startup:
         self._thread = None
         self._saved = None
         if self.live:
+            self._print("")
             self._frames = FRAMES if _can_encode(self.stream, FRAMES) else ASCII_FRAMES
             if _can_encode(self.stream, CURSOR):
                 for cursor, word in zip(CURSOR.splitlines(), WORDMARK.splitlines()):
