@@ -3,12 +3,12 @@
 ## Before going on stage
 
 - `.env` has both keys; `uv run python scripts/smoke.py` passes.
-- Chrome open on a new tab, Live Caption **off** (Settings, Accessibility).
-- Gmail signed in to the demo account, inbox visible, no draft open.
+- Check that [Google Chrome](https://www.google.com/chrome/) is installed. Install it if it is missing, then open a new tab with Live Caption **off** in Settings, Accessibility.
+- Open Gmail in Google Chrome, signed in to the demo account, with the inbox visible and no draft open.
 - Spotify open on Home, paused, window visible (not minimised).
 - Close notifications (Focus mode on). Make the screen font large.
 - Start Nudge: `uv run nudge`, then wait about 15 seconds for the vision models to warm up. The bar sits at the bottom centre.
-- Backup: if Wi-Fi fails, `uv run nudge --offline gmail` shows the same UI on a scripted screen. Say that it's a rehearsal.
+- Backup: close Nudge, then run `uv run nudge --demo gmail-email` or `uv run nudge --demo chrome-live-caption`. No app needs to be open. Press Go with the prefilled goal and follow the step feed. The email rehearsal asks you to review the draft, choose Type it and approve a simulated Send. These rehearsals use scripted controls with no browser window, send no email and change no Chrome settings.
 
 ## 1. The problem (20 s)
 

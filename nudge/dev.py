@@ -1,4 +1,4 @@
-"""Offline stand-ins so the UI can be rehearsed without API keys: `uv run nudge --offline gmail`."""
+"""Offline stand-ins for `uv run nudge --demo gmail-email`."""
 
 from __future__ import annotations
 
@@ -17,6 +17,11 @@ PATHS = {
 GOALS = {
     "live_caption": "turn on Live Caption",
     "gmail": "email prof.lee@sfu.ca that I'm sick and will miss lecture",
+}
+
+DEMO_INSTRUCTIONS = {
+    "gmail": "Gmail email rehearsal: press Go, review the draft, choose Type it, then approve the simulated Send. No email is sent.",
+    "live_caption": "Chrome Live Caption rehearsal: press Go and follow the simulated settings steps in the feed. Chrome settings do not change.",
 }
 
 
