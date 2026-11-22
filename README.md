@@ -130,6 +130,8 @@ uv run nudge --stop          # Quit the running Nudge, including a foreground in
 uv run nudge --offline gmail # Try the scripted demo without keys.
 ~~~
 
+When Nudge starts, the terminal shows a banner and a spinner with the current startup step until the bar is ready. Redirected output gets one plain line per step. If startup fails, Nudge names the failed step and prints the error.
+
 Use `--keep-running` to stay attached to the terminal with logs in the terminal. The close button hides the bar, and the hotkey brings it back. Press Ctrl+C or run `nudge --stop` in another terminal to quit.
 
 Use `--background` or its alias `--detach` to run Nudge independently of the terminal. Closing the terminal leaves Nudge running. The close button hides the bar, the hotkey brings it back, and the menu bar or tray icon offers Show and Quit. Run `nudge --stop` to quit. Logs go to `~/Library/Logs/Nudge/nudge.log` on macOS and `%LOCALAPPDATA%\Nudge\nudge.log` on Windows.

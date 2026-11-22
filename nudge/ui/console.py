@@ -22,6 +22,7 @@ class Console:
 
     def banner(self, features: dict[str, bool]) -> None:
         parts = [self._paint(name, "32") if on else self._paint(f"{name} off", "90") for name, on in features.items()]
+        self._write("")
         self._write("Nudge · " + "  ".join(parts))
 
     def note(self, text: str) -> None:
