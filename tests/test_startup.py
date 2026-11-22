@@ -29,7 +29,7 @@ def slow_spinner(monkeypatch):
 def test_terminal_prints_the_banner_at_once_then_a_spinner_until_ready():
     terminal = Terminal()
     progress = Startup("1.2.3", terminal)
-    assert terminal.getvalue() == "\n" + BANNER + "\nv1.2.3\n\n"
+    assert terminal.getvalue() == "\n" + BANNER + "\n\nv1.2.3\n\n"
     progress.step("Loading Qt and Nudge modules")
     assert terminal.getvalue().endswith("\r\x1b[2K⠋ Loading Qt and Nudge modules")
     progress.ready()

@@ -67,6 +67,7 @@ class Startup:
                     self._print(self._paint(f"{cursor:<12}", "38;2;79;142;247") + "   " + word)
             else:
                 self._print(self._paint(WORDMARK, "36"))
+            self._print("")
             self._print(self._paint(f"v{version}", "90") + "\n")
         else:
             self._print(f"Starting Nudge {version}")
