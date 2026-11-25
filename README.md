@@ -56,16 +56,18 @@ uv sync --frozen
 uv run nudge --demo gmail-email
 ~~~
 
-### Try an offline rehearsal
+### Offline Demo
 
-No app needs to be open. You do not need Google Chrome, a Gmail account, API keys or desktop permissions. These rehearsals simulate app controls and show Nudge's bar, cursor and step feed. They do not display a browser window or control your computer.
+If you want to see a demo of nudge running without any setup, use the `--demo` flag.
+
+The demo is offline and doesn't require any API keys. These demos are hard-coded and have pre-defined steps to showcase different use cases.
+
+Note, you will need to open Google Chrome before running `--demo` for the demos to work properly.
 
 | Command | What to do in Nudge | Result |
 | --- | --- | --- |
 | `uv run nudge --demo gmail-email` | Press Go with the prefilled email goal. Review the draft, choose Type it, then approve Send. | Simulates composing an email in Gmail. No email is sent. |
 | `uv run nudge --demo chrome-live-caption` | Press Go with the prefilled caption goal. Follow Chrome, Settings, Accessibility and Live Caption in the feed. | Simulates turning on Chrome Live Caption. Your Chrome settings do not change. |
-
-Keep the prefilled goal for each rehearsal. The steps are scripted, so these modes cannot carry out other requests. Close Nudge before starting the other rehearsal. Prefer `--demo`; `--offline gmail` and `--offline live_caption` are supported alternatives.
 
 <details>
 <summary>Use Nudge with real apps</summary>
