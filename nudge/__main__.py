@@ -12,8 +12,17 @@ def main() -> None:
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(errors="backslashreplace")
-    parser = argparse.ArgumentParser(prog="nudge", description="Type a goal; Nudge points to and presses each step.")
-    parser.add_argument("--offline", choices=["live_caption", "gmail"], help="rehearse the UI on a scripted screen, no keys needed")
+    parser = argparse.ArgumentParser(
+        prog="nudge",
+        description="Type a goal; Nudge points to and presses each step.",
+        epilog="Demos simulate app controls. No browser, account, API keys or desktop permissions needed. "
+        "To use real Gmail or Chrome Live Caption, install Google Chrome, open the inbox or a new tab, "
+        "then run nudge without --demo.",
+    )
+    demos = parser.add_mutually_exclusive_group()
+    demos.add_argument("--demo", choices=["gmail-email", "chrome-live-caption"],
+                       help="offline rehearsal: draft a Gmail email or turn on Chrome Live Caption")
+    demos.add_argument("--offline", choices=["live_caption", "gmail"], help="alternative demo command; --demo is preferred")
     parser.add_argument("--debug", action="store_true", help="start with Peek on: box every element Nudge can see")
     parser.add_argument("--no-vision", action="store_true", help="never use the screenshot fallback")
     parser.add_argument("--keep-running", action="store_true", help="closing the bar hides it; stay attached to the terminal with logs in the terminal")
@@ -22,6 +31,8 @@ def main() -> None:
     parser.add_argument("--version", action="version", version=f"Nudge {get_version()}", help="show the installed version and exit")
     parser.add_argument("--doctor", action="store_true", help="check setup offline without starting the UI")
     args = parser.parse_args()
+    if args.demo:
+        args.offline = {"gmail-email": "gmail", "chrome-live-caption": "live_caption"}[args.demo]
     if args.doctor:
         from .doctor import run_doctor
 

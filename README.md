@@ -53,12 +53,21 @@ Install [uv](https://docs.astral.sh/uv/getting-started/installation/) on macOS o
 git clone https://github.com/mekdimd/nudge
 cd nudge
 uv sync --frozen
-uv run nudge --offline gmail
+uv run nudge --demo gmail-email
 ~~~
 
-If you want to try Nudge without real apps, use the offline demo.
+### Offline Demo
 
-The offline demo needs no API keys or desktop permissions. It uses a scripted screen and does not control your computer.
+If you want to see a demo of nudge running without any setup, use the `--demo` flag.
+
+The demo is offline and doesn't require any API keys. These demos are hard-coded and have pre-defined steps to showcase different use cases.
+
+Note, you will need to open Google Chrome before running `--demo` for the demos to work properly.
+
+| Command | What to do in Nudge | Result |
+| --- | --- | --- |
+| `uv run nudge --demo gmail-email` | Press Go with the prefilled email goal. Review the draft, choose Type it, then approve Send. | Simulates composing an email in Gmail. No email is sent. |
+| `uv run nudge --demo chrome-live-caption` | Press Go with the prefilled caption goal. Follow Chrome, Settings, Accessibility and Live Caption in the feed. | Simulates turning on Chrome Live Caption. Your Chrome settings do not change. |
 
 <details>
 <summary>Use Nudge with real apps</summary>
@@ -75,6 +84,15 @@ uv run nudge
 ~~~
 
 On macOS, allow the terminal or editor in System Settings → Privacy & Security → Accessibility, then restart Nudge. On Windows, run Nudge and the target app without administrator privileges.
+
+To try the rehearsal tasks with real apps, first check that [Google Chrome](https://www.google.com/chrome/) is installed. Install it if it is missing, then open it:
+
+| Task | Prepare Google Chrome | Goal to enter in Nudge |
+| --- | --- | --- |
+| Send an email in Gmail | Open [Gmail](https://mail.google.com/), sign in to your account and leave the inbox visible with no draft open. | `email prof.lee@sfu.ca that I'm sick and will miss lecture` |
+| Turn on Chrome Live Caption | Open a new tab. Check Settings, Accessibility and make sure Live Caption is off before the task. | `turn on Live Caption` |
+
+Run `uv run nudge` without `--demo` or `--offline`, then bring the Chrome window to the front before pressing Go. Real tasks can send email or change settings. Review the draft and recipient before approving Send.
 
 Real tasks send your goal and control details to Jev. [Setup and privacy](docs/SETUP.md) explains provider data use, voice, local vision and installation without uv.
 
@@ -127,7 +145,10 @@ uv run nudge --keep-running  # Keep running when the bar closes; logs stay in th
 uv run nudge --background    # Detach from the terminal; logs go to a file.
 uv run nudge --detach        # Same as --background.
 uv run nudge --stop          # Quit the running Nudge, including a foreground instance.
-uv run nudge --offline gmail # Try the scripted demo without keys.
+uv run nudge --demo gmail-email         # Rehearse a Gmail email without sending it.
+uv run nudge --demo chrome-live-caption # Rehearse Chrome's caption settings.
+uv run nudge --offline gmail            # Alternative to --demo gmail-email.
+uv run nudge --offline live_caption     # Alternative to --demo chrome-live-caption.
 ~~~
 
 When Nudge starts, the terminal shows a banner and a spinner with the current startup step until the bar is ready. Redirected output gets one plain line per step. If startup fails, Nudge names the failed step and prints the error.

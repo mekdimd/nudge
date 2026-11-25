@@ -101,7 +101,7 @@ class Nudge(QObject):
         if offline_goal is not None:
             self.set_target(adapter.app)
             self.bar.input.setText(offline_goal)
-            self.bar.set_status("Offline rehearsal on a scripted screen. Nothing on your computer is touched.")
+            self.bar.set_status("Offline rehearsal. No app to open. Press Go to follow simulated steps in the feed.")
         else:
             self.tracker = QTimer()
             self.tracker.setInterval(400)
@@ -446,9 +446,13 @@ def run(args, owner, startup=None) -> None:
 
     if args.offline:
         startup.step("Loading the offline rehearsal")
-        from .dev import GOALS, PATHS, OfflineJev, OfflineWriter
+        from .dev import DEMO_INSTRUCTIONS, GOALS, PATHS, OfflineJev, OfflineWriter
         from .platform.fake import FakeAdapter
 
+        print(DEMO_INSTRUCTIONS[args.offline], flush=True)
+        print("No app to open. Google Chrome, a Gmail account, API keys and desktop permissions are not required.", flush=True)
+        print("The demo shows Nudge's bar, cursor and step feed, with no browser window.", flush=True)
+        print("For a real task, install and open Google Chrome, then restart with 'nudge' without --demo or --offline.", flush=True)
         adapter = FakeAdapter.from_fixture(args.offline)
         startup.step("Opening the bar")
         controller = Nudge(adapter, OfflineJev(PATHS[args.offline]), OfflineWriter(), offline_goal=GOALS[args.offline], debug=args.debug, keep_running=args.keep_running)

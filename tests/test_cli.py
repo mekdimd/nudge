@@ -9,6 +9,34 @@ import pytest
 from nudge import background
 
 
+@pytest.mark.parametrize('arguments, fixture', [
+    (['--demo', 'gmail-email'], 'gmail'),
+    (['--demo', 'chrome-live-caption'], 'live_caption'),
+    (['--offline', 'gmail'], 'gmail'),
+    (['--offline', 'live_caption'], 'live_caption'),
+])
+def test_demo_names_select_the_scripted_fixture(arguments, fixture, monkeypatch):
+    import nudge.__main__ as cli
+    from nudge import app
+
+    monkeypatch.setattr(sys, 'argv', ['nudge', *arguments])
+    owner = Mock()
+    monkeypatch.setattr(background, 'acquire', lambda: owner)
+    selected = []
+    monkeypatch.setattr(app, 'run', lambda args, owner, startup: selected.append(args.offline))
+    cli.main()
+    assert selected == [fixture]
+
+
+def test_demo_and_legacy_offline_cannot_be_combined(monkeypatch):
+    import nudge.__main__ as cli
+
+    monkeypatch.setattr(sys, 'argv', ['nudge', '--demo', 'gmail-email', '--offline', 'live_caption'])
+    with pytest.raises(SystemExit) as result:
+        cli.main()
+    assert result.value.code == 2
+
+
 def test_help_works_with_windows_output_encoding(tmp_path):
     environment = {**os.environ, 'PYTHONIOENCODING': 'cp1252:strict'}
     result = subprocess.run(
