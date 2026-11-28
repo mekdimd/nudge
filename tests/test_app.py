@@ -247,3 +247,19 @@ def test_qt_fatal_messages_name_the_failed_step_before_qt_aborts(capsys):
     show(QtMsgType.QtFatalMsg, types.SimpleNamespace(category="default"), "no platform plugin")
     progress.fail.assert_called_once_with()
     assert capsys.readouterr().err == "qt.qpa.plugin: plugin missing\nno platform plugin\n"
+
+
+def test_offline_run_omits_goal_in_logs_by_default_and_opts_in(offline, capsys):
+    app, _, goal = offline("live_caption")
+    app.start(goal)
+    assert wait_until(lambda: finished(app))
+    default_out = capsys.readouterr().out
+    assert "▶ Task started · Google Chrome" in default_out
+    assert goal not in default_out
+    assert app.timeline.entries[0].verb == goal
+
+    detailed_app, _, goal = offline("live_caption", detailed_logs=True)
+    detailed_app.start(goal)
+    assert wait_until(lambda: finished(detailed_app))
+    detailed_out = capsys.readouterr().out
+    assert f"▶ {goal} · Google Chrome" in detailed_out

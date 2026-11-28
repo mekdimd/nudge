@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from urllib.parse import urlparse
 
+from ..logs import redact_secrets
 from .models import Control
 
 MODEL = "gemini-3.5-flash-lite"
@@ -89,6 +90,7 @@ class Writer:
         from google import genai
         from google.genai import types
 
+        self._api_key = api_key
         self._client = genai.Client(
             api_key=api_key,
             http_options=types.HttpOptions(timeout=TIMEOUT_MS, retry_options=types.HttpRetryOptions(attempts=1)),
@@ -119,16 +121,16 @@ class Writer:
         pool.shutdown(wait=False, cancel_futures=True)  # don't wait for the slower model
         if response is None:
             if error is not None and not any(s in str(error) for s in OVERLOADED):
-                raise WriterError(f"Gemini request failed: {error}") from error
+                raise WriterError(f"Gemini request failed: {redact_secrets(str(error), (self._api_key,))}") from error
             try:
                 response = call(FALLBACK_MODEL)
             except Exception as exc:
-                raise WriterError(f"Gemini request failed: {exc}") from exc
+                raise WriterError(f"Gemini request failed: {redact_secrets(str(exc), (self._api_key,))}") from exc
         elapsed = int((time.perf_counter() - started) * 1000)
         try:
             return json.loads(response.text or "{}"), elapsed
         except json.JSONDecodeError as exc:
-            raise WriterError(f"Gemini returned unreadable JSON: {exc}") from exc
+            raise WriterError(f"Gemini returned unreadable JSON: {redact_secrets(str(exc), (self._api_key,))}") from exc
 
     def fill(self, goal: str, fields: list[Control], page: str = "") -> FillDraft:
         schema = {

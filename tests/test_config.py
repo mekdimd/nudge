@@ -38,3 +38,13 @@ def test_environment_model_path_uses_working_directory_without_env_file(tmp_path
     monkeypatch.setattr(config, 'ROOT', tmp_path / 'site-packages')
     monkeypatch.setenv('WAKE_WORD', 'models/custom.onnx')
     assert config.load_config().wake_word == str(tmp_path / 'models' / 'custom.onnx')
+
+
+def test_detailed_logs_defaults_off_and_opts_in_via_env(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(config, 'ROOT', tmp_path / 'site-packages')
+    monkeypatch.delenv('NUDGE_DETAILED_LOGS', raising=False)
+    assert config.load_config().detailed_logs is False
+
+    monkeypatch.setenv('NUDGE_DETAILED_LOGS', '1')
+    assert config.load_config().detailed_logs is True

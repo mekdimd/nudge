@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import os
+import sys
 import time
 import traceback
 import re
 from dataclasses import dataclass, replace
 from typing import Protocol
 
+from ..logs import redact_secrets
 from . import safety
 from .actions import OptionSet, build_options, field_key, fillable, option_label, to_action
 from .jev import JevClient, JevDecision, JevError
@@ -121,8 +123,8 @@ class NudgeLoop:
         except (JevError, WriterError) as exc:
             outcome = Outcome(False, "model_error", str(exc), len(self.history))
         except Exception as exc:  # adapters talk to live OS APIs; never crash the bar
-            traceback.print_exc()
-            outcome = Outcome(False, "error", f"{type(exc).__name__}: {exc}", len(self.history))
+            print(redact_secrets(traceback.format_exc()), file=sys.stderr, end="", flush=True)
+            outcome = Outcome(False, "error", redact_secrets(f"{type(exc).__name__}: {exc}"), len(self.history))
         self.events.finished(outcome.ok, outcome.message)
         return outcome
 
@@ -385,7 +387,7 @@ class NudgeLoop:
         try:
             extra = self.adapter.shell_controls(self.app)
         except Exception:  # the shell is a bonus source; never let it break a run
-            traceback.print_exc()
+            print(redact_secrets(traceback.format_exc()), file=sys.stderr, end="", flush=True)
             return snapshot
         extra = [c for c in extra if c.label != self.app.name]  # pressing the app you're already in does nothing
         return replace(snapshot, controls=snapshot.controls + extra) if extra else snapshot

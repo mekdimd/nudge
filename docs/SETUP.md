@@ -22,6 +22,7 @@ Copy-Item .env.example .env
 | ELEVENLABS_VOICE_ID | Optional voice for spoken prompts. |
 | WAKE_WORD | Bundled wake model name or ONNX path. Defaults to hey_jarvis. |
 | WAKE_THRESHOLD | Wake detection threshold. Defaults to 0.5. |
+| NUDGE_DETAILED_LOGS | Optional. Set to 1 to include full goals and URLs in logs for debugging. Defaults to 0. |
 
 Keep keys in .env. Git ignores that file. After adding the required keys:
 
@@ -77,7 +78,23 @@ Nudge allows one instance per user across foreground and background modes. Backg
 
 Closing a background bar hides it. The hotkey brings it back, and the menu bar or tray icon offers Show and Quit. Use --keep-running for the same behavior without detaching from the terminal.
 
-Logs go to ~/Library/Logs/Nudge on macOS and %LOCALAPPDATA%\Nudge on Windows. Ctrl+C quits a foreground process.
+Logs go to `~/Library/Logs/Nudge/nudge.log` on macOS and `%LOCALAPPDATA%\Nudge\nudge.log` on Windows. Background logs rotate at 1 MB and keep 3 backups (`nudge.log.1` through `nudge.log.3`, 4 MB max). Ctrl+C quits a foreground process.
+
+By default, logs omit full goals, strip URL paths and queries, and redact API keys. Pass `--detailed-logs` or set `NUDGE_DETAILED_LOGS=1` to log full goals and URLs when debugging:
+
+~~~bash
+uv run nudge --background --detailed-logs
+~~~
+
+Clear background logs with:
+
+~~~bash
+# macOS
+rm -f ~/Library/Logs/Nudge/nudge.log*
+
+# Windows PowerShell
+Remove-Item "$env:LOCALAPPDATA\Nudge\nudge.log*" -ErrorAction SilentlyContinue
+~~~
 
 Click Peek, or start with:
 
@@ -96,7 +113,7 @@ Blue outlines mark accessibility controls, green marks text fields, orange marks
 | Local vision | No screenshot. Nudge processes the target window locally and sends the resulting labels to Jev. |
 | ElevenLabs, when enabled | Microphone audio for transcription and prompt text for spoken replies. |
 
-Nudge does not read password fields. Provider icons in the step feed explain their data use. Logs contain task and action details; review them before attaching them to an issue.
+Nudge does not read password fields. Provider icons in the step feed explain their data use. Logs omit full goals and redact API keys by default, though they still record app names, control labels, and step outcomes. With `--detailed-logs`, they also record full goals and URLs. Review logs before attaching them to an issue.
 
 ## Support and limits
 

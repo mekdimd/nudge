@@ -19,6 +19,10 @@ def test_child_args_drop_both_detached_flags():
     assert background.child_args(["--background", "--detach"]) == ["--keep-running"]
 
 
+def test_child_args_preserve_detailed_logs():
+    assert background.child_args(["--background", "--detailed-logs"]) == ["--detailed-logs", "--keep-running"]
+
+
 @pytest.fixture
 def processes(tmp_path, monkeypatch):
     monkeypatch.setattr(background, "STATE", tmp_path / "state")
@@ -268,3 +272,26 @@ def test_detach_checks_child_exit_before_observing_owner(processes, monkeypatch)
     owner_pid = background.detach(["--background"], timeout=5)
     assert owner_pid == processes.wait_initialized()
     assert children[0].returncode == 0
+
+
+def test_background_mode_rotates_logs_and_redacts_api_keys(processes):
+    from nudge.logs import REDACTED, log_files
+
+    secret = "ts_detached_secret_value_12345"
+    result = processes.run(
+        ["--background", "--detailed-logs"],
+        NUDGE_TEST_LOG_MAX_BYTES="200",
+        NUDGE_TEST_LOG_BACKUPS="2",
+        NUDGE_TEST_LOG_LINES="12",
+        TYPESAFE_API_KEY=secret,
+    )
+    assert result.returncode == 0, result.stderr
+    files = log_files(background.log_path())
+    assert [f.name for f in files] == ["nudge.log", "nudge.log.1", "nudge.log.2"]
+    combined = ""
+    for log_file in files:
+        assert log_file.stat().st_size <= 200
+        combined += log_file.read_text(encoding="utf-8")
+    assert secret not in combined
+    assert REDACTED in combined
+    assert "detailed_logs=True" in background.log_path().read_text(encoding="utf-8")

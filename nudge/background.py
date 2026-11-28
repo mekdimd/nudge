@@ -11,6 +11,8 @@ import threading
 import time
 from pathlib import Path
 
+from . import logs
+
 if sys.platform == "darwin":
     STATE = Path.home() / "Library" / "Logs" / "Nudge"
 elif sys.platform == "win32":
@@ -25,6 +27,14 @@ class ProcessError(RuntimeError):
 
 def log_path() -> Path:
     return STATE / "nudge.log"
+
+
+def open_log(max_bytes: int | None = None, backup_count: int | None = None) -> logs.RotatingLogStream:
+    return logs.RotatingLogStream(
+        log_path(),
+        max_bytes=logs.MAX_LOG_BYTES if max_bytes is None else max_bytes,
+        backup_count=logs.LOG_BACKUPS if backup_count is None else backup_count,
+    )
 
 
 def child_args(argv: list[str]) -> list[str]:
@@ -166,16 +176,19 @@ def acquire() -> Instance | None:
 
 def detach(argv: list[str], timeout: float = 30) -> int:
     """Wait for a detached child to acquire ownership and finish initialization."""
-    STATE.mkdir(parents=True, exist_ok=True)
+    STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
     launch = secrets.token_hex(32)
-    with open(log_path(), "a", buffering=1) as log:
-        options: dict = {"stdin": subprocess.DEVNULL, "stdout": log, "stderr": subprocess.STDOUT,
-                         "env": {**os.environ, "NUDGE_LAUNCH": launch}}
-        if sys.platform == "win32":
-            options["creationflags"] = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
-        else:
-            options["start_new_session"] = True
-        child = subprocess.Popen([sys.executable, "-m", "nudge", *child_args(argv)], **options)
+    options: dict = {
+        "stdin": subprocess.DEVNULL,
+        "stdout": subprocess.DEVNULL,
+        "stderr": subprocess.DEVNULL,
+        "env": {**os.environ, "NUDGE_LAUNCH": launch, "NUDGE_LOG_TO_FILE": "1"},
+    }
+    if sys.platform == "win32":
+        options["creationflags"] = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+    else:
+        options["start_new_session"] = True
+    child = subprocess.Popen([sys.executable, "-m", "nudge", *child_args(argv)], **options)
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         code = child.poll()

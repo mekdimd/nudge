@@ -17,9 +17,13 @@ import time
 import threading
 import types
 from pathlib import Path
-from nudge import background
+from nudge import background, logs
 
 background.STATE = Path(os.environ['NUDGE_TEST_STATE'])
+if os.environ.get('NUDGE_TEST_LOG_MAX_BYTES'):
+    logs.MAX_LOG_BYTES = int(os.environ['NUDGE_TEST_LOG_MAX_BYTES'])
+if os.environ.get('NUDGE_TEST_LOG_BACKUPS'):
+    logs.LOG_BACKUPS = int(os.environ['NUDGE_TEST_LOG_BACKUPS'])
 if os.environ.get('NUDGE_TEST_PUBLISH_GATE'):
     original_init = background.Instance.__init__
     def delayed_init(self, fd):
@@ -40,7 +44,12 @@ def run(args, owner, startup=None):
         threading.Thread(target=lambda: time.sleep(60), daemon=False).start()
     if os.environ.get('NUDGE_TEST_FAIL'):
         raise RuntimeError('deliberate startup failure')
-    print('UI stub ready; keep_running=' + str(args.keep_running), flush=True)
+    if os.environ.get('NUDGE_TEST_LOG_LINES'):
+        count = int(os.environ['NUDGE_TEST_LOG_LINES'])
+        secret = os.environ.get('TYPESAFE_API_KEY', '')
+        for index in range(count):
+            print(f'log-line-{index:02d} secret={secret} ' + ('z' * 40), flush=True)
+    print('UI stub ready; keep_running=' + str(args.keep_running) + ' detailed_logs=' + str(args.detailed_logs), flush=True)
     owner.mark_ready()
     if startup is not None:
         startup.ready()

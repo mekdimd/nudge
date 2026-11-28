@@ -6,6 +6,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from .logs import env_flag
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -17,6 +19,7 @@ class Config:
     elevenlabs_voice_id: str
     wake_word: str
     wake_threshold: float
+    detailed_logs: bool = False
 
 
 def _wake_word(value: str, base: Path = ROOT) -> str:
@@ -43,4 +46,5 @@ def load_config() -> Config:
         elevenlabs_voice_id=os.environ.get("ELEVENLABS_VOICE_ID", "JBFqnCBsd6RMkjVDRZzb").strip(),
         wake_word=_wake_word(os.environ.get("WAKE_WORD", "hey_jarvis").strip(), env_file.parent),
         wake_threshold=float(os.environ.get("WAKE_THRESHOLD", "0.5")),
+        detailed_logs=env_flag("NUDGE_DETAILED_LOGS"),
     )
