@@ -9,6 +9,7 @@ from urllib.parse import urlencode
 from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtMultimedia import QMediaDevices
 
+from ..logs import redact_secrets
 from .levels import rms_level
 from .pcm import open_mic
 
@@ -135,7 +136,7 @@ class Voice(QObject):
                     elif kind in ("committed_transcript", "committed_transcript_with_timestamps"):
                         self._transcript.emit(message.get("text", ""), True)
                     elif kind.endswith("error") or kind.endswith("_exceeded") or kind == "unaccepted_terms":
-                        self._failed.emit(message.get("error") or kind)
+                        self._failed.emit(redact_secrets(str(message.get("error") or kind), (self.api_key,)))
                         return
         except InvalidStatus as exc:
             if not done.is_set():
@@ -143,7 +144,7 @@ class Voice(QObject):
                 self._failed.emit("ElevenLabs rejected the API key" if rejected else f"ElevenLabs returned {exc.response.status_code}")
         except (OSError, WebSocketException) as exc:
             if not done.is_set():
-                self._failed.emit(str(exc) or type(exc).__name__)
+                self._failed.emit(redact_secrets(str(exc) or type(exc).__name__, (self.api_key,)))
 
     @staticmethod
     def _send(ws, audio: queue.Queue) -> None:

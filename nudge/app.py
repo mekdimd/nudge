@@ -15,6 +15,7 @@ from .core.jev import JevClient, JevDecision
 from .core.loop import NudgeLoop
 from .core.models import Action, AppRef, Control, Snapshot
 from .core.writer import Writer
+from .logs import env_flag, redact_secrets
 from .ui.audio_settings import AudioSettings
 from .ui.bar import HOTKEY, Bar
 from .ui.bridge import Bridge, Worker
@@ -31,7 +32,7 @@ PEEK_INTERVAL = 1.0
 class Nudge(QObject):
     sig_peeked = Signal(object)
 
-    def __init__(self, adapter, jev, writer, vision=None, offline_goal: str | None = None, debug: bool = False, voice=None, wake=None, speaker=None, audio: AudioSettings | None = None, keep_running: bool = False):
+    def __init__(self, adapter, jev, writer, vision=None, offline_goal: str | None = None, debug: bool = False, voice=None, wake=None, speaker=None, audio: AudioSettings | None = None, keep_running: bool = False, detailed_logs: bool = False):
         super().__init__()
         self.keep_running = keep_running
         self.adapter, self.jev, self.writer, self.vision = adapter, jev, writer, vision
@@ -50,6 +51,8 @@ class Nudge(QObject):
         self.timeline = Timeline()
         self.recorder = RunRecorder(self.timeline)
         self.console = Console(self.timeline)
+        if detailed_logs:
+            self.console.detailed = True
         self.console.banner({
             "Jev": jev is not None,
             "Gemini": writer is not None,
@@ -427,7 +430,8 @@ def _qt_printer(startup):
         if mode == QtMsgType.QtFatalMsg:
             startup.fail()  # Qt aborts the process after this message
         category = context.category if context.category not in (None, "default") else ""
-        print(f"{category}: {message}" if category else message, file=sys.stderr, flush=True)
+        line = f"{category}: {message}" if category else message
+        print(redact_secrets(line), file=sys.stderr, flush=True)
 
     return show
 
@@ -454,13 +458,15 @@ def run(args, owner, startup=None) -> None:
         print("The demo shows Nudge's bar, cursor and step feed, with no browser window.", flush=True)
         print("For a real task, install and open Google Chrome, then restart with 'nudge' without --demo or --offline.", flush=True)
         adapter = FakeAdapter.from_fixture(args.offline)
+        detailed_logs = bool(getattr(args, "detailed_logs", False) or env_flag("NUDGE_DETAILED_LOGS"))
         startup.step("Opening the bar")
-        controller = Nudge(adapter, OfflineJev(PATHS[args.offline]), OfflineWriter(), offline_goal=GOALS[args.offline], debug=args.debug, keep_running=args.keep_running)
+        controller = Nudge(adapter, OfflineJev(PATHS[args.offline]), OfflineWriter(), offline_goal=GOALS[args.offline], debug=args.debug, keep_running=args.keep_running, detailed_logs=detailed_logs)
     else:
         from .platform.base import load_adapter
 
         startup.step("Reading settings")
         config = load_config()
+        detailed_logs = bool(getattr(args, "detailed_logs", False) or config.detailed_logs)
         audio = AudioSettings()
         jev = JevClient(config.typesafe_api_key) if config.typesafe_api_key else None
         writer = Writer(config.gemini_api_key) if config.gemini_api_key else None
@@ -491,7 +497,7 @@ def run(args, owner, startup=None) -> None:
         startup.step("Loading the desktop adapter")
         adapter = load_adapter(physical_to_logical)
         startup.step("Opening the bar")
-        controller = Nudge(adapter, jev, writer, vision, debug=args.debug, voice=voice, wake=wake, speaker=speaker, audio=audio, keep_running=args.keep_running)
+        controller = Nudge(adapter, jev, writer, vision, debug=args.debug, voice=voice, wake=wake, speaker=speaker, audio=audio, keep_running=args.keep_running, detailed_logs=detailed_logs)
 
     app._nudge = controller
     signal.signal(signal.SIGINT, lambda *_: controller.quit())
@@ -501,6 +507,8 @@ def run(args, owner, startup=None) -> None:
     heartbeat.start(200)
     owner.mark_ready()
     startup.ready()
-    qInstallMessageHandler(None)
+    qInstallMessageHandler(_qt_printer(_Quiet()) if getattr(sys.stderr, "is_log_file", False) else None)
     code = app.exec()
+    sys.stdout.flush()
+    sys.stderr.flush()
     os._exit(code)  # a run may be stuck in a network call; don't wait for it

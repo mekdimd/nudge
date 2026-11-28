@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import atexit
 import os
 import traceback
 import sys
@@ -24,6 +25,7 @@ def main() -> None:
                        help="offline rehearsal: draft a Gmail email or turn on Chrome Live Caption")
     demos.add_argument("--offline", choices=["live_caption", "gmail"], help="alternative demo command; --demo is preferred")
     parser.add_argument("--debug", action="store_true", help="start with Peek on: box every element Nudge can see")
+    parser.add_argument("--detailed-logs", action="store_true", help="include full goals and URLs in logs for debugging (still omits API keys)")
     parser.add_argument("--no-vision", action="store_true", help="never use the screenshot fallback")
     parser.add_argument("--keep-running", action="store_true", help="closing the bar hides it; stay attached to the terminal with logs in the terminal")
     parser.add_argument("--background", "--detach", action="store_true", help="closing the bar hides it; detach from this terminal with logs in a file")
@@ -39,6 +41,7 @@ def main() -> None:
         raise SystemExit(run_doctor())
 
     from . import background
+    from .logs import redact_secrets
 
     if args.stop:
         try:
@@ -48,6 +51,12 @@ def main() -> None:
             raise SystemExit(1) from exc
         print(f"Stopped Nudge (pid {pid})." if pid else "Nudge isn't running.")
         return
+
+    log_stream = None
+    if not args.background and os.environ.pop("NUDGE_LOG_TO_FILE", "") == "1":
+        log_stream = background.open_log()
+        sys.stdout = sys.stderr = log_stream
+        atexit.register(log_stream.flush)
 
     from .startup import Startup
 
@@ -80,17 +89,21 @@ def main() -> None:
             run(args, owner, startup)
         except BaseException:
             startup.fail()
-            traceback.print_exc()
+            print(redact_secrets(traceback.format_exc()), file=sys.stderr, end="", flush=True)
             sys.stderr.flush()
+            if log_stream is not None:
+                log_stream.flush()
             os._exit(1)  # An initialized worker must not outlive failed startup.
         finally:
             owner.close()
     except background.ProcessError as exc:
         startup.fail()
-        print(str(exc), file=sys.stderr)
+        print(redact_secrets(str(exc)), file=sys.stderr)
         raise SystemExit(1) from exc
     finally:
         startup.close()
+        if log_stream is not None:
+            log_stream.flush()
 
 
 if __name__ == "__main__":

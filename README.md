@@ -141,6 +141,7 @@ Nudge has a few command line options to control its behavior.
 uv run nudge                 # Run Nudge. Clicking the close (×) button quits the app.
 uv run nudge --help          # Show all options.
 uv run nudge --debug         # Open with Peek debug mode enabled.
+uv run nudge --detailed-logs # Include full goals and URLs in logs for debugging.
 uv run nudge --keep-running  # Keep running when the bar closes; logs stay in the terminal.
 uv run nudge --background    # Detach from the terminal; logs go to a file.
 uv run nudge --detach        # Same as --background.
@@ -155,7 +156,9 @@ When Nudge starts, the terminal shows a banner and a spinner with the current st
 
 Use `--keep-running` to stay attached to the terminal with logs in the terminal. The close button hides the bar, and the hotkey brings it back. Press Ctrl+C or run `nudge --stop` in another terminal to quit.
 
-Use `--background` or its alias `--detach` to run Nudge independently of the terminal. Closing the terminal leaves Nudge running. The close button hides the bar, the hotkey brings it back, and the menu bar or tray icon offers Show and Quit. Run `nudge --stop` to quit. Logs go to `~/Library/Logs/Nudge/nudge.log` on macOS and `%LOCALAPPDATA%\Nudge\nudge.log` on Windows.
+Use `--background` or its alias `--detach` to run Nudge independently of the terminal. Closing the terminal leaves Nudge running. The close button hides the bar, the hotkey brings it back, and the menu bar or tray icon offers Show and Quit. Run `nudge --stop` to quit. Logs go to `~/Library/Logs/Nudge/nudge.log` on macOS and `%LOCALAPPDATA%\Nudge\nudge.log` on Windows. Each log file rotates at 1 MB and keeps 3 rotated backups (`nudge.log.1` through `nudge.log.3`).
+
+Logs omit full goals and URL paths or query strings by default, and API keys are never written to logs. Pass `--detailed-logs` or set `NUDGE_DETAILED_LOGS=1` to include full goals and URLs when debugging. See [background mode and logs](docs/SETUP.md#background-mode-and-debugging) for commands to clear log files.
 
 Only one Nudge can run per user, including during startup. A second launch reports the existing instance. Background launches wait for initialization and report startup failures. The stop command waits up to five seconds for the owner to exit and reports a failure if it cannot stop. Crashes release ownership automatically.
 

@@ -7,6 +7,7 @@ from typing import Any
 
 import httpx
 
+from ..logs import redact_secrets
 from .actions import NONE_KEY, OptionSet
 from .models import Snapshot
 
@@ -143,15 +144,16 @@ class JevClient:
                 json={"state": state, "model": self.model, "questions": questions},
             )
         except httpx.HTTPError as exc:
-            raise JevError(f"Could not reach Jev: {exc}") from exc
+            raise JevError(f"Could not reach Jev: {redact_secrets(str(exc), (self.api_key,))}") from exc
         elapsed = int((time.perf_counter() - started) * 1000)
         if response.status_code >= 300:
-            raise JevError(f"Jev returned {response.status_code}: {response.text[:300]}")
+            body_text = redact_secrets(response.text, (self.api_key,))[:300]
+            raise JevError(f"Jev returned {response.status_code}: {body_text}")
         try:
             body = response.json()
             answers = body["answers"]
         except (ValueError, KeyError) as exc:
-            raise JevError(f"Jev sent something unreadable: {exc}") from exc
+            raise JevError(f"Jev sent something unreadable: {redact_secrets(str(exc), (self.api_key,))}") from exc
         tokens = int((body.get("usage") or {}).get("input_tokens") or 0)
         return answers, elapsed, tokens
 

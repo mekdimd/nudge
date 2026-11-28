@@ -44,7 +44,7 @@ def test_help_works_with_windows_output_encoding(tmp_path):
         cwd=tmp_path, env=environment, capture_output=True, timeout=30,
     )
     assert result.returncode == 0, result.stderr.decode('cp1252')
-    for flag in (b'--keep-running', b'--background', b'--detach', b'--stop'):
+    for flag in (b'--keep-running', b'--background', b'--detach', b'--stop', b'--detailed-logs'):
         assert flag in result.stdout
     assert b'--persistent' not in result.stdout
 
@@ -135,3 +135,16 @@ def test_process_failures_have_a_nonzero_exit(operation, monkeypatch, capsys):
         cli.main()
     assert result.value.code == 1
     assert "failed" in capsys.readouterr().err
+
+
+def test_detailed_logs_flag_is_passed_to_app(monkeypatch):
+    import nudge.__main__ as cli
+    from nudge import app
+
+    monkeypatch.setattr(sys, "argv", ["nudge", "--demo", "gmail-email", "--detailed-logs"])
+    owner = Mock()
+    monkeypatch.setattr(background, "acquire", lambda: owner)
+    seen = []
+    monkeypatch.setattr(app, "run", lambda args, owner, startup: seen.append(args.detailed_logs))
+    cli.main()
+    assert seen == [True]
