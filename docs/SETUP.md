@@ -78,15 +78,15 @@ Nudge allows one instance per user across foreground and background modes. Backg
 
 Closing a background bar hides it. The hotkey brings it back, and the menu bar or tray icon offers Show and Quit. Use --keep-running for the same behavior without detaching from the terminal.
 
-Logs go to `~/Library/Logs/Nudge/nudge.log` on macOS and `%LOCALAPPDATA%\Nudge\nudge.log` on Windows. Background logs rotate at 1 MB and keep up to 3 rotated files (`nudge.log.1` through `nudge.log.3`, 4 MB total). Ctrl+C quits a foreground process.
+Logs go to `~/Library/Logs/Nudge/nudge.log` on macOS and `%LOCALAPPDATA%\Nudge\nudge.log` on Windows. Background logs rotate at 1 MB and keep 3 backups (`nudge.log.1` through `nudge.log.3`, 4 MB max). Ctrl+C quits a foreground process.
 
-By default, logs omit full goals and strip URL paths and query strings, and API keys are redacted before writing. To include full goals and URLs while debugging, pass `--detailed-logs` or set `NUDGE_DETAILED_LOGS=1`:
+By default, logs omit full goals, strip URL paths and queries, and redact API keys. Pass `--detailed-logs` or set `NUDGE_DETAILED_LOGS=1` to log full goals and URLs when debugging:
 
 ~~~bash
 uv run nudge --background --detailed-logs
 ~~~
 
-To clear background logs (you can stop Nudge first with `uv run nudge --stop`, or delete the files directly):
+Clear background logs with:
 
 ~~~bash
 # macOS
@@ -113,7 +113,7 @@ Blue outlines mark accessibility controls, green marks text fields, orange marks
 | Local vision | No screenshot. Nudge processes the target window locally and sends the resulting labels to Jev. |
 | ElevenLabs, when enabled | Microphone audio for transcription and prompt text for spoken replies. |
 
-Nudge does not read password fields. Provider icons in the step feed explain their data use. Logs omit full goals by default and redact API keys, but still record app names, control labels and step outcomes; `--detailed-logs` also records full goals and URLs. Review logs before attaching them to an issue.
+Nudge does not read password fields. Provider icons in the step feed explain their data use. Logs omit full goals and redact API keys by default, though they still record app names, control labels, and step outcomes. With `--detailed-logs`, they also record full goals and URLs. Review logs before attaching them to an issue.
 
 ## Support and limits
 
